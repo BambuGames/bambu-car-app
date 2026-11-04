@@ -37,10 +37,14 @@ Task 2 sürüyor.
 - **Test telefonları:** iPhone 11 (eski iPhone, ultra geniş kamerası var), iPhone 16 Pro Max (güncel iPhone), Samsung Galaxy A34 (orta segment Android), Tecno Camon (düşük segment Android; tam model ve işletim sistemi sürümleri bekleniyor). Ultra geniş kamerası olmayan bir iPhone yok. Bu durum, ultra geniş kamerası yoksa Tecno'da denenecek; o da varsa uygulamada lens gizlenerek denenecek.
 - **Kurulum notları (M1 için):**
   - Expo SDK 58 ve React Native 0.88, Node 22.13+, 24.3+ veya 26+ istiyor; tek sayılı sürümler (25 dahil) desteklenmiyor. Geliştirme makinesinde Homebrew'un Node 26 LTS'i kullanılıyor.
-  - Expo SDK 58 iOS'ta Xcode 26 veya üstünü istiyor: `expo-modules-jsi` Swift 6.2 araçlarıyla derleniyor, Xcode 16.4'te Swift 6.1 var ve derleme başarısız oluyor.
+  - Expo SDK 58 iOS'ta Xcode 26 veya üstünü istiyor: `expo-modules-jsi` Swift 6.2 araçlarıyla derleniyor, Xcode 16.4'te Swift 6.1 var ve derleme başarısız oluyor. App Store Connect de 28 Nisan 2026'dan beri Xcode 26 ve iOS 26 SDK istiyor.
+  - Geliştirme makinesinde Xcode 26.6, mevcut Xcode 16.4'ün yanına kuruldu (macOS 26.2'de çalışan en yeni sürüm; Xcode 27 macOS 26.6 istiyor). Bu proje onu komut bazında `DEVELOPER_DIR` ile seçiyor; sistemin varsayılan Xcode'u 16.4 olarak kalıyor.
+  - Xcode 26, Metal araç setini ayrı bir bileşen olarak veriyor. Resizer'ın GPU kodu (`ResizerKernels.metal`) için `xcodebuild -downloadComponent MetalToolchain` gerekiyor. Bununla iOS simülatör derlemesi başarılı.
   - CocoaPods (Homebrew, Ruby 4.0) kabuk dil ayarı UTF-8 değilse `pod install` sırasında çöküyor; `LANG=en_US.UTF-8` ile çalışıyor.
   - fast-tflite'ın VisionCamera v5 örneği herkese açık değil; iki kütüphane de Nitro tabanlı olduğu için model kare işleyicide doğrudan çağrılıyor.
   - iOS'ta `metal` delegate'i derlemeye girmiyor; denenen delegate'ler iOS'ta CPU ve CoreML, Android'de CPU ve GPU.
+  - VisionCamera'nın resizer paketi Android'de en az API 26 (Android 8.0) istiyor. Expo'nun varsayılanı 24 olduğu için `expo-build-properties` ile `android.minSdkVersion: 26` ayarlanıyor.
+  - EfficientDet-Lite0 ve Lite2 (MediaPipe, int8) modellerinin içindeki `labels.txt`'ye göre sınıf numaraları: insan 0, araba 2, otobüs 5, kamyon 7.
 
 ## Maske kalitesi
 
