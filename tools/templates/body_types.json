@@ -1,0 +1,3 @@
+{
+  "sedan": {"file": "models/generic_electric_sedan_vector.glb", "forward": "-x", "up": "+y", "length_m": 4.75}
+}

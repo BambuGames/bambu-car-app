@@ -1,0 +1,8 @@
+spikes/
+.venv/
+__pycache__/
+.pytest_cache/
+.DS_Store
+.env
+tools/templates/models/*
+!tools/templates/models/SOURCES.md

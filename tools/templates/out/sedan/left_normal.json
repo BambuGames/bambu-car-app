@@ -1,0 +1,16 @@
+{
+  "bodyType": "sedan",
+  "slot": "left",
+  "mode": "normal",
+  "hfovDeg": 69.0,
+  "cameraHeightM": 1.0,
+  "pitchDeg": 0.0,
+  "distanceM": 4.735,
+  "box": [
+    0.1,
+    0.4192,
+    0.9006,
+    0.7542
+  ],
+  "svg": "left_normal.svg"
+}
