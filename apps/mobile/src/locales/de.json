@@ -1,0 +1,148 @@
+{
+  "common": {
+    "offline": "Keine Internetverbindung. Bitte versuchen Sie es erneut, sobald Sie online sind.",
+    "cancel": "Abbrechen",
+    "retry": "Erneut versuchen"
+  },
+  "auth": {
+    "email": "E-Mail-Adresse",
+    "password": "Passwort",
+    "newPassword": "Neues Passwort",
+    "code": "Code aus der E-Mail",
+    "back": "Zurück",
+    "signIn": {
+      "title": "Anmelden",
+      "submit": "Anmelden",
+      "acceptInvite": "Einladung annehmen",
+      "forgotPassword": "Passwort vergessen"
+    },
+    "acceptInvite": {
+      "title": "Einladung annehmen",
+      "hint": "Geben Sie den 6-stelligen Code aus der Einladung und Ihre E-Mail-Adresse ein. Danach legen Sie Ihr Passwort fest.",
+      "submit": "Konto einrichten"
+    },
+    "resetPassword": {
+      "title": "Passwort vergessen",
+      "hint": "Wir senden Ihnen einen 6-stelligen Code per E-Mail.",
+      "request": "Code senden",
+      "codeSent": "Wir haben Ihnen einen Code geschickt. Geben Sie ihn ein und legen Sie ein neues Passwort fest.",
+      "submit": "Neues Passwort speichern"
+    },
+    "validation": {
+      "email": "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
+      "code": "Der Code besteht aus 6 Ziffern.",
+      "passwordTooShort": "Das Passwort muss mindestens 8 Zeichen haben."
+    },
+    "errors": {
+      "invalidCredentials": "E-Mail-Adresse oder Passwort ist falsch.",
+      "codeExpired": "Der Code ist abgelaufen oder falsch. Fordern Sie einen neuen Code an.",
+      "generic": "Das hat nicht funktioniert. Bitte versuchen Sie es erneut."
+    },
+    "passwordNotSaved": {
+      "title": "Passwort nicht gespeichert",
+      "body": "Sie sind angemeldet, aber Ihr Passwort wurde nicht gespeichert. Tippen Sie bei der nächsten Anmeldung auf „Passwort vergessen“ und legen Sie ein neues fest."
+    }
+  },
+  "vehicles": {
+    "title": "Fahrzeuge",
+    "empty": "Noch keine Fahrzeuge.",
+    "status": {
+      "draft": "Entwurf",
+      "shooting": "Fotos werden aufgenommen",
+      "processing": "In Bearbeitung",
+      "ready": "Fertig",
+      "archived": "Archiviert"
+    },
+    "new": "Neues Fahrzeug",
+    "exteriorProgress": "Außen {{done}}/{{total}}",
+    "pendingUploads_one": "{{count}} Foto wartet",
+    "pendingUploads_other": "{{count}} Fotos warten"
+  },
+  "account": {
+    "title": "Konto",
+    "gallery": "Galerie",
+    "role": "Rolle",
+    "roles": {
+      "owner": "Inhaber",
+      "staff": "Mitarbeiter"
+    },
+    "signOut": "Abmelden",
+    "delete": "Konto löschen",
+    "deleteTitle": "Konto endgültig löschen?",
+    "deleteBody": "Ihr Zugang wird gelöscht und kann nicht wiederhergestellt werden. Die Fahrzeuge Ihrer Galerie bleiben erhalten.",
+    "deletePending_one": "{{count}} Änderung auf diesem Gerät ist noch nicht hochgeladen und geht verloren.",
+    "deletePending_other": "{{count}} Änderungen auf diesem Gerät sind noch nicht hochgeladen und gehen verloren.",
+    "deleteOffline": "Zum Löschen des Kontos ist eine Internetverbindung nötig."
+  },
+  "noGallery": {
+    "title": "Keine Galerie",
+    "body": "Ihr Konto ist noch keiner Galerie zugeordnet. Bitte wenden Sie sich an Ihren Ansprechpartner."
+  },
+  "vehicleForm": {
+    "make": "Marke",
+    "model": "Modell",
+    "bodyType": "Karosserie",
+    "save": "Fahrzeug anlegen",
+    "useTyped": "„{{value}}“ übernehmen",
+    "required": "Bitte ausfüllen.",
+    "pickMakeFirst": "Zuerst die Marke wählen."
+  },
+  "bodyTypes": {
+    "sedan": "Limousine (Stufenheck)",
+    "hatchback": "Schrägheck",
+    "kombi": "Kombi",
+    "suv": "SUV / Geländewagen",
+    "other": "Andere"
+  },
+  "vehicle": {
+    "exterior": "Außen",
+    "details": "Details",
+    "interior": "Innenraum",
+    "missingExterior_one": "Noch {{count}} Außenansicht fehlt.",
+    "missingExterior_other": "Noch {{count}} Außenansichten fehlen.",
+    "exteriorComplete": "Alle Außenansichten sind aufgenommen.",
+    "notFound": "Dieses Fahrzeug gibt es auf diesem Gerät nicht."
+  },
+  "photoState": {
+    "missing": "Fehlt",
+    "pending": "Auf dem Gerät",
+    "uploading": "Wird hochgeladen",
+    "uploaded": "Hochgeladen",
+    "remote": "Auf anderem Gerät aufgenommen",
+    "failed": "Upload fehlgeschlagen"
+  },
+  "sync": {
+    "offlinePending_one": "Offline: {{count}} Änderung wird später übertragen.",
+    "offlinePending_other": "Offline: {{count}} Änderungen werden später übertragen.",
+    "uploading_one": "{{count}} Änderung wird übertragen.",
+    "uploading_other": "{{count}} Änderungen werden übertragen.",
+    "retrying_one": "{{count}} Übertragung fehlgeschlagen, neuer Versuch folgt.",
+    "retrying_other": "{{count}} Übertragungen fehlgeschlagen, neuer Versuch folgt."
+  },
+  "slots": {
+    "front_left_45": "Vorne links schräg",
+    "front": "Vorne",
+    "front_right_45": "Vorne rechts schräg",
+    "right": "Rechte Seite",
+    "rear_right_45": "Hinten rechts schräg",
+    "rear": "Hinten",
+    "rear_left_45": "Hinten links schräg",
+    "left": "Linke Seite",
+    "detail_wheel": "Felge",
+    "detail_headlights": "Scheinwerfer",
+    "detail_taillights": "Rückleuchten",
+    "detail_trunk_open": "Kofferraum offen",
+    "detail_engine": "Motorraum",
+    "detail_roof": "Dach",
+    "detail_other": "Weiteres Detail",
+    "interior_cockpit": "Cockpit",
+    "interior_console": "Mittelkonsole",
+    "interior_instruments": "Instrumente",
+    "interior_front_seats": "Vordersitze",
+    "interior_rear_seats": "Rücksitze",
+    "interior_door": "Türverkleidung",
+    "interior_trunk": "Kofferraum",
+    "interior_headliner": "Dachhimmel",
+    "interior_other": "Weiteres innen"
+  }
+}

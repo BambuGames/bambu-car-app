@@ -1,0 +1,148 @@
+{
+  "common": {
+    "offline": "İnternet bağlantısı yok. Bağlantı gelince tekrar deneyin.",
+    "cancel": "Vazgeç",
+    "retry": "Tekrar dene"
+  },
+  "auth": {
+    "email": "E-posta adresi",
+    "password": "Şifre",
+    "newPassword": "Yeni şifre",
+    "code": "E-postadaki kod",
+    "back": "Geri",
+    "signIn": {
+      "title": "Giriş yap",
+      "submit": "Giriş yap",
+      "acceptInvite": "Daveti kabul et",
+      "forgotPassword": "Şifremi unuttum"
+    },
+    "acceptInvite": {
+      "title": "Daveti kabul et",
+      "hint": "Davetteki 6 haneli kodu ve e-posta adresinizi girin. Ardından şifrenizi belirleyin.",
+      "submit": "Hesabı aç"
+    },
+    "resetPassword": {
+      "title": "Şifremi unuttum",
+      "hint": "Size e-postayla 6 haneli bir kod göndereceğiz.",
+      "request": "Kod gönder",
+      "codeSent": "Size bir kod gönderdik. Kodu girin ve yeni şifrenizi belirleyin.",
+      "submit": "Yeni şifreyi kaydet"
+    },
+    "validation": {
+      "email": "Geçerli bir e-posta adresi girin.",
+      "code": "Kod 6 rakamdan oluşur.",
+      "passwordTooShort": "Şifre en az 8 karakter olmalı."
+    },
+    "errors": {
+      "invalidCredentials": "E-posta adresi veya şifre yanlış.",
+      "codeExpired": "Kodun süresi dolmuş veya kod yanlış. Yeni bir kod isteyin.",
+      "generic": "İşlem tamamlanamadı. Lütfen tekrar deneyin."
+    },
+    "passwordNotSaved": {
+      "title": "Şifre kaydedilmedi",
+      "body": "Giriş yaptınız ama şifreniz kaydedilmedi. Bir sonraki girişte \"Şifremi unuttum\" bağlantısına dokunup yeni bir şifre belirleyin."
+    }
+  },
+  "vehicles": {
+    "title": "Araçlar",
+    "empty": "Henüz araç yok.",
+    "status": {
+      "draft": "Taslak",
+      "shooting": "Çekimde",
+      "processing": "İşleniyor",
+      "ready": "Hazır",
+      "archived": "Arşivde"
+    },
+    "new": "Yeni araç",
+    "exteriorProgress": "Dış {{done}}/{{total}}",
+    "pendingUploads_one": "{{count}} fotoğraf bekliyor",
+    "pendingUploads_other": "{{count}} fotoğraf bekliyor"
+  },
+  "account": {
+    "title": "Hesap",
+    "gallery": "Galeri",
+    "role": "Rol",
+    "roles": {
+      "owner": "Sahip",
+      "staff": "Personel"
+    },
+    "signOut": "Çıkış yap",
+    "delete": "Hesabı sil",
+    "deleteTitle": "Hesap kalıcı olarak silinsin mi?",
+    "deleteBody": "Erişiminiz silinir ve geri getirilemez. Galerinizin araçları silinmez.",
+    "deletePending_one": "Bu cihazdaki {{count}} değişiklik henüz yüklenmedi ve kaybolacak.",
+    "deletePending_other": "Bu cihazdaki {{count}} değişiklik henüz yüklenmedi ve kaybolacak.",
+    "deleteOffline": "Hesabı silmek için internet bağlantısı gerekiyor."
+  },
+  "noGallery": {
+    "title": "Galeri yok",
+    "body": "Hesabınız henüz bir galeriye bağlı değil. Lütfen yetkili kişinize başvurun."
+  },
+  "vehicleForm": {
+    "make": "Marka",
+    "model": "Model",
+    "bodyType": "Kasa tipi",
+    "save": "Aracı oluştur",
+    "useTyped": "\"{{value}}\" kullan",
+    "required": "Lütfen doldurun.",
+    "pickMakeFirst": "Önce markayı seçin."
+  },
+  "bodyTypes": {
+    "sedan": "Sedan",
+    "hatchback": "Hatchback",
+    "kombi": "Station wagon",
+    "suv": "SUV / Arazi aracı",
+    "other": "Diğer"
+  },
+  "vehicle": {
+    "exterior": "Dış",
+    "details": "Detaylar",
+    "interior": "İç mekân",
+    "missingExterior_one": "{{count}} dış açı eksik.",
+    "missingExterior_other": "{{count}} dış açı eksik.",
+    "exteriorComplete": "Tüm dış açılar çekildi.",
+    "notFound": "Bu araç bu cihazda yok."
+  },
+  "photoState": {
+    "missing": "Eksik",
+    "pending": "Cihazda kayıtlı",
+    "uploading": "Yükleniyor",
+    "uploaded": "Yüklendi",
+    "remote": "Başka cihazda çekildi",
+    "failed": "Yükleme başarısız"
+  },
+  "sync": {
+    "offlinePending_one": "Çevrimdışı: {{count}} değişiklik sonra gönderilecek.",
+    "offlinePending_other": "Çevrimdışı: {{count}} değişiklik sonra gönderilecek.",
+    "uploading_one": "{{count}} değişiklik gönderiliyor.",
+    "uploading_other": "{{count}} değişiklik gönderiliyor.",
+    "retrying_one": "{{count}} gönderim başarısız oldu, yeniden denenecek.",
+    "retrying_other": "{{count}} gönderim başarısız oldu, yeniden denenecek."
+  },
+  "slots": {
+    "front_left_45": "Ön sol çapraz",
+    "front": "Ön",
+    "front_right_45": "Ön sağ çapraz",
+    "right": "Sağ yan",
+    "rear_right_45": "Arka sağ çapraz",
+    "rear": "Arka",
+    "rear_left_45": "Arka sol çapraz",
+    "left": "Sol yan",
+    "detail_wheel": "Jant",
+    "detail_headlights": "Farlar",
+    "detail_taillights": "Stoplar",
+    "detail_trunk_open": "Bagaj açık",
+    "detail_engine": "Motor bölümü",
+    "detail_roof": "Tavan",
+    "detail_other": "Diğer detay",
+    "interior_cockpit": "Kokpit",
+    "interior_console": "Orta konsol",
+    "interior_instruments": "Gösterge paneli",
+    "interior_front_seats": "Ön koltuklar",
+    "interior_rear_seats": "Arka koltuklar",
+    "interior_door": "Kapı döşemesi",
+    "interior_trunk": "Bagaj",
+    "interior_headliner": "Tavan döşemesi",
+    "interior_other": "Diğer iç mekân"
+  }
+}

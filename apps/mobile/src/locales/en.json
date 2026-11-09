@@ -1,0 +1,148 @@
+{
+  "common": {
+    "offline": "No internet connection. Please try again once you are online.",
+    "cancel": "Cancel",
+    "retry": "Try again"
+  },
+  "auth": {
+    "email": "Email address",
+    "password": "Password",
+    "newPassword": "New password",
+    "code": "Code from the email",
+    "back": "Back",
+    "signIn": {
+      "title": "Sign in",
+      "submit": "Sign in",
+      "acceptInvite": "Accept invitation",
+      "forgotPassword": "Forgot password"
+    },
+    "acceptInvite": {
+      "title": "Accept invitation",
+      "hint": "Enter the 6-digit code from the invitation and your email address. Then set your password.",
+      "submit": "Set up account"
+    },
+    "resetPassword": {
+      "title": "Forgot password",
+      "hint": "We will email you a 6-digit code.",
+      "request": "Send code",
+      "codeSent": "We sent you a code. Enter it and choose a new password.",
+      "submit": "Save new password"
+    },
+    "validation": {
+      "email": "Please enter a valid email address.",
+      "code": "The code has 6 digits.",
+      "passwordTooShort": "The password needs at least 8 characters."
+    },
+    "errors": {
+      "invalidCredentials": "Email address or password is wrong.",
+      "codeExpired": "The code has expired or is wrong. Request a new code.",
+      "generic": "That did not work. Please try again."
+    },
+    "passwordNotSaved": {
+      "title": "Password not saved",
+      "body": "You are signed in, but your password was not saved. Next time you sign in, tap \"Forgot password\" and set a new one."
+    }
+  },
+  "vehicles": {
+    "title": "Vehicles",
+    "empty": "No vehicles yet.",
+    "status": {
+      "draft": "Draft",
+      "shooting": "Taking photos",
+      "processing": "Processing",
+      "ready": "Ready",
+      "archived": "Archived"
+    },
+    "new": "New vehicle",
+    "exteriorProgress": "Exterior {{done}}/{{total}}",
+    "pendingUploads_one": "{{count}} photo waiting",
+    "pendingUploads_other": "{{count}} photos waiting"
+  },
+  "account": {
+    "title": "Account",
+    "gallery": "Gallery",
+    "role": "Role",
+    "roles": {
+      "owner": "Owner",
+      "staff": "Staff"
+    },
+    "signOut": "Sign out",
+    "delete": "Delete account",
+    "deleteTitle": "Delete account permanently?",
+    "deleteBody": "Your access is deleted and cannot be restored. Your gallery's vehicles are kept.",
+    "deletePending_one": "{{count}} change on this device has not been uploaded yet and will be lost.",
+    "deletePending_other": "{{count}} changes on this device have not been uploaded yet and will be lost.",
+    "deleteOffline": "Deleting the account needs an internet connection."
+  },
+  "noGallery": {
+    "title": "No gallery",
+    "body": "Your account is not linked to a gallery yet. Please contact the person who invited you."
+  },
+  "vehicleForm": {
+    "make": "Make",
+    "model": "Model",
+    "bodyType": "Body type",
+    "save": "Create vehicle",
+    "useTyped": "Use \"{{value}}\"",
+    "required": "Please fill in.",
+    "pickMakeFirst": "Choose the make first."
+  },
+  "bodyTypes": {
+    "sedan": "Sedan",
+    "hatchback": "Hatchback",
+    "kombi": "Estate",
+    "suv": "SUV / Off-road",
+    "other": "Other"
+  },
+  "vehicle": {
+    "exterior": "Exterior",
+    "details": "Details",
+    "interior": "Interior",
+    "missingExterior_one": "{{count}} exterior view is missing.",
+    "missingExterior_other": "{{count}} exterior views are missing.",
+    "exteriorComplete": "All exterior views are taken.",
+    "notFound": "This vehicle is not on this device."
+  },
+  "photoState": {
+    "missing": "Missing",
+    "pending": "On this device",
+    "uploading": "Uploading",
+    "uploaded": "Uploaded",
+    "remote": "Taken on another device",
+    "failed": "Upload failed"
+  },
+  "sync": {
+    "offlinePending_one": "Offline: {{count}} change will be sent later.",
+    "offlinePending_other": "Offline: {{count}} changes will be sent later.",
+    "uploading_one": "Sending {{count}} change.",
+    "uploading_other": "Sending {{count}} changes.",
+    "retrying_one": "{{count}} transfer failed, trying again soon.",
+    "retrying_other": "{{count}} transfers failed, trying again soon."
+  },
+  "slots": {
+    "front_left_45": "Front left angle",
+    "front": "Front",
+    "front_right_45": "Front right angle",
+    "right": "Right side",
+    "rear_right_45": "Rear right angle",
+    "rear": "Rear",
+    "rear_left_45": "Rear left angle",
+    "left": "Left side",
+    "detail_wheel": "Wheel",
+    "detail_headlights": "Headlights",
+    "detail_taillights": "Tail lights",
+    "detail_trunk_open": "Trunk open",
+    "detail_engine": "Engine bay",
+    "detail_roof": "Roof",
+    "detail_other": "Other detail",
+    "interior_cockpit": "Cockpit",
+    "interior_console": "Center console",
+    "interior_instruments": "Instruments",
+    "interior_front_seats": "Front seats",
+    "interior_rear_seats": "Rear seats",
+    "interior_door": "Door panel",
+    "interior_trunk": "Trunk",
+    "interior_headliner": "Headliner",
+    "interior_other": "Other interior"
+  }
+}
