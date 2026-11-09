@@ -6,3 +6,4 @@ __pycache__/
 .env
 tools/templates/models/*
 !tools/templates/models/SOURCES.md
+node_modules/
