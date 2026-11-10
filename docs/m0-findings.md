@@ -32,9 +32,9 @@ Plan: `docs/superpowers/plans/2026-11-03-m0-spikes.md` · Tasarım: `docs/superp
 
 ## Canlı yönlendirme performansı
 
-Task 2 sürüyor. Tecno ölçüldü; Galaxy A34 ve iPhone'lar bekleniyor. Model ve delegate kararı, plana göre orta segment Android ve eski iPhone ölçülünce verilecek.
+Task 2 sürüyor. Tecno ve Galaxy A34 ölçüldü; iPhone'lar bekleniyor. Model ve delegate kararı, plana göre orta segment Android ve eski iPhone ölçülünce verilecek.
 
-- **Test telefonları:** iPhone 11 (eski iPhone, ultra geniş kamerası var), iPhone 16 Pro Max (güncel iPhone), Samsung Galaxy A34 (orta segment Android), Tecno CAMON 18P (CH7n; düşük segment Android, Android 12, MediaTek Helio G96, 8 GB RAM). Ultra geniş kamerası olmayan bir iPhone yok. Tecno'da ultra geniş kamera uygulamalara açık değil, bu durum orada görüldü.
+- **Test telefonları:** iPhone 11 (eski iPhone, ultra geniş kamerası var), iPhone 16 Pro Max (güncel iPhone), Samsung Galaxy A34 (SM-A346E; orta segment Android, Android 16, MediaTek Dimensity 1080, 8 GB RAM), Tecno CAMON 18P (CH7n; düşük segment Android, Android 12, MediaTek Helio G96, 8 GB RAM). Ultra geniş kamerası olmayan bir iPhone yok. İki Android'de de ultra geniş kamera uygulamalara açık değil.
 
 ### Tecno CAMON 18P (10 Kasım 2026)
 
@@ -58,6 +58,29 @@ Release derlemesi, Wi-Fi üzerinden kablosuz hata ayıklamayla kuruldu. Değerle
 - **Odak noktası pozlamayı ölçüyor mu:** Evet. Parlak pencere önünde koyu bir kutu ortalandı ve `focusTo` ekranın ortasına çağrıldı. Ortadaki 300×300 pikselin ortalama parlaklığı 3 saniyede 72'den 167'ye çıktı, sürekli uyarlamayla 6 saniyede 112'ye oturdu. Cihaz `supportsExposureMetering: true` bildiriyor.
 - **Fotoğraf çözünürlüğü:** 1x, 4:3: 3968×2976 (11,8 MP). Ultra geniş olmadığı için 0,5x fotoğraf yok.
 - **Ölçüm notu:** Deneme uygulamasındaki "camera fps" değeri sensörün hızı değil, işlenen kare sayısı; düşürülen kareler bildirilmiyor.
+
+### Samsung Galaxy A34 (10 Kasım 2026)
+
+Tecno ile aynı yöntem, aynı ofis ve aynı APK.
+
+| Işık | Model + delegate | Çıkarım medyanı | Çıkarım p90 | Tespit/sn medyanı | En düşük |
+|---|---|---|---|---|---|
+| Aydınlık | Lite0 + CPU | 122 ms | 123 ms | 8 | 7 |
+| Aydınlık | Lite0 + GPU | 58 ms | 62 ms | 16 | 15 |
+| Aydınlık | Lite2 + CPU | 392 ms | 394 ms | 3 | 2 |
+| Aydınlık | Lite2 + GPU | 143 ms | 149 ms | 7 | 6 |
+| Az ışık | Lite0 + CPU | 110 ms | 113 ms | 9 | 7 |
+| Az ışık | Lite0 + GPU | 57 ms | 59 ms | 10 | 9 |
+| Az ışık | Lite2 + CPU | 353 ms | 371 ms | 3 | 2 |
+| Az ışık | Lite2 + GPU | 130 ms | 131 ms | 7 | 7 |
+
+- **Sonuç:** Lite0 + GPU hedefin rahatça üstünde: aydınlıkta saniyede 16, az ışıkta 10 tespit. Lite2 + GPU saniyede 7 ile hedefin hemen altında kalıyor. GPU bu telefonda belirleyici: Lite0'ı 2,1 kat, Lite2'yi 2,7 kat hızlandırıyor.
+- **Az ışık:** Lite0 + GPU'nun çıkarım süresi aynı kaldı (57 ms), ama tespit hızı 16'dan 10'a indi. Az ışıkta kamera kare hızını yaklaşık 10 fps'e düşürüyor; sınırı model değil kamera koyuyor.
+- **CPU iş parçacığı:** fast-tflite 3.0.1 iş parçacığı sayısını ayarlamıyor; CPU süreleri iki telefonda neredeyse aynı. Kütüphaneye 4 iş parçacığı eklenmiş bir derlemeyle az ışıkta Lite0 110'dan 127 ms'ye (iyileşme yok), Lite2 353'ten 291 ms'ye (%18) gitti. Bu ölçüm sırasında termal durum 2 olduğu için sonuç kesin değil. Android'de asıl kazanç GPU'dan geliyor.
+- **Isınma:** Pil 23,9 °C'den 31,7 °C'ye çıktı. Termal durum ilk 5 dakikanın sonunda 1'e (hafif), yaklaşık 20 dakikada 2'ye (orta) yükseldi; Tecno aynı sürede 0'da kalmıştı.
+- **Ultra geniş kamera:** Telefonda var (kamera 50: 1,64 mm, yaklaşık 96° yatay görüş) ama Samsung onu yalnız kendi kamera uygulamasına açıyor. Uygulamalar yalnız kamera 0 (ana, 4,65 mm, yaklaşık 69°), 1 ve 2'yi (ön) görüyor; birleşik kamera 23 (0 ve 50) ve makro 54 da gizli. `minZoom` 1.
+- **Odak noktası pozlamayı ölçüyor mu:** Hayır. Parlak arka plan önünde koyu bir kutu ortalandı; `focusTo` hatasız bitti, ama ortadaki parlaklık değişmedi (8,8 → 8,7). Cihaz bir pozlama bölgesini kabul ettiğini bildiriyor (`maxRegions` AE 1, donanım seviyesi LIMITED); Samsung'un kamera katmanı bölgeyi pozlamaya yansıtmıyor.
+- **Fotoğraf çözünürlüğü:** 4:3 istendi, 3840×2160 (16:9) geldi. Muhtemel neden: aynı oturumdaki 1280×720'lik (16:9) kare akışı. Tecno'da aynı istek 4:3 vermişti.
 - **Kurulum notları (M1 için):**
   - Expo SDK 58 ve React Native 0.88, Node 22.13+, 24.3+ veya 26+ istiyor; tek sayılı sürümler (25 dahil) desteklenmiyor. Geliştirme makinesinde Homebrew'un Node 26 LTS'i kullanılıyor.
   - Expo SDK 58 iOS'ta Xcode 26 veya üstünü istiyor: `expo-modules-jsi` Swift 6.2 araçlarıyla derleniyor, Xcode 16.4'te Swift 6.1 var ve derleme başarısız oluyor. App Store Connect de 28 Nisan 2026'dan beri Xcode 26 ve iOS 26 SDK istiyor.
@@ -72,6 +95,9 @@ Release derlemesi, Wi-Fi üzerinden kablosuz hata ayıklamayla kuruldu. Değerle
   - Android release derlemesinde fast-tflite 3.0.1, `require(...)` ile paketlenen modeli açamıyor (`MalformedURLException: no protocol`), çünkü dosya şemasız bir kaynak adı olarak geliyor. Çözüm: model açılışta `expo-asset` ile bir dosyaya çıkarılıyor ve `{ url: 'file://...' }` olarak veriliyor.
   - Android Gradle Plugin 9, resizer paketinin Vulkan gölgelendiricisini kendiliğinden derlemiyor; resizer çalışırken `shaders/Resizer.comp.spv` bulunamıyor ve hiçbir kare işlenmiyor. Çözüm: Gradle'da `android.defaults.buildfeatures.shaders=true` ve `local.properties` içinde NDK'nın `shader-tools` klasörünü gösteren `glslc.dir`. M1'de bu ayar bir yapılandırma eklentisiyle verilmeli ve her derleme makinesinde (EAS dahil) `glslc` bulunmalı.
   - Test telefonu kablo yerine kablosuz hata ayıklamayla (Android 11 ve sonrası, eşleme kodu) bağlanabiliyor. Tecno'da iki USB kablosu veri taşımadı.
+  - Samsung'da uygulama adb ile güncellenirken Google Play Protect onay penceresi çıkıyor; kurulum telefonda seçim yapılana kadar bekliyor.
+  - Fotoğrafın en-boy oranı cihaza göre değişebiliyor: A34 aynı oturumda 4:3 yerine 16:9 verdi. M1'de çekim oturumu her cihazda 4:3 fotoğraf verecek şekilde doğrulanmalı (örneğin kare akışını da 4:3 seçerek).
+  - Odak noktasıyla pozlama ölçümü her cihazda çalışmıyor (A34'te etkisiz). Araç üzerinde doğru pozlama gerekiyorsa M1'de pozlama telafisi gibi bir yol cihaz bazında denenmeli.
 
 ## Maske kalitesi
 
