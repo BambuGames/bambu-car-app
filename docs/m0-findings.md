@@ -11,6 +11,10 @@ Plan: `docs/superpowers/plans/2026-11-03-m0-spikes.md` · Tasarım: `docs/superp
 | Yürüme yarıçapı | Bir modda 8 açının hepsi aynı uzaklıktan çekilir. Normal modda bu uzaklık, yan görünümün kadraj genişliğinin %80'ini doldurduğu mesafedir. Dar alan modunda, 8 silüetin hepsinin kenarlarda %5 pay bırakarak sığdığı en yakın mesafedir | Task 1 |
 | Sedan için gereken boşluk | Normal: aracın yanında 3,8 m, önünde 2,4 m. Dar alan: yanında 2,3 m, önünde 0,9 m | Task 1 |
 | Sedan şablon modeli | Generic Electric sedan vector (Antonis_zks, CC BY 4.0). Uygulamanın lisanslar ekranında anılmalı | Task 1 |
+| Model ve delegate, iOS | Lite2 + CPU. iPhone 11'de saniyede 11 tespit (en düşük 10), telefon ısınmışken de; iPhone 16 Pro Max'te 15–16. CoreML int8 modellerde fark yaratmıyor | Task 2 |
+| Model ve delegate, Android | Lite0 + GPU. Galaxy A34'te saniyede 16 (aydınlık) ve 10 (az ışık) tespit; Lite2 + GPU saniyede 7 ile hedefin altında. Düşük segment Tecno'da Lite0 saniyede 7–8 | Task 2 |
+| Basit mod eşiği | Plandaki değer kalıyor: tespit hızı 3 saniye boyunca saniyede 4'ün altında kalırsa basit moda geçilir. Seçilen kombinasyonlar test telefonlarında 4'ün altına inmedi (en düşük: Tecno'da Lite0 + GPU, 5) | Task 2 |
+| Ultra geniş kamerayı açmayan telefonlar | Tasarımdaki gibi dar alan modu görünmez; bu telefonlarda yalnız normal mod var. Test edilen iki Android de (Tecno, A34) bu durumda | Task 2 |
 
 ## Şablon üretimi
 
@@ -32,9 +36,10 @@ Plan: `docs/superpowers/plans/2026-11-03-m0-spikes.md` · Tasarım: `docs/superp
 
 ## Canlı yönlendirme performansı
 
-Task 2 sürüyor. Tecno ve Galaxy A34 ölçüldü; iPhone'lar bekleniyor. Model ve delegate kararı, plana göre orta segment Android ve eski iPhone ölçülünce verilecek.
+Task 2 tamamlandı: dört test telefonu ölçüldü. Plandaki karar kuralı orta segment Android'e ve eski iPhone'a bakıyor; model ve delegate kararları Kararlar tablosunda.
 
-- **Test telefonları:** iPhone 11 (eski iPhone, ultra geniş kamerası var), iPhone 16 Pro Max (güncel iPhone), Samsung Galaxy A34 (SM-A346E; orta segment Android, Android 16, MediaTek Dimensity 1080, 8 GB RAM), Tecno CAMON 18P (CH7n; düşük segment Android, Android 12, MediaTek Helio G96, 8 GB RAM). Ultra geniş kamerası olmayan bir iPhone yok. İki Android'de de ultra geniş kamera uygulamalara açık değil.
+- **Test telefonları:** iPhone 11 (eski iPhone, iOS 26.6.2, Apple A13, ultra geniş kamerası var), iPhone 16 Pro Max (güncel iPhone, iOS 27.2, Apple A18 Pro), Samsung Galaxy A34 (SM-A346E; orta segment Android, Android 16, MediaTek Dimensity 1080, 8 GB RAM), Tecno CAMON 18P (CH7n; düşük segment Android, Android 12, MediaTek Helio G96, 8 GB RAM). Ultra geniş kamerası olmayan bir iPhone yok. İki Android'de de ultra geniş kamera uygulamalara açık değil, iPhone 11'de açık.
+- **Sürümler (deneme uygulaması):** expo 58.0.23, react-native 0.88.1, react-native-vision-camera, -vision-camera-resizer ve -vision-camera-worklets 5.2.4, react-native-fast-tflite 3.0.1, react-native-worklets 0.13.0, react-native-nitro-modules 0.37.2, react-native-nitro-image 0.15.2.
 
 ### Tecno CAMON 18P (10 Kasım 2026)
 
@@ -81,6 +86,53 @@ Tecno ile aynı yöntem, aynı ofis ve aynı APK.
 - **Ultra geniş kamera:** Telefonda var (kamera 50: 1,64 mm, yaklaşık 96° yatay görüş) ama Samsung onu yalnız kendi kamera uygulamasına açıyor. Uygulamalar yalnız kamera 0 (ana, 4,65 mm, yaklaşık 69°), 1 ve 2'yi (ön) görüyor; birleşik kamera 23 (0 ve 50) ve makro 54 da gizli. `minZoom` 1.
 - **Odak noktası pozlamayı ölçüyor mu:** Hayır. Parlak arka plan önünde koyu bir kutu ortalandı; `focusTo` hatasız bitti, ama ortadaki parlaklık değişmedi (8,8 → 8,7). Cihaz bir pozlama bölgesini kabul ettiğini bildiriyor (`maxRegions` AE 1, donanım seviyesi LIMITED); Samsung'un kamera katmanı bölgeyi pozlamaya yansıtmıyor.
 - **Fotoğraf çözünürlüğü:** 4:3 istendi, 3840×2160 (16:9) geldi. Muhtemel neden: aynı oturumdaki 1280×720'lik (16:9) kare akışı. Tecno'da aynı istek 4:3 vermişti.
+
+### iPhone 11 (10–11 Kasım 2026)
+
+Release derlemesi Xcode 26.6 ile imzalanıp `devicectl` ile kuruldu. Aynı ofis ve aynı yöntem (15 saniye ısınma, 60 saniye örnek); her kombinasyon uygulama yeniden açılarak başladı. Günlük satırları uygulamanın hata çıkışından `devicectl device process launch --console` ile okundu. Telefon ağ üzerinden bağlıydı, kablo takılı değildi.
+
+| Işık | Model + delegate | Çıkarım medyanı | Çıkarım p90 | Tespit/sn medyanı | En düşük |
+|---|---|---|---|---|---|
+| Aydınlık | Lite0 + CPU | 24 ms | 25 ms | 30 | 29 |
+| Aydınlık | Lite0 + CoreML | 28 ms | 29 ms | 30 | 29 |
+| Aydınlık | Lite2 + CPU | 93 ms | 94 ms | 11 | 10 |
+| Aydınlık | Lite2 + CoreML | 93 ms | 94 ms | 10,5 | 10 |
+| Az ışık | Lite0 + CPU | 25 ms | 25 ms | 30 | 29 |
+| Az ışık | Lite0 + CoreML | 25 ms | 25 ms | 30 | 29 |
+| Az ışık | Lite2 + CPU | 90 ms | 90 ms | 11 | 10 |
+| Az ışık | Lite2 + CoreML | 90 ms | 90 ms | 11 | 10 |
+
+- **Sonuç:** Lite2 + CPU hem aydınlıkta hem az ışıkta saniyede 11 tespit veriyor, en düşük 10. Hedefi (en az 8) telefon ısınmışken bile karşılıyor. Lite0 kameranın 30 karesinin hepsini işliyor.
+- **CoreML:** Fark yaratmıyor; Lite2'de CPU ile 0,1 ms'ye kadar aynı. Delegate oluşturuluyor ama int8 işlemleri almıyor, model tümüyle CPU'da çalışıyor. Neural Engine'den yararlanmak için M1'de float16 bir model denenebilir.
+- **Az ışık:** Kamera kare hızını düşürmedi (30 fps); süreler aydınlıktakiyle aynı.
+- **Takılma:** İşlenen kare sayısı dalgalanmadı (Lite0'da 29–30, Lite2'de 10–11). Önizlemenin akıcılığı ekrandan ayrıca kontrol edilmedi.
+- **Isınma:** Telefon hızlı ısınıyor. Termal durum ilk dakikada 1'e (fair), yaklaşık 2,5 dakikada 2'ye (serious) çıktı ve ölçümün sonuna kadar 2'de kaldı; tablodaki Lite2 değerleri bu durumda alındı. İlk ölçüm telefon şarj kablosundayken ve durum baştan 2 iken yapılmıştı, daha yavaştı (Lite2 + CPU 110 ms, saniyede 9, en düşük 8).
+- **Ultra geniş kamera:** Var ve uygulamalara açık. Ultra geniş ve ana kamerayı birleştiren cihazda `minZoom` 1, lens geçişi 2'de: zoom 1 ultra geniş, zoom 2 ana kamera ("1x").
+- **Odak noktası pozlamayı ölçüyor mu:** Bu testte fark çıkmadı. Parlak arka plan önünde koyu bir kutu ortalandı; ortadaki 400×400 pikselin ortalama parlaklığı `focusTo`'dan önce 40,9, sonra 43,5 (karenin tamamı 112,7 → 114,3). VisionCamera iOS'ta `focusTo` ile pozlama noktasını da taşıyor, ama iOS'un varsayılan pozlama noktası zaten ekranın ortası; ortalanmış kutuyla bu test iki durumu ayıramıyor. Kutu iki fotoğrafta da karanlık kaldı: iOS'un otomatik pozlaması noktayı tek başına değil, karenin geneliyle birlikte değerlendiriyor.
+- **Fotoğraf çözünürlüğü:** 1x ve ultra geniş (0,5x), ikisi de 4:3, 4032×3024 (12,2 MP), HEIC.
+
+### iPhone 16 Pro Max (11 Kasım 2026)
+
+iPhone 11 ile aynı yöntem ve aynı ofis; telefon ağ üzerinden bağlıydı.
+
+| Işık | Model + delegate | Çıkarım medyanı | Çıkarım p90 | Tespit/sn medyanı | En düşük |
+|---|---|---|---|---|---|
+| Aydınlık | Lite0 + CPU | 18 ms | 19 ms | 52 | 47 |
+| Aydınlık | Lite0 + CoreML | 19 ms | 19 ms | 51 | 47 |
+| Aydınlık | Lite2 + CPU | 65 ms | 66 ms | 15 | 14 |
+| Aydınlık | Lite2 + CoreML | 67 ms | 69 ms | 15 | 13 |
+| Az ışık | Lite0 + CPU | 17 ms | 17 ms | 55 | 49 |
+| Az ışık | Lite0 + CoreML | 20 ms | 23 ms | 48 | 30 |
+| Az ışık | Lite2 + CPU | 62 ms | 64 ms | 16 | 14 |
+| Az ışık | Lite2 + CoreML | 60 ms | 62 ms | 16 | 15 |
+
+- **Sonuç:** Bütün kombinasyonlar hedefin çok üstünde. Lite2 + CPU saniyede 15–16 tespit veriyor (en düşük 14), iPhone 11'den yaklaşık 1,4 kat hızlı. Kamera saniyede 60 kare veriyor; Lite0 bunun 52–55'ini işliyor.
+- **CoreML:** Yine fark yaratmıyor; az ışıkta Lite0'da biraz yavaş ve dalgalı (en düşük 30).
+- **Az ışık:** Kamera kare hızını düşürmedi; süreler aydınlıktakiyle aynı.
+- **Isınma:** Telefon ölçümlere termal durum 2'de (serious) başladı ve 2'de kaldı; hemen önce Geliştirici Modu için yeniden başlatılmış ve kabloya bağlı kalmıştı. Tablodaki değerler ısınmış telefondan.
+- **Ultra geniş kamera:** Var ve uygulamalara açık. Ultra geniş ve ana kamerayı birleştiren cihaz iPhone 11'dekiyle aynı: `minZoom` 1, lens geçişi 2.
+- **Odak noktası pozlamayı ölçüyor mu:** Denenmedi; iOS'ta ortalanmış kutuyla yapılan test bunu ayırt edemiyor (iPhone 11'e bakın).
+- **Fotoğraf çözünürlüğü:** 1x ve 0,5x, ikisi de 4:3, 4032×3024 (12,2 MP), HEIC. Ana sensör 48 MP olsa da `UHD_4_3` hedefi 12 MP fotoğraf veriyor.
 - **Kurulum notları (M1 için):**
   - Expo SDK 58 ve React Native 0.88, Node 22.13+, 24.3+ veya 26+ istiyor; tek sayılı sürümler (25 dahil) desteklenmiyor. Geliştirme makinesinde Homebrew'un Node 26 LTS'i kullanılıyor.
   - Expo SDK 58 iOS'ta Xcode 26 veya üstünü istiyor: `expo-modules-jsi` Swift 6.2 araçlarıyla derleniyor, Xcode 16.4'te Swift 6.1 var ve derleme başarısız oluyor. App Store Connect de 28 Nisan 2026'dan beri Xcode 26 ve iOS 26 SDK istiyor.
@@ -98,6 +150,11 @@ Tecno ile aynı yöntem, aynı ofis ve aynı APK.
   - Samsung'da uygulama adb ile güncellenirken Google Play Protect onay penceresi çıkıyor; kurulum telefonda seçim yapılana kadar bekliyor.
   - Fotoğrafın en-boy oranı cihaza göre değişebiliyor: A34 aynı oturumda 4:3 yerine 16:9 verdi. M1'de çekim oturumu her cihazda 4:3 fotoğraf verecek şekilde doğrulanmalı (örneğin kare akışını da 4:3 seçerek).
   - Odak noktasıyla pozlama ölçümü her cihazda çalışmıyor (A34'te etkisiz). Araç üzerinde doğru pozlama gerekiyorsa M1'de pozlama telafisi gibi bir yol cihaz bazında denenmeli.
+  - VisionCamera v5'te zoom değerleri cihazın kendi çarpanları. iPhone'da ultra geniş ve ana kamerayı birleştiren cihazda 1 ultra geniş kamerayı açıyor; ana kamera ilk lens geçiş değerinde (2). Android'de ana kamera 1. Normal modun zoom'u `zoomLensSwitchFactors[0] ?? 1` gibi seçilmeli; doğrudan `zoom={1}` iPhone'da ultra geniş kamerayı açar.
+  - iOS release derlemesinde `console.log` görünmüyor: React Native release'te günlük eşiği hata seviyesinde ve çıktı yalnız sistem günlüğüne gidiyor. Ölçüm için deneme uygulamasının `AppDelegate.swift` dosyasına `RCTSetLogThreshold(.info)` ve satırları termal durumla stderr'e yazan bir günlük fonksiyonu eklendi.
+  - iPhone, Mac ile bir kez kabloyla eşleştikten sonra aynı ağ üzerinden `devicectl` ile kurulup açılabiliyor. İmza için geliştirici hesabı Xcode'a eklenip ekip projede seçiliyor; komut satırı derlemesi `-allowProvisioningUpdates` ile profili kendisi oluşturuyor, `-allowProvisioningDeviceRegistration` ile yeni telefonu ekibe ekliyor.
+  - Xcode 26.6 (iOS 26 SDK) ile derlenen uygulama iOS 27.2'deki iPhone 16 Pro Max'e kuruldu; geliştirici servisleri (uygulamayı açma, günlük okuma) de çalıştı.
+  - iPhone 11 sürekli kamera ve tespitle 2–3 dakikada termal durum 2'ye çıkıyor. M1'de tespit hızı gerekenle sınırlanmalı (örneğin saniyede 10) ve çekimler arasında tespit durdurulmalı.
 
 ## Maske kalitesi
 
