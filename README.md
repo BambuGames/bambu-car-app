@@ -176,6 +176,108 @@ Galeriye bağlanmamış bir hesap, girişten sonra "Galeri yok" ekranını gör�
 
 `admin_*` fonksiyonlarını yalnız SQL editörü çalıştırabilir. Uygulama kullanıcılarının bu yetkisi yok.
 
+## Kredi yükleme ve iade
+
+1 kredi bir araçtır. Kredi, aracın fotoğrafları ilk kez işlenirken düşer. SQL editöründe:
+
+```sql
+select public.admin_grant_credits('<galeri id>', 10, 'Pilot paketi');   -- yeni bakiyeyi döndürür
+select public.admin_refund_vehicle('<araç id>', 'İşleme tamamen başarısız');
+```
+
+Bir araç en fazla bir kez ücretlendirilir ve en fazla bir kez iade edilir. Bakiye `credit_ledger` tablosundan hesaplanır.
+
+## İşleme servisi
+
+Python servisi `services/image-worker`, bir aracın fotoğraflarını işler:
+
+1. Plakaları bulup kapatır.
+2. Photoroom'dan maske alır.
+3. Aracı şablon konumuna yerleştirir.
+4. Stüdyo arka planını, gölgeyi, ton düzeltmesini, plaka banner'ını ve filigranı ekler.
+
+Uygulama işlemeyi `process-vehicle` Edge Function'ı ile başlatır. Fonksiyon krediyi düşer, fotoğrafları kuyruğa alır ve servisi çağırır.
+
+### Kurulum
+
+```bash
+python3.13 -m venv services/image-worker/.venv
+```
+
+```bash
+services/image-worker/.venv/bin/pip install -r services/image-worker/requirements-dev.txt
+```
+
+Plaka modelinin ONNX dosyası git'te değildir; bir kez üretilir. Ağırlıklar M0'da indirildi ve `spikes/.cache/hf` önbelleğinde durur. `spikes/.venv`'de torch, transformers, onnx ve onnxruntime gerekir.
+
+```bash
+HF_HOME=spikes/.cache/hf spikes/.venv/bin/python services/image-worker/scripts/export_plate_onnx.py
+```
+
+### Ortam değişkenleri
+
+Anahtarlar git'e girmez ve hiçbir yerde yazdırılmaz.
+
+- `services/image-worker/.env`: `.env.example`'dan kopyalanır.
+  - `SUPABASE_SERVICE_ROLE_KEY`: `npx supabase status -o env` çıktısındaki `SERVICE_ROLE_KEY`.
+  - `PHOTOROOM_API_KEY`: Photoroom panelindeki anahtar.
+  - `WORKER_SECRET`: Edge Function'daki değerle aynı olmalı.
+  - `SUPABASE_URL`: Docker içinde `http://host.docker.internal:54321`, doğrudan `uvicorn` ile çalıştırırken `http://127.0.0.1:54321`.
+- `supabase/functions/.env`: `.env.example`'dan kopyalanır.
+  - `WORKER_URL=http://host.docker.internal:8090` ve `WORKER_SECRET`.
+  - `supabase start` bu dosyayı okur.
+  - Yerel edge runtime, fonksiyon listesini başlarken kurar. Yeni bir fonksiyon eklenince `npx supabase stop`, ardından `npm run db:start` çalıştırılır.
+  - Var olan bir fonksiyonun kodu değişince yerel edge runtime değişikliği kendiliğinden almaz: `docker restart supabase_edge_runtime_bambu-car-app`.
+
+### Çalıştırma
+
+Servis yerelde 8090 portunda çalışır.
+
+```bash
+docker build -t bambu-image-worker services/image-worker
+```
+
+```bash
+docker run --rm -d --name bambu-image-worker -p 8090:8080 --env-file services/image-worker/.env bambu-image-worker
+```
+
+- Sağlık kontrolü: `curl localhost:8090/health` → `{"ok":true}`.
+- Durdurmak için: `docker stop bambu-image-worker`.
+- Cloud Run `linux/amd64` imaj ister; buluta kurulum (Frankfurt) M2c'de yapılır.
+- Servis `/process` isteğine hemen `202` ile yanıt verir ve aracı arka planda işler. Cloud Run'da bu yüzden CPU'nun istek dışında da ayrılması gerekir (M2c).
+
+### Testler
+
+```bash
+services/image-worker/.venv/bin/python -m pytest services/image-worker -q
+```
+
+```bash
+services/image-worker/.venv/bin/python -m pytest services/image-worker -q -m model
+```
+
+- İkinci komut, dönüştürülmüş plaka modelini M0 fotoğraflarında dener.
+- `npm run test:int`, sahte bir servisi 8090 portunda açar. Bu yüzden gerçek servis o sırada durdurulmuş olmalı.
+
+### Gerçek fotoğraflarla uçtan uca deneme
+
+Bu deneme Photoroom'a görsel başına $0.02 harcar.
+
+1. Servisi yukarıdaki gibi Docker'da başlatın.
+2. Testgalerie'ye kredi yükleyin.
+3. Aşağıdaki iki komutu çalıştırın:
+
+```bash
+set -a && eval "$(npx supabase status -o env)" && set +a && services/image-worker/.venv/bin/python services/image-worker/scripts/seed_test_vehicle.py --process
+```
+
+```bash
+set -a && eval "$(npx supabase status -o env)" && set +a && services/image-worker/.venv/bin/python services/image-worker/scripts/contact_sheet.py <araç id>
+```
+
+- İlk komut M0 fotoğraflarından 8 açılık bir test aracı kurar ve işlemeyi sahip hesabıyla başlatır. Testgalerie'ye örnek bir logo ve banner da yükler. `--details` eklenirse aynı fotoğraflar detay ve iç mekân adımlarına konur; Photoroom'a gidilmez, para harcanmaz.
+- İkinci komut orijinalleri ve çıktıları yan yana koyar: `services/image-worker/out/<araç id>.png`.
+
 ## Elle uçtan uca kontrol
 
 Her sürümden önce iOS'ta ve Android'de yapılır:

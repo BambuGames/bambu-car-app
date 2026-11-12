@@ -157,14 +157,15 @@ Aracın pikselleri hiçbir aşamada yeniden üretilmez. Araç sadece arka planda
 ### 7.2 Dış açılar için işlem sırası
 
 1. **Plaka tespiti:** Plakanın dört köşesi bulunur. Model erken denemeyle seçilir (bölüm 14) ve lisansı ticari kullanıma uygun olmalıdır. AGPL lisanslı Ultralytics YOLO kullanılmaz.
-2. **Araç maskesi:** Görüntü Photoroom Remove Background API'ye gönderilir ($0.02/görsel). Plaka otomatik bulunduysa göndermeden önce kapatılır, bulunamadıysa görüntü olduğu gibi gider. Bu bir garanti değil, en iyi çaba ilkesidir; Photoroom zaten veri işleme sözleşmesi kapsamında bir alt işleyendir **[Öneri]**. Maske saklanır; arka plan veya filigran değişince tekrar API çağrısı yapılmaz. Kadrajda başka araç veya kişi varsa maske, çekimde kaydedilen hedef aracın kutusuyla sınırlanır ve sadece hedef araca bağlı parçalar tutulur; kutu yoksa (basit mod) merkezdeki en büyük parça tutulur (bkz. 14).
-3. **Hiza ve kadraj:** Kayıtlı eğime göre ufuk düzeltilir. Araç her fotoğrafta şablonun tanımladığı konum ve boyuta yerleştirilir; böylece hem set hem galerinin tüm ilanları tutarlı görünür.
-4. **Arka plan:** Hazır kütüphaneden seçilir: kesintisiz stüdyolar (beyaz, açık gri, koyu) ve modern galeri iç mekânı, showroom gibi hazır görseller **[Karar: başlangıçta hazır şablon ve görseller]**. Görseller şablonlarla aynı kamera yüksekliği ve eğimiyle hazırlanır, örneğin 3D sahnelerden render alınarak; böylece araç zemine doğru ölçekte oturur. Galeri kendi görselini kullanmak isterse Bambu Games onu bu kurala göre hazırlayıp galerinin kütüphanesine ekler; uygulamada arka plan yükleme yoktur **[Öneri]**.
-5. **Zemin gölgesi:** Maskeden üretilen sentetik bir temas gölgesi eklenir.
-6. **Ton düzeltme:** Aynı araç setin her fotoğrafında aynı görünmelidir; oysa tek bir turda bile aracın bir yüzü güneşte, öbürü gölgede kalabilir. Bu yüzden her fotoğrafta aracın parlaklığı ve renk sıcaklığı, setin ortalamasına doğru klasik algoritmalarla ve sınırlı güçte yaklaştırılır. Hedef sabit bir değer değil setin kendisidir; böylece siyah araç siyah, kırmızı araç kırmızı kalır. Kullanıcı bunu kapatabilir **[Öneri]**.
-7. **Plaka banner'ı:** Galerinin banner görseli, bulunan dört köşeye perspektif dönüşümüyle (homografi) oturtulur **[Karar: banner plakanın üstünde]**.
-8. **Filigran:** Logo konumu, boyutu ve saydamlığı ayarlanır; isteğe bağlı üst veya alt kurumsal bant eklenir (doküman 5).
-9. **Çıktı:** JPEG, 4:3, uzun kenar 2560 px. Filigranlı ve filigransız iki sürüm üretilir **[Öneri]**.
+2. **Araç maskesi:** Görüntü Photoroom Remove Background API'ye gönderilir ($0.02/görsel). Bulunan bütün plakalar göndermeden önce kapatılır; hangisinin hedef araca ait olduğu ancak maskeden anlaşılır (M0 kararı, 12 Kasım 2026). Plaka bulunamadıysa görüntü olduğu gibi gider. Bu bir garanti değil, en iyi çaba ilkesidir; Photoroom zaten veri işleme sözleşmesi kapsamında bir alt işleyendir **[Öneri]**. Maske saklanır; arka plan veya filigran değişince tekrar API çağrısı yapılmaz. Kadrajda başka araç veya kişi varsa maskeden yalnız çekimde kaydedilen hedef aracın kutusuna değen parçalar tutulur; kutuya kırpılmaz, çünkü tespit kutusu aracın uçlarını ve antenini çoğu zaman dışarıda bırakır. Kutu yoksa (basit mod) merkezdeki en büyük parça tutulur (bkz. 14; M0 kararı, 12 Kasım 2026).
+3. **Rötuş:** Maskede kalan yabancı parçayı (bitişik araç, tabela, kablo) personel işlenmiş fotoğrafta dokunarak ya da üstünü silerek kaldırır. Silmeler saklanır ve her çizimde saklı maskeye yeniden uygulanır; API'ye yeniden gidilmez (M0 kararı, 12 Kasım 2026).
+4. **Hiza ve kadraj:** Kayıtlı eğime göre ufuk düzeltilir. Araç her fotoğrafta şablonun tanımladığı konum ve boyuta yerleştirilir; dar alan modunda çekilenler de normal modun kutusuna (M2a planı); böylece hem set hem galerinin tüm ilanları tutarlı görünür.
+5. **Arka plan:** Hazır kütüphaneden seçilir: kesintisiz stüdyolar (beyaz, açık gri, koyu) ve modern galeri iç mekânı, showroom gibi hazır görseller **[Karar: başlangıçta hazır şablon ve görseller]**. Görseller şablonlarla aynı kamera yüksekliği ve eğimiyle hazırlanır, örneğin 3D sahnelerden render alınarak; böylece araç zemine doğru ölçekte oturur. Galeri kendi görselini kullanmak isterse Bambu Games onu bu kurala göre hazırlayıp galerinin kütüphanesine ekler; uygulamada arka plan yükleme yoktur **[Öneri]**.
+6. **Zemin gölgesi:** Maskeden üretilen sentetik bir temas gölgesi eklenir.
+7. **Ton düzeltme:** Aynı araç setin her fotoğrafında aynı görünmelidir; oysa tek bir turda bile aracın bir yüzü güneşte, öbürü gölgede kalabilir. Bu yüzden her fotoğrafta aracın parlaklığı ve renk sıcaklığı, setin ortalamasına doğru klasik algoritmalarla ve sınırlı güçte yaklaştırılır. Hedef sabit bir değer değil setin kendisidir; böylece siyah araç siyah, kırmızı araç kırmızı kalır. Kullanıcı bunu kapatabilir **[Öneri]**.
+8. **Plaka banner'ı:** Galerinin banner görseli, bulunan dört köşeye perspektif dönüşümüyle (homografi) oturtulur **[Karar: banner plakanın üstünde]**.
+9. **Filigran:** Logo konumu, boyutu ve saydamlığı ayarlanır; isteğe bağlı üst veya alt kurumsal bant eklenir (doküman 5).
+10. **Çıktı:** JPEG, 4:3, uzun kenar 2560 px. Filigranlı ve filigransız iki sürüm üretilir **[Öneri]**.
 
 ### 7.3 Detay ve iç mekân fotoğrafları [Öneri]
 
@@ -174,7 +175,9 @@ Arka plan değişmez. Ton düzeltmesi ve filigran uygulanır. Plaka görünüyor
 
 Plaka bulunamazsa veya tespit güveni düşükse fotoğraf "plaka kontrolü gerekiyor" olarak işaretlenir. Kullanıcı banner'ın dört köşesini sürükleyerek yerleştirir veya "plaka görünmüyor" der. İşaretli bir fotoğraf bu adım yapılmadan dışarı verilmek istenirse uyarı gösterilir.
 
-Tespitin yanlış yere oturttuğu bir banner'ı sistem fark edemez. Bu yüzden sonuç ekranında banner yerleştirilen fotoğraflar hızlı kontrol için öne çıkarılır ve yanlış yerleşim aynı ekrandan düzeltilir.
+Tespitin yanlış yere oturttuğu bir banner'ı sistem fark edemez. Bu yüzden sonuç ekranında banner yerleştirilen fotoğraflar hızlı kontrol için öne çıkarılır ve yanlış yerleşim aynı ekrandan düzeltilir. Pilotta güvene göre ayırma yapılmaz: M0'da güvenilir bir eşik bulunamadığı için her banner yerleşimi hızlı kontrolden geçer (M0 kararı, 12 Kasım 2026).
+
+Yan açılarda, detay ve iç mekân fotoğraflarında plaka bulunamazsa fotoğraf işaretlenmez; bu açılarda plaka çoğu zaman görünmez.
 
 ### 7.5 Toplu ve yeniden işleme [Öneri, doküman 4.4]
 

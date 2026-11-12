@@ -220,6 +220,7 @@
     "detector": "Vehicle detection",
     "by": "by {{author}}",
     "adapted": "The outlines in the camera view were made from this 3D model and changed.",
-    "license": "Licence: {{license}}"
+    "license": "Licence: {{license}}",
+    "plate": "Number plate detection"
   }
 }

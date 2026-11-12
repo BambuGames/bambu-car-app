@@ -220,6 +220,7 @@
     "detector": "Araç tespiti",
     "by": "{{author}}",
     "adapted": "Kameradaki silüetler bu 3D modelden üretildi ve değiştirildi.",
-    "license": "Lisans: {{license}}"
+    "license": "Lisans: {{license}}",
+    "plate": "Plaka tespiti"
   }
 }

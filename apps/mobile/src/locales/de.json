@@ -220,6 +220,7 @@
     "detector": "Fahrzeugerkennung",
     "by": "von {{author}}",
     "adapted": "Die Umrisse im Kamerabild wurden aus diesem 3D-Modell erzeugt und verändert.",
-    "license": "Lizenz: {{license}}"
+    "license": "Lizenz: {{license}}",
+    "plate": "Kennzeichenerkennung"
   }
 }

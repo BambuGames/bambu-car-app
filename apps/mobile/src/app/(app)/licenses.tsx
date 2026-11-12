@@ -21,6 +21,22 @@ const DETECTOR: Credit = {
   link: 'https://github.com/google/automl/tree/master/efficientdet',
 };
 
+// Number plate detection on the processing server (M0 Task 4): weights and their training data.
+const PLATE: Credit[] = [
+  {
+    model: 'RT-DETRv2 License Plate Detection',
+    author: 'justjuu',
+    license: 'Apache-2.0',
+    link: 'https://huggingface.co/justjuu/rtdetr-v2-license-plate-detection',
+  },
+  {
+    model: 'License Plate Detection Dataset',
+    author: 'justjuu',
+    license: 'CC BY 4.0',
+    link: 'https://huggingface.co/datasets/justjuu/license-plate-detection',
+  },
+];
+
 function Link({ url, label }: { url: string; label?: string }) {
   return (
     <Pressable accessibilityRole="link" onPress={() => Linking.openURL(url)}>
@@ -57,6 +73,12 @@ export default function Licenses() {
         {t('licenses.detector')}
       </Text>
       <Entry credit={DETECTOR} />
+      <Text style={styles.section} accessibilityRole="header">
+        {t('licenses.plate')}
+      </Text>
+      {PLATE.map((c) => (
+        <Entry key={c.link} credit={c} />
+      ))}
     </Screen>
   );
 }
