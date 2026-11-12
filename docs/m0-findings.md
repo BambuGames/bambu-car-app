@@ -19,6 +19,8 @@ Plan: `docs/superpowers/plans/2026-11-03-m0-spikes.md` · Tasarım: `docs/superp
 | Maske geçme çizgisi | Tutmadı (hedef %90 / `crowded` %80; Photoroom %79,2 / %74,4). Kullanıcı kararı (12 Kasım 2026): Photoroom ile devam; M2'ye personelin kalan parçaya dokunup sildiği bir rötuş adımı ve başka bir aracın tespit kutusu hedef araca değdiğinde açı değiştirmeyi öneren çekim uyarısı eklenir. Tasarımın 7.2 bölümü M2 planında buna göre güncellenir | Task 3 |
 | Maske kırpma ve SAM 2 | Plandaki biçimleriyle kullanılmıyor: ikisi de tespit kutusu dar kaldığında aracı ve anteni kesiyor | Task 3 |
 | Cam karıştırma adımı | Gerekmiyor: belirgin cam sorunu Photoroom'da %8, eşik %30 | Task 3 |
+| Plaka yöntemi | justjuu/rtdetr-v2-license-plate-detection (Apache-2.0; eğitim verisi CC BY 4.0, uygulamanın lisanslar ekranında anılmalı) plakanın kutusunu bulur; köşeler kutunun içinde klasik dörtgen aramasıyla ve AB şeridi düzeltmesiyle bulunur. 46 plakanın 37'sini buldu; köşe hatası %3 içinde kalan 11, %5 içinde 21 | Task 4 |
+| Plaka kontrolü | Geçme çizgisi tutmadı ve güven eşiği bulunamadı. Kullanıcı kararı (12 Kasım 2026): banner otomatik yerleşir, pilotta her yerleşim tasarım 7.4'teki hızlı kontrol ekranından geçer; personel gerekirse köşeleri sürükler. Düzeltilen köşeler, galerinin izniyle köşe modeli eğitimi için saklanır (tasarım 7.6) | Task 4 |
 
 ## Şablon üretimi
 
@@ -265,4 +267,54 @@ Puanlar `spikes/out/mask/scores.csv`'de, karşılaştırma sayfaları `spikes/ou
 
 ## Plaka köşeleri
 
-Task 4, galeri fotoğrafları gelince başlayacak.
+### Veri ve yöntemler (12 Kasım 2026)
+
+- **Doğru köşeler:** Task 3'ün 48 fotoğrafında hedef aracın plaka köşelerini kullanıcı işaretledi (`spikes/data/plates_gt.json`, git dışı). 46 fotoğrafta plaka var; 2 tam yan fotoğrafta (40, 47) yok.
+  - Commons'taki `left` ve `right` fotoğrafları 65–90° arası olduğu için plaka görünüyor (12, 13, 14, 15); bunlar "yan" grubunda.
+  - 45 ve 48'de işaretleme Türk plakasının altındaki bayi bandını da kapsıyor.
+- **Klasik yöntem:** Aracın maske kutusunun alt %60'ında konturlar dörtgene indirilir. Adaylar plaka zemininin parlaklığı, yazı yoğunluğu, kenar karşıtlığı ve soldaki mavi AB şeridiyle puanlanır.
+  - İlk ölçümde dörtgen, AB şeridini dışarıda bırakıp yalnız beyaz alanı buluyordu. Dörtgenin solunda mavi şerit varsa sol kenar şeridin üstüne kaydırılıyor; bu düzeltmeyle 3% içindeki tespitler 5'ten 10'a çıktı.
+- **Hazır model:** [justjuu/rtdetr-v2-license-plate-detection](https://huggingface.co/justjuu/rtdetr-v2-license-plate-detection).
+  - Lisanslar: ağırlıklar Apache-2.0, temel model RT-DETRv2 (PekingU) Apache-2.0. Eğitim verisi [justjuu/license-plate-detection](https://huggingface.co/datasets/justjuu/license-plate-detection) CC BY 4.0; Roboflow'dan türetilmiş, kaynağın lisansı yazılmamış.
+  - Boyut 172 MB. 4 işlemci çekirdeğinde (M4) fotoğraf başına 0,27 sn.
+  - Yalnız kutu veriyor. Köşeler, kutunun %15 büyütülmüş halinde klasik dörtgen aramasıyla bulunuyor; dörtgen bulunamazsa kutunun köşeleri kullanılıyor.
+- **Elenen adaylar:**
+  - [autolane/rfdetr-alpr](https://huggingface.co/autolane/rfdetr-alpr): eğitim verisi belirtilmemiş.
+  - [open-image-models](https://github.com/ankandrew/open-image-models): ağırlıkların lisansı ve eğitim verisi yazılmamış; YOLOv9 kökenli.
+  - LiteALPR: AGPL-3.0.
+  - Ultralytics ve YOLOv5 tabanlılar: AGPL.
+
+### Ölçümler
+
+Tespit: doğru dörtgenle IoU en az 0,5. Köşe hatası: ortalama köşe uzaklığının plaka genişliğine oranı.
+
+| Grup | Klasik: tespit | Klasik: hata medyan / %90 | Klasik: %3 içinde | Model: tespit | Model: hata medyan / %90 | Model: %3 içinde |
+|---|---|---|---|---|---|---|
+| Hepsi | 28/46 | %3,8 / %7,8 | 10/28 | 37/46 | %4,5 / %13,7 | 11/37 |
+| Ön ve arka | 13/15 | %3,8 / %7,2 | 4/13 | 15/15 | %3,7 / %9,0 | 5/15 |
+| 45° | 15/27 | %3,8 / %7,5 | 6/15 | 20/27 | %5,5 / %18,0 | 6/20 |
+| Yan (65–90°) | 0/4 | – | – | 2/4 | %13,4 / %13,8 | 0/2 |
+| `rain` | 3/7 | %2,1 / %5,2 | 2/3 | 6/7 | %5,5 / %23,1 | 1/6 |
+| `dusk` veya `backlight` | 3/5 | %3,2 / %4,6 | 1/3 | 3/5 | %2,5 / %4,5 | 2/3 |
+| Ultra geniş | 5/9 | %2,6 / %6,2 | 3/5 | 6/9 | %3,6 / %8,5 | 2/6 |
+
+- **Yanlış alarm:** Klasik yöntem plakasız 2 fotoğrafın 1'inde bir şey buldu; model hiçbirinde bulmadı.
+- **Daha gevşek eşikler:** Görünen 46 plakadan köşe hatası %5 içinde kalan klasikte 18, modelde 21. %10 içinde kalan ikisinde de 26.
+- **Güven eşiği yok:** Hiçbir güven değerinin üstünde, tespitlerin %95'i %3 hata içinde kalmıyor. Yani "plaka kontrolü gerekiyor" ayrımı güvene bakarak yapılamıyor.
+- **Banner sayfaları:** `spikes/out/plate/sheets/classical/` ve `spikes/out/plate/sheets/model/` (git dışı). Hatası %5 civarındaki yerleşimler gözle bakınca çoğunlukla kabul edilebilir görünüyor; %10'un üstündekiler plakanın yanına kayıyor ya da plakayı tam örtmüyor.
+
+### Hata kaynakları
+
+- **Model plakayı ıskaladığında (9 fotoğraf):** 12, 13, 17, 23, 27, 29, 41, 43, 46. Çoğu çok eğik ya da küçük plakalar; 41, 43 ve 46 kendi çekimimizdeki, aracın yanından çok eğik görülen plakalar.
+- **Köşe hatası:**
+  - Dörtgen bazen plakanın kendisi yerine çevresindeki bayi çerçevesini buluyor (09, 33). Çerçeve plakadan 10–25 px büyük, bu da %3 sınırını aşıyor.
+  - 45° açılarda ve yağmurda dörtgen bulunamayınca kutunun köşelerine düşülüyor; kutu eğik plakanın köşelerini veremiyor (16, 18, 36).
+- **Sonuç:** Ne klasik yöntem ne de hazır model plandaki çizgiye (tespit %90, tespitlerin %90'ı %3 hata içinde) yaklaşıyor. Asıl eksik köşe hassasiyeti; model plakanın yerini ön ve arka açılarda her seferinde buluyor.
+
+### Karar (12 Kasım 2026)
+
+Kullanıcı otomatik yerleştirme ve hızlı kontrolü seçti. Diğer seçenek köşeleri doğrudan veren bir model eğitmekti; köşe işaretli açık lisanslı veri nadir olduğu için birkaç gün sürecek ve sonucu belirsizdi.
+
+- **Pilotta akış:** Banner, modelin bulduğu ve klasik aramayla inceltilen köşelere otomatik yerleşir. Güven eşiği olmadığı için her yerleşim hızlı kontrol ekranında gösterilir. Model plakayı bulamazsa fotoğraf "plaka kontrolü gerekiyor" olur.
+- **Tasarımla uyumu:** Tasarımın 7.4 bölümünde köşe sürükleme ve banner'lı fotoğrafları hızlı kontrole çıkarma zaten var. Tek fark, güvene göre ayırma yapılmaması.
+- **M2 notu:** İşleme servisi şu an yalnız OpenCV ve Pillow kullanıyor. Model sunucuda çalışacağı için PyTorch yerine ONNX'e çevrilip onnxruntime ile çalıştırılması değerlendirilmeli.
