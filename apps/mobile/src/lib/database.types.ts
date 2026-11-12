@@ -23,19 +23,71 @@ export type Database = {
           }
         },"public": {
           Tables: {
-            "galleries": {
+            "backgrounds": {
                   Row: {
-                    "created_at": string,"id": string,"name": string
+                    "gallery_id": string | null,"id": string,"name": string,"sort_order": number,"spec": NonNullable<Json>
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"id"?: string,"name": string
+                    "gallery_id"?: string | null,"id"?: string,"name": string,"sort_order"?: number,"spec": NonNullable<Json>
                   }
                   Update: {
-                    "created_at"?: string,"id"?: string,"name"?: string
+                    "gallery_id"?: string | null,"id"?: string,"name"?: string,"sort_order"?: number,"spec"?: NonNullable<Json>
                   }
                   Relationships: [
-                    
+                    {
+      foreignKeyName: "backgrounds_gallery_id_fkey"
+      columns: ["gallery_id"]
+isOneToOne: false
+      referencedRelation: "galleries"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"credit_ledger": {
+                  Row: {
+                    "amount": number,"created_at": string,"created_by": string | null,"gallery_id": string,"id": number,"note": string | null,"reason": Database["public"]['Enums']["credit_reason"],"vehicle_id": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "amount": number,"created_at"?: string,"created_by"?: string | null,"gallery_id": string,"id"?: never,"note"?: string | null,"reason": Database["public"]['Enums']["credit_reason"],"vehicle_id"?: string | null
+                  }
+                  Update: {
+                    "amount"?: number,"created_at"?: string,"created_by"?: string | null,"gallery_id"?: string,"id"?: never,"note"?: string | null,"reason"?: Database["public"]['Enums']["credit_reason"],"vehicle_id"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "credit_ledger_gallery_id_fkey"
+      columns: ["gallery_id"]
+isOneToOne: false
+      referencedRelation: "galleries"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "credit_ledger_vehicle_id_fkey"
+      columns: ["vehicle_id"]
+isOneToOne: false
+      referencedRelation: "vehicles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"galleries": {
+                  Row: {
+                    "banner_path": string | null,"created_at": string,"default_background_id": string | null,"id": string,"logo_path": string | null,"name": string,"watermark": NonNullable<Json>
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "banner_path"?: string | null,"created_at"?: string,"default_background_id"?: string | null,"id"?: string,"logo_path"?: string | null,"name": string,"watermark"?: NonNullable<Json>
+                  }
+                  Update: {
+                    "banner_path"?: string | null,"created_at"?: string,"default_background_id"?: string | null,"id"?: string,"logo_path"?: string | null,"name"?: string,"watermark"?: NonNullable<Json>
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "galleries_default_background_id_fkey"
+      columns: ["default_background_id"]
+isOneToOne: false
+      referencedRelation: "backgrounds"
+      referencedColumns: ["id"]
+    }
                   ]
                 },"gallery_members": {
                   Row: {
@@ -93,14 +145,14 @@ isOneToOne: false
                   ]
                 },"photos": {
                   Row: {
-                    "capture": NonNullable<Json>,"captured_at": string,"created_at": string,"gallery_id": string,"id": string,"original_path": string,"qc": NonNullable<Json>,"slot": string,"updated_at": string,"vehicle_id": string
+                    "capture": NonNullable<Json>,"captured_at": string,"created_at": string,"gallery_id": string,"id": string,"mask_edits": NonNullable<Json>,"mask_path": string | null,"original_path": string,"output_path": string | null,"output_wm_path": string | null,"placement": Json | null,"plate_corners": Json | null,"plate_status": Database["public"]['Enums']["plate_status"] | null,"process_error": string | null,"process_status": Database["public"]['Enums']["photo_process_status"],"processed_at": string | null,"qc": NonNullable<Json>,"slot": string,"tone_stats": Json | null,"updated_at": string,"vehicle_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "capture"?: NonNullable<Json>,"captured_at": string,"created_at"?: string,"gallery_id": string,"id": string,"original_path": string,"qc"?: NonNullable<Json>,"slot": string,"updated_at"?: string,"vehicle_id": string
+                    "capture"?: NonNullable<Json>,"captured_at": string,"created_at"?: string,"gallery_id": string,"id": string,"mask_edits"?: NonNullable<Json>,"mask_path"?: string | null,"original_path": string,"output_path"?: string | null,"output_wm_path"?: string | null,"placement"?: Json | null,"plate_corners"?: Json | null,"plate_status"?: Database["public"]['Enums']["plate_status"] | null,"process_error"?: string | null,"process_status"?: Database["public"]['Enums']["photo_process_status"],"processed_at"?: string | null,"qc"?: NonNullable<Json>,"slot": string,"tone_stats"?: Json | null,"updated_at"?: string,"vehicle_id": string
                   }
                   Update: {
-                    "capture"?: NonNullable<Json>,"captured_at"?: string,"created_at"?: string,"gallery_id"?: string,"id"?: string,"original_path"?: string,"qc"?: NonNullable<Json>,"slot"?: string,"updated_at"?: string,"vehicle_id"?: string
+                    "capture"?: NonNullable<Json>,"captured_at"?: string,"created_at"?: string,"gallery_id"?: string,"id"?: string,"mask_edits"?: NonNullable<Json>,"mask_path"?: string | null,"original_path"?: string,"output_path"?: string | null,"output_wm_path"?: string | null,"placement"?: Json | null,"plate_corners"?: Json | null,"plate_status"?: Database["public"]['Enums']["plate_status"] | null,"process_error"?: string | null,"process_status"?: Database["public"]['Enums']["photo_process_status"],"processed_at"?: string | null,"qc"?: NonNullable<Json>,"slot"?: string,"tone_stats"?: Json | null,"updated_at"?: string,"vehicle_id"?: string
                   }
                   Relationships: [
                     {
@@ -113,17 +165,23 @@ isOneToOne: false
                   ]
                 },"vehicles": {
                   Row: {
-                    "body_type": Database["public"]['Enums']["body_type"],"created_at": string,"created_by": string | null,"details": NonNullable<Json>,"gallery_id": string,"id": string,"make": string,"model": string,"status": Database["public"]['Enums']["vehicle_status"],"updated_at": string
+                    "background_id": string | null,"body_type": Database["public"]['Enums']["body_type"],"created_at": string,"created_by": string | null,"credit_charged_at": string | null,"details": NonNullable<Json>,"gallery_id": string,"id": string,"make": string,"model": string,"status": Database["public"]['Enums']["vehicle_status"],"tone_enabled": boolean,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "body_type": Database["public"]['Enums']["body_type"],"created_at"?: string,"created_by"?: string | null,"details"?: NonNullable<Json>,"gallery_id": string,"id"?: string,"make": string,"model": string,"status"?: Database["public"]['Enums']["vehicle_status"],"updated_at"?: string
+                    "background_id"?: string | null,"body_type": Database["public"]['Enums']["body_type"],"created_at"?: string,"created_by"?: string | null,"credit_charged_at"?: string | null,"details"?: NonNullable<Json>,"gallery_id": string,"id"?: string,"make": string,"model": string,"status"?: Database["public"]['Enums']["vehicle_status"],"tone_enabled"?: boolean,"updated_at"?: string
                   }
                   Update: {
-                    "body_type"?: Database["public"]['Enums']["body_type"],"created_at"?: string,"created_by"?: string | null,"details"?: NonNullable<Json>,"gallery_id"?: string,"id"?: string,"make"?: string,"model"?: string,"status"?: Database["public"]['Enums']["vehicle_status"],"updated_at"?: string
+                    "background_id"?: string | null,"body_type"?: Database["public"]['Enums']["body_type"],"created_at"?: string,"created_by"?: string | null,"credit_charged_at"?: string | null,"details"?: NonNullable<Json>,"gallery_id"?: string,"id"?: string,"make"?: string,"model"?: string,"status"?: Database["public"]['Enums']["vehicle_status"],"tone_enabled"?: boolean,"updated_at"?: string
                   }
                   Relationships: [
                     {
+      foreignKeyName: "vehicles_background_id_fkey"
+      columns: ["background_id"]
+isOneToOne: false
+      referencedRelation: "backgrounds"
+      referencedColumns: ["id"]
+    },{
       foreignKeyName: "vehicles_gallery_id_fkey"
       columns: ["gallery_id"]
 isOneToOne: false
@@ -142,10 +200,22 @@ isOneToOne: false
                            },
 "admin_create_gallery":
 { Args: { "p_name": string,"p_owner_email": string }; Returns: string
+                           },
+"admin_grant_credits":
+{ Args: { "p_amount": number,"p_gallery_id": string,"p_note": string }; Returns: number
+                           },
+"admin_refund_vehicle":
+{ Args: { "p_note": string,"p_vehicle_id": string }; Returns: number
+                           },
+"gallery_credit_balance":
+{ Args: { "p_gallery_id": string }; Returns: number
+                           },
+"start_processing":
+{ Args: { "p_photo_id"?: string,"p_rerender"?: boolean,"p_vehicle_id": string }; Returns: (string)[]
                            }
           }
           Enums: {
-            "body_type": "sedan"|"kombi"|"suv"|"hatchback"|"other","member_role": "owner"|"staff","vehicle_status": "draft"|"shooting"|"processing"|"ready"|"archived"
+            "body_type": "sedan"|"kombi"|"suv"|"hatchback"|"other","credit_reason": "grant"|"vehicle"|"refund","member_role": "owner"|"staff","photo_process_status": "unprocessed"|"queued"|"processing"|"done"|"failed","plate_status": "auto"|"needs_check"|"confirmed"|"none","vehicle_status": "draft"|"shooting"|"processing"|"ready"|"archived"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -265,7 +335,7 @@ export const Constants = {
           }
         },"public": {
           Enums: {
-            "body_type": ["sedan", "kombi", "suv", "hatchback", "other"],"member_role": ["owner", "staff"],"vehicle_status": ["draft", "shooting", "processing", "ready", "archived"]
+            "body_type": ["sedan", "kombi", "suv", "hatchback", "other"],"credit_reason": ["grant", "vehicle", "refund"],"member_role": ["owner", "staff"],"photo_process_status": ["unprocessed", "queued", "processing", "done", "failed"],"plate_status": ["auto", "needs_check", "confirmed", "none"],"vehicle_status": ["draft", "shooting", "processing", "ready", "archived"]
           }
         }
 } as const
