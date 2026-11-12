@@ -1,0 +1,16 @@
+{
+  "bodyType": "suv",
+  "slot": "rear_right_45",
+  "mode": "wide",
+  "hfovDeg": 106.0,
+  "cameraHeightM": 1.0,
+  "pitchDeg": 0.0,
+  "distanceM": 2.991,
+  "box": [
+    0.1981,
+    0.3158,
+    0.8025,
+    0.8642
+  ],
+  "svg": "rear_right_45_wide.svg"
+}

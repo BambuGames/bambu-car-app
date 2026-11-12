@@ -1,0 +1,16 @@
+{
+  "bodyType": "kombi",
+  "slot": "front_left_45",
+  "mode": "wide",
+  "hfovDeg": 106.0,
+  "cameraHeightM": 1.0,
+  "pitchDeg": 0.0,
+  "distanceM": 3.284,
+  "box": [
+    0.2131,
+    0.415,
+    0.7875,
+    0.8042
+  ],
+  "svg": "front_left_45_wide.svg"
+}

@@ -4,7 +4,9 @@ import numpy as np
 import pytest
 import trimesh
 
-from templates import SLOTS, load_car, make_template, mode_distance, project, solve_distance
+import json
+
+from templates import SLOTS, export_app, load_car, make_template, mode_distance, project, solve_distance
 
 
 def box_car():
@@ -96,3 +98,38 @@ def test_svg_path_closed_and_inside_viewbox():
     assert d.startswith("M") and d.endswith("Z")
     nums = [float(n) for n in re.findall(r"-?\d+(?:\.\d+)?", d)]
     assert all(0 <= x <= 1600 for x in nums[0::2]) and all(0 <= y <= 1200 for y in nums[1::2])
+
+
+def _write_templates(out, body_type, names):
+    folder = out / body_type
+    folder.mkdir(parents=True)
+    for slot, mode in names:
+        meta, svg = make_template(V, F, body_type, slot, mode)
+        (folder / f"{slot}_{mode}.json").write_text(json.dumps(meta))
+        (folder / meta["svg"]).write_text(svg)
+
+
+def _exported(dest, name):
+    text = dest.read_text()
+    return json.loads(re.search(rf"export const {name}: [^=]+= (.*);\n", text).group(1))
+
+
+def test_export_app_writes_one_entry_per_template_and_credits(tmp_path):
+    _write_templates(tmp_path / "out", "sedan", [("front_left_45", "normal"), ("front_left_45", "wide")])
+    dest = tmp_path / "templates.generated.ts"
+    export_app(str(tmp_path / "out"), str(dest))
+    templates = _exported(dest, "TEMPLATES")
+    assert sorted((t["bodyType"], t["slot"], t["mode"]) for t in templates) == [
+        ("sedan", "front_left_45", "normal"), ("sedan", "front_left_45", "wide")]
+    assert templates[0]["path"].startswith("M ") and len(templates[0]["box"]) == 4
+    credits = _exported(dest, "TEMPLATE_CREDITS")
+    assert [c["author"] for c in credits] == ["Antonis_zks"]
+
+
+def test_export_app_skips_wide_front_and_rear(tmp_path):
+    _write_templates(tmp_path / "out", "sedan", [("front", "wide"), ("rear", "wide"), ("front", "normal"),
+                                                 ("front_left_45", "wide")])
+    dest = tmp_path / "templates.generated.ts"
+    export_app(str(tmp_path / "out"), str(dest))
+    assert sorted((t["slot"], t["mode"]) for t in _exported(dest, "TEMPLATES")) == [
+        ("front", "normal"), ("front_left_45", "wide")]

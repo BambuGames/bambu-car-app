@@ -10,6 +10,7 @@ export const INTERIOR_SLOTS = [
   'interior_door', 'interior_trunk', 'interior_headliner', 'interior_other',
 ] as const;
 
+export type ExteriorSlot = (typeof EXTERIOR_SLOTS)[number];
 export type Slot = (typeof EXTERIOR_SLOTS)[number] | (typeof DETAIL_SLOTS)[number] | (typeof INTERIOR_SLOTS)[number];
 
 export const isExterior = (slot: Slot): boolean => (EXTERIOR_SLOTS as readonly Slot[]).includes(slot);

@@ -1,0 +1,16 @@
+{
+  "bodyType": "hatchback",
+  "slot": "front_left_45",
+  "mode": "wide",
+  "hfovDeg": 106.0,
+  "cameraHeightM": 1.0,
+  "pitchDeg": 0.0,
+  "distanceM": 3.035,
+  "box": [
+    0.2281,
+    0.4283,
+    0.7725,
+    0.8275
+  ],
+  "svg": "front_left_45_wide.svg"
+}

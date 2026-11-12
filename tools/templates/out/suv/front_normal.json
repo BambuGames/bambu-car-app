@@ -1,0 +1,16 @@
+{
+  "bodyType": "suv",
+  "slot": "front",
+  "mode": "normal",
+  "hfovDeg": 69.0,
+  "cameraHeightM": 1.0,
+  "pitchDeg": 0.0,
+  "distanceM": 4.587,
+  "box": [
+    0.2631,
+    0.3642,
+    0.7375,
+    0.8008
+  ],
+  "svg": "front_normal.svg"
+}
