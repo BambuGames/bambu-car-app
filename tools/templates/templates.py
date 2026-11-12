@@ -4,6 +4,7 @@ Car coordinates: +x is the car's front, +y its left, +z up; the origin is the ca
 The photographer walks around the car at one radius per lens mode and keeps the car centered in the frame.
 Usage: python tools/templates/templates.py sedan
        python tools/templates/templates.py export-app   (writes the app's templates.generated.ts)
+       python tools/templates/templates.py export-worker   (writes the image worker's templates.json)
 """
 import argparse
 import json
@@ -197,11 +198,28 @@ def export_app(out_dir: str, dest: str) -> None:
     )
 
 
+WORKER_DEST = HERE.parent.parent / "services/image-worker/worker/templates.json"
+
+
+def export_worker(out_dir: str, dest: str) -> None:
+    """Writes every template's target box for the image worker, which places the car on it."""
+    rows = []
+    for meta_file in sorted(Path(out_dir).glob("*/*.json")):
+        meta = json.loads(meta_file.read_text())
+        if meta["mode"] == "wide" and meta["slot"] in WIDE_SKIPPED:
+            continue
+        rows.append({k: meta[k] for k in ("bodyType", "slot", "mode", "box")})
+    Path(dest).parent.mkdir(parents=True, exist_ok=True)
+    Path(dest).write_text(json.dumps(rows, indent=1) + "\n")
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate capture guide templates for one body type.")
-    parser.add_argument("body_type", help="a key of body_types.json, or export-app")
+    parser.add_argument("body_type", help="a key of body_types.json, export-app or export-worker")
     name = parser.parse_args().body_type
     if name == "export-app":
         export_app(str(HERE / "out"), str(APP_DEST))
+    elif name == "export-worker":
+        export_worker(str(HERE / "out"), str(WORKER_DEST))
     else:
         generate(name, str(HERE / "out"))

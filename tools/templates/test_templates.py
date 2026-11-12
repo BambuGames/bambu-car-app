@@ -6,7 +6,7 @@ import trimesh
 
 import json
 
-from templates import SLOTS, export_app, load_car, make_template, mode_distance, project, solve_distance
+from templates import SLOTS, export_app, export_worker, load_car, make_template, mode_distance, project, solve_distance
 
 
 def box_car():
@@ -133,3 +133,12 @@ def test_export_app_skips_wide_front_and_rear(tmp_path):
     export_app(str(tmp_path / "out"), str(dest))
     assert sorted((t["slot"], t["mode"]) for t in _exported(dest, "TEMPLATES")) == [
         ("front", "normal"), ("front_left_45", "wide")]
+
+
+def test_export_worker_writes_boxes(tmp_path):
+    _write_templates(tmp_path / "out", "sedan", [("left", "normal"), ("front", "wide"), ("left", "wide")])
+    dest = tmp_path / "templates.json"
+    export_worker(str(tmp_path / "out"), str(dest))
+    rows = json.loads(dest.read_text())
+    assert sorted((r["bodyType"], r["slot"], r["mode"]) for r in rows) == [("sedan", "left", "normal"), ("sedan", "left", "wide")]
+    assert len(rows[0]["box"]) == 4 and set(rows[0]) == {"bodyType", "slot", "mode", "box"}
