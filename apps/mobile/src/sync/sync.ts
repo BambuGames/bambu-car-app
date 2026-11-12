@@ -34,6 +34,7 @@ async function push(db: Db, remote: Remote, item: OutboxItem): Promise<void> {
     originalPath: path,
     capturedAt: photo.capturedAt,
     capture: photo.capture,
+    qc: photo.qc,
   });
   // Re-shot during the upload: the item stays queued and the new file goes up next.
   await setUploadState(db, photo.id, (await complete(db, item)) ? 'uploaded' : 'pending', path);

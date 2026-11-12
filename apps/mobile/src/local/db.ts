@@ -11,7 +11,7 @@ export interface Db {
 }
 
 // One entry per schema version; never edit an entry that has shipped, append a new one.
-const MIGRATIONS = [
+export const MIGRATIONS = [
   `create table vehicles (
      id text primary key,
      gallery_id text not null,
@@ -49,6 +49,7 @@ const MIGRATIONS = [
      unique (kind, entity_id)
    );
    create table meta (key text primary key, value text not null);`,
+  `alter table photos add column qc text not null default '{}';`,
 ];
 
 export async function migrate(db: Db): Promise<void> {

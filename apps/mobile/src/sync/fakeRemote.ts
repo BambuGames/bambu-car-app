@@ -4,7 +4,7 @@ import type { RemotePhoto } from '../local/photos';
 import type { Remote } from './remote';
 
 type Name = keyof Remote;
-type StoredPhoto = RemotePhoto & { capture: Record<string, unknown> };
+type StoredPhoto = RemotePhoto & { capture: Record<string, unknown>; qc: Record<string, unknown> };
 
 export class FakeRemote implements Remote {
   calls: { name: Name; args: unknown[] }[] = [];

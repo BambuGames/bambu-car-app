@@ -1,7 +1,7 @@
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { migrate, type Db } from './db';
+import { MIGRATIONS, migrate, type Db } from './db';
 import { backoffMs, complete, enqueue, fail, nextDue, pendingCount } from './outbox';
 import { listPhotos, savePhoto } from './photos';
 import { closeDb, memoryDb } from './testDb';
@@ -19,8 +19,35 @@ afterEach(() => closeDb(db));
 const passat = (id = 'v1') =>
   createVehicle(db, { id, galleryId: 'g1', make: 'Volkswagen', model: 'Passat', bodyType: 'kombi', now: NOW });
 
-const photo = (slot: Parameters<typeof savePhoto>[1]['slot'], id: string, localUri = `file:///${id}.jpg`) =>
-  savePhoto(db, { id, vehicleId: 'v1', galleryId: 'g1', slot, localUri, capturedAt: '2026-11-09T10:01:00.000Z', capture: {} });
+const photo = (
+  slot: Parameters<typeof savePhoto>[1]['slot'],
+  id: string,
+  localUri = `file:///${id}.jpg`,
+  qc: Record<string, unknown> = {},
+) =>
+  savePhoto(db, { id, vehicleId: 'v1', galleryId: 'g1', slot, localUri, capturedAt: '2026-11-09T10:01:00.000Z', capture: {}, qc });
+
+test('savePhoto stores qc and returns the replaced file uri', async () => {
+  await passat();
+  const first = await photo('front', 'p1', 'file:///a.jpg', { issues: ['dark'], accepted: false });
+  const second = await photo('front', 'p2', 'file:///b.jpg', { issues: [], accepted: false });
+  expect(first.replacedUri).toBeNull();
+  expect(second.replacedUri).toBe('file:///a.jpg');
+  expect((await listPhotos(db, 'v1'))[0].qc).toEqual({ issues: [], accepted: false });
+});
+
+test('migrate adds qc to a version 1 database', async () => {
+  const old = memoryDb();
+  await old.exec(MIGRATIONS[0]);
+  await old.exec('pragma user_version = 1');
+  await old.run(
+    `insert into photos (id, vehicle_id, gallery_id, slot, local_uri, original_path, captured_at, upload_state)
+     values ('p1', 'v1', 'g1', 'front', 'file:///a.jpg', null, '2026-11-09T10:01:00.000Z', 'pending')`,
+  );
+  await migrate(old);
+  expect((await listPhotos(old, 'v1'))[0].qc).toEqual({});
+  closeDb(old);
+});
 
 test('createVehicle stores a draft vehicle and queues it for upload', async () => {
   const v = await passat();

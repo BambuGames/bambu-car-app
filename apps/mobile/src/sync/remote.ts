@@ -12,7 +12,7 @@ type JsonObject = { [key: string]: Json | undefined };
 export interface Remote {
   upsertVehicle(v: Vehicle): Promise<void>;
   uploadPhoto(path: string, localUri: string): Promise<void>;
-  upsertPhoto(p: RemotePhoto & { capture: Record<string, unknown> }): Promise<void>;
+  upsertPhoto(p: RemotePhoto & { capture: Record<string, unknown>; qc: Record<string, unknown> }): Promise<void>;
   fetchVehicles(galleryId: string): Promise<Vehicle[]>;
   fetchPhotos(galleryId: string): Promise<RemotePhoto[]>;
   fetchCatalog(): Promise<{ makes: Make[]; models: Model[] }>;
@@ -78,6 +78,7 @@ export function createRemote(client: SupabaseClient<Database>, readFile: (uri: s
             original_path: p.originalPath,
             captured_at: p.capturedAt,
             capture: p.capture as JsonObject,
+            qc: p.qc as JsonObject,
           },
           { onConflict: 'vehicle_id,slot' },
         ),

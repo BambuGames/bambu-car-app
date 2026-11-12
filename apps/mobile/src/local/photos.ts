@@ -13,6 +13,7 @@ export type PhotoRow = {
   originalPath: string | null;
   capturedAt: string;
   capture: Record<string, unknown>;
+  qc: Record<string, unknown>;
   uploadState: UploadState;
 };
 
@@ -35,6 +36,7 @@ type Row = {
   original_path: string | null;
   captured_at: string;
   capture: string;
+  qc: string;
   upload_state: UploadState;
 };
 
@@ -47,10 +49,12 @@ const toPhoto = (r: Row): PhotoRow => ({
   originalPath: r.original_path,
   capturedAt: r.captured_at,
   capture: JSON.parse(r.capture),
+  qc: JSON.parse(r.qc),
   uploadState: r.upload_state,
 });
 
-// One photo per step: a re-shot replaces the file and keeps the step's photo id.
+// One photo per step: a re-shot replaces the file and keeps the step's photo id. The replaced file's uri
+// is returned so the caller can delete it.
 export async function savePhoto(
   db: Db,
   input: {
@@ -61,22 +65,34 @@ export async function savePhoto(
     localUri: string;
     capturedAt: string;
     capture: Record<string, unknown>;
+    qc: Record<string, unknown>;
   },
-): Promise<{ photoId: string }> {
+): Promise<{ photoId: string; replacedUri: string | null }> {
   let photoId = input.id;
+  let replacedUri: string | null = null;
   const now = Date.parse(input.capturedAt);
   await db.transaction(async () => {
-    const existing = await db.get<{ id: string }>('select id from photos where vehicle_id = ? and slot = ?', [
-      input.vehicleId,
-      input.slot,
-    ]);
+    const existing = await db.get<{ id: string; local_uri: string | null }>(
+      'select id, local_uri from photos where vehicle_id = ? and slot = ?',
+      [input.vehicleId, input.slot],
+    );
     photoId = existing?.id ?? input.id;
+    replacedUri = existing?.local_uri ?? null;
     await db.run(
-      `insert into photos (id, vehicle_id, gallery_id, slot, local_uri, original_path, captured_at, capture, upload_state)
-       values (?, ?, ?, ?, ?, null, ?, ?, 'pending')
+      `insert into photos (id, vehicle_id, gallery_id, slot, local_uri, original_path, captured_at, capture, qc, upload_state)
+       values (?, ?, ?, ?, ?, null, ?, ?, ?, 'pending')
        on conflict (id) do update set local_uri = excluded.local_uri, captured_at = excluded.captured_at,
-         capture = excluded.capture, upload_state = 'pending'`,
-      [photoId, input.vehicleId, input.galleryId, input.slot, input.localUri, input.capturedAt, JSON.stringify(input.capture)],
+         capture = excluded.capture, qc = excluded.qc, upload_state = 'pending'`,
+      [
+        photoId,
+        input.vehicleId,
+        input.galleryId,
+        input.slot,
+        input.localUri,
+        input.capturedAt,
+        JSON.stringify(input.capture),
+        JSON.stringify(input.qc),
+      ],
     );
     const vehicle = await db.get<{ status: string }>('select status from vehicles where id = ?', [input.vehicleId]);
     if (vehicle?.status === 'draft') {
@@ -85,7 +101,7 @@ export async function savePhoto(
     }
     await enqueue(db, 'photo', photoId, now);
   });
-  return { photoId };
+  return { photoId, replacedUri };
 }
 
 export async function listPhotos(db: Db, vehicleId: string): Promise<PhotoRow[]> {

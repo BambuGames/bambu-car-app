@@ -43,11 +43,13 @@ test('real remote stores a vehicle and photo the gallery can read back and other
   await remote.uploadPhoto(path, pathToFileURL(file).href);
   await remote.upsertPhoto({
     id: crypto.randomUUID(), vehicleId: id, galleryId: TESTGALERIE, slot: 'front',
-    originalPath: path, capturedAt: now, capture: { cameraMode: 'normal' },
+    originalPath: path, capturedAt: now, capture: { cameraMode: 'normal' }, qc: { issues: ['dark'], accepted: true },
   });
 
   expect((await remote.fetchVehicles(TESTGALERIE)).map((v) => v.id)).toContain(id);
   expect((await remote.fetchPhotos(TESTGALERIE)).find((p) => p.vehicleId === id)).toMatchObject({ slot: 'front', originalPath: path });
+  const { data: row } = await staff.from('photos').select('qc').eq('vehicle_id', id).single();
+  expect(row?.qc).toEqual({ issues: ['dark'], accepted: true });
   const download = await staff.storage.from('originals').download(path);
   expect(Buffer.from(await download.data!.arrayBuffer())).toEqual(JPEG);
 

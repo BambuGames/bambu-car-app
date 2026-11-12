@@ -20,9 +20,17 @@ afterEach(() => closeDb(db));
 
 const vehicle = (id: string, model = 'Passat') =>
   createVehicle(db, { id, galleryId: 'g1', make: 'Volkswagen', model, bodyType: 'kombi', now: NOW });
-const front = (vehicleId = 'v1') =>
-  savePhoto(db, { id: 'p1', vehicleId, galleryId: 'g1', slot: 'front', localUri: 'file:///front.jpg', capturedAt: NOW, capture: {} });
+const front = (vehicleId = 'v1', qc: Record<string, unknown> = {}) =>
+  savePhoto(db, { id: 'p1', vehicleId, galleryId: 'g1', slot: 'front', localUri: 'file:///front.jpg', capturedAt: NOW, capture: {}, qc });
 const sync = (at = T0) => syncOnce(db, fake, 'g1', () => at);
+
+test('pushes qc with the photo row', async () => {
+  const qc = { issues: ['blurry'], accepted: true, laplacianVar: 12, meanLuma: 90, clippedShare: 0 };
+  await vehicle('v1');
+  await front('v1', qc);
+  await sync();
+  expect(fake.photos.get('v1/front')?.qc).toEqual(qc);
+});
 
 test('pushes a new vehicle before its photo', async () => {
   await vehicle('v1');
@@ -58,7 +66,7 @@ test('a photo re-shot during its upload is uploaded again with the new file', as
   await front();
   fake.beforeUpload = async () => {
     fake.beforeUpload = undefined;
-    await savePhoto(db, { id: 'p2', vehicleId: 'v1', galleryId: 'g1', slot: 'front', localUri: 'file:///front-2.jpg', capturedAt: NOW, capture: {} });
+    await savePhoto(db, { id: 'p2', vehicleId: 'v1', galleryId: 'g1', slot: 'front', localUri: 'file:///front-2.jpg', capturedAt: NOW, capture: {}, qc: {} });
   };
   await sync();
   expect(fake.files.get('g1/v1/front.jpg')).toBe('file:///front-2.jpg');
