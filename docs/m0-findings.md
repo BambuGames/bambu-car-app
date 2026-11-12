@@ -15,6 +15,10 @@ Plan: `docs/superpowers/plans/2026-11-03-m0-spikes.md` · Tasarım: `docs/superp
 | Model ve delegate, Android | Lite0 + GPU. Galaxy A34'te saniyede 16 (aydınlık) ve 10 (az ışık) tespit; Lite2 + GPU saniyede 7 ile hedefin altında. Düşük segment Tecno'da Lite0 saniyede 7–8 | Task 2 |
 | Basit mod eşiği | Plandaki değer kalıyor: tespit hızı 3 saniye boyunca saniyede 4'ün altında kalırsa basit moda geçilir. Seçilen kombinasyonlar test telefonlarında 4'ün altına inmedi (en düşük: Tecno'da Lite0 + GPU, 5) | Task 2 |
 | Ultra geniş kamerayı açmayan telefonlar | Tasarımdaki gibi dar alan modu görünmez; bu telefonlarda yalnız normal mod var. Test edilen iki Android de (Tecno, A34) bu durumda | Task 2 |
+| Maske sağlayıcısı | Photoroom. 48 fotoğrafta %79,2 kabul; BiRefNet %62,5. Antenleri, siyah aynaları ve camları daha iyi işliyor | Task 3 |
+| Maske geçme çizgisi | Tutmadı (hedef %90 / `crowded` %80; Photoroom %79,2 / %74,4). Kullanıcı kararı (12 Kasım 2026): Photoroom ile devam; M2'ye personelin kalan parçaya dokunup sildiği bir rötuş adımı ve başka bir aracın tespit kutusu hedef araca değdiğinde açı değiştirmeyi öneren çekim uyarısı eklenir. Tasarımın 7.2 bölümü M2 planında buna göre güncellenir | Task 3 |
+| Maske kırpma ve SAM 2 | Plandaki biçimleriyle kullanılmıyor: ikisi de tespit kutusu dar kaldığında aracı ve anteni kesiyor | Task 3 |
+| Cam karıştırma adımı | Gerekmiyor: belirgin cam sorunu Photoroom'da %8, eşik %30 | Task 3 |
 
 ## Şablon üretimi
 
@@ -158,7 +162,106 @@ iPhone 11 ile aynı yöntem ve aynı ofis; telefon ağ üzerinden bağlıydı.
 
 ## Maske kalitesi
 
-Task 3, galeri fotoğrafları gelince başlayacak.
+### Fotoğraf seti (11 Kasım 2026)
+
+Galeri fotoğrafları zamanında gelemedi. Plandan sapma: set 48 fotoğraftan oluşuyor.
+
+- **Commons'tan 38 fotoğraf:** Hepsi Wikimedia Commons'ta açık lisanslı ve hepsinde Alman plakası var.
+  - Lisanslar ticari kullanıma izin veriyor: CC BY-SA (2.0, 3.0, 3.0 de, 4.0) 33, CC BY (2.0, 4.0) 3, CC0 1, kamu malı 1. NC ve ND lisanslı fotoğraf yok.
+  - Her fotoğrafın kaynak sayfası, yazarı ve lisansı `spikes/data/sources.csv`'de (git dışı).
+- **Kendi çekimimiz 10 fotoğraf:** Ultra geniş eksiğini kapatmak için iPhone 11'in 0.5x kamerasıyla Türkiye'de çekildi; Türk plakası 520×110 mm, Alman plakasıyla aynı ölçüde.
+  - 6'sı loş bir yeraltı otoparkında bir Fiat Egea'nın, 4'ü sokakta park etmiş araçların arasında bir Opel Crossland'in fotoğrafı.
+  - 13 kareden neredeyse aynı iki kare ve aracın kadraja sığmadığı bir kare elendi.
+  - Konum dahil bütün EXIF bilgisi silindi.
+- **Boyut:** Fotoğraflar 2048 px genişliğe küçültüldü. Commons'tan dört fotoğraf daha küçük olduğu için özgün boyutunda kaldı.
+- **Yeniden doğrulama:** Bu setle verilen karar, M2'den önce galerinin kendi fotoğraflarıyla yeniden doğrulanır.
+
+| Koşul | Sayı | Asgari |
+|---|---|---|
+| `crowded` | 39 | 5 |
+| `rain` | 7 | 3 |
+| `indoor` | 12 | 3 |
+| `dusk` veya `backlight` | 5 (hepsi `dusk`) | 3 |
+| Ultra geniş lens | 11 (Commons'tan 1, kendi çekimimiz 10) | 3 |
+| `outdoor` / `sun` / `overcast` | 36 / 8 / 23 | – |
+
+| Açı | `front` | `front_right_45` | `right` | `rear_right_45` | `rear` | `rear_left_45` | `left` | `front_left_45` |
+|---|---|---|---|---|---|---|---|---|
+| Sayı (asgari 2) | 7 | 7 | 4 | 5 | 8 | 6 | 2 | 9 |
+
+- **Lens ayrımı:** EXIF'teki 35 mm karşılığı odak uzaklığı 18 mm ve altıysa lens ultra geniş sayıldı.
+- **Yan açılar:** Commons'taki `left` ve `right` fotoğrafları 65–90° arası, çünkü tam 90°'de plaka görünmüyor. Kendi çekimimizdeki iki yan fotoğraf tam yandan.
+- **Setin galeriden farkı:** Fotoğrafların çoğu sokakta, fuarda ve otoparkta çekildi; set bu yüzden galeriden daha kalabalık. Klasik araçlar ve iki spor araba da var.
+
+### Sonuçlar (11–12 Kasım 2026)
+
+Puanlar `spikes/out/mask/scores.csv`'de, karşılaştırma sayfaları `spikes/out/mask/sheets/` altında (git dışı). Kullanıcı hatalı sayfaları kendisi de inceledi.
+
+**Nasıl puanlandı**
+- **Kabul ölçütü:** Bir fotoğraf ancak maskede yabancı nesne kalmamışsa, aracın hiçbir parçası (ayna, anten, jant) kesilmemişse ve kenar kalitesi en az 2 ise kabul edildi.
+- **Yakın çekim kontrolü:** İnce şeritler ve antenler sayfa ölçeğinde görünmediği için BiRefNet–Photoroom farkları ve tespit kutusunun üstünde kalan pikseller yakın çekimde ayrıca kontrol edildi.
+- **Puan değişikliği:** Bu kontrolden sonra BiRefNet'in önceki %79,2'lik oranı düştü. Antenler (04, 09, 17, 19, 20, 41, 42, 43, 48), 06'da arka lastik ve 44'te duvar şeridi sonradan hata sayıldı.
+
+| Varyant | Kabul (tüm set) | Kabul (`crowded`) | Kabul (ultra geniş) | `glass == 2` |
+|---|---|---|---|---|
+| `photoroom` | 38/48 (%79,2) | 29/39 (%74,4) | 6/11 | 4/48 (%8) |
+| `photoroom_crop` | 27/48 (%56,2) | 19/39 (%48,7) | 5/11 | 4/48 |
+| `photoroom_samp` | 29/48 (%60,4) | 21/39 (%53,8) | 6/11 | 4/48 |
+| `birefnet` | 30/48 (%62,5) | 22/39 (%56,4) | 3/11 | 8/48 (%17) |
+| `birefnet_crop` | 22/48 (%45,8) | 15/39 (%38,5) | 3/11 | 8/48 |
+| `birefnet_sam` (plandaki SAM 2 kuralı) | 25/48 (%52,1) | 18/39 (%46,2) | 4/11 | 8/48 |
+| `birefnet_samp` | 26/48 (%54,2) | 19/39 (%48,7) | 4/11 | 8/48 |
+
+`_crop`: plandaki kırpma (tespit kutusunun %3 dışını silmek). `_sam`: SAM 2'nin tek maskesi. `_samp`: SAM 2'nin 3 aday maskesinden yöntemin kendi maskesine en çok benzeyeni.
+
+**Photoroom**
+- **Süre:** 48 fotoğraf 49 saniyede işlendi, yani görsel başına yaklaşık 1 saniye.
+- **Hatalar (10 fotoğraf):**
+  - **Bitişik araç (5):** 29, 39, 41, 43, 46. Dördü kendi çekimimizdeki ultra geniş fotoğraflar; araç park yerinde komşu araçlara çok yakın. Photoroom bitişik aracı BiRefNet'ten de fazla içine alıyor.
+  - **Tabela ve kablo (3):** 08 ve 25'te aracın önündeki tabela, 37'de şarj kablosu maskede kaldı.
+  - **Küçük parçalar (2):** 44'te araca bitişik duvardan bir şerit kaldı; 19'da tavanın üstünde küçük, kopuk bir parça var.
+- **BiRefNet'ten iyi olduğu yerler:**
+  - Antenleri, 45'teki siyah aynaları ve 06'daki arka lastiği korudu.
+  - BiRefNet'te kalan ayrık komşu parçaları (01, 09, 30, 48) dışarıda bıraktı.
+  - Camdan arka planın göründüğü bölgelerin bir kısmını saydam bıraktı. Bu yüzden belirgin cam sorunu %17'den %8'e indi.
+
+**BiRefNet**
+- **Süre:** Apple M4'te MPS ile fotoğraf başına ortanca 1,65 sn.
+- **En sık hata antenler:** Çubuk antenleri çoğu fotoğrafta kesti ya da kısalttı (9 fotoğraf).
+- **Diğer hatalar:**
+  - Bitişik ya da kısmen değen komşu araç: 01, 09, 29, 30, 39, 41, 48.
+  - 45'te iki siyah ayna, 06'da arka lastiğin bir kısmı kesildi.
+  - 08'de motosiklet parçası maskeye girdi, tabela tamponda delik bıraktı. 37'de şarj kablosu kaldı.
+
+**Kırpma (plandaki kural)**
+- **Aracı ve anteni kesiyor:** Faster R-CNN v2'nin en iyi kutusu bile eğik açılarda aracın %20'ye varan kısmını dışarıda bırakıyor. Kırpma, 8 fotoğrafta aracın ucunu kesti: 04, 13, 16, 23, 25, 31, 34, 36. Kutunun üstünde kalan anten uçlarını da sildi. Ham tespitlere bakıldı, seçim kodunda hata yok. Cihazdaki daha küçük model bu kutuları daha da kaba verecek.
+- **Bitişik aracı ayırmıyor:** Komşu aracı ortadan bölüp bir parçasını bırakıyor (39, 41, 43, 46).
+
+**SAM 2** (`facebook/sam2.1-hiera-small`, Apache 2.0, 184 MB; Meta'nın GitHub deposundan kuruldu, PyPI'deki `sam2` paketi üçüncü kişinin fork'u)
+- **Süre:** 4 işlemci çekirdeğinde (M4) fotoğraf başına ortanca 0,56 sn, ekran kartı kullanılmadan. Cloud Run vCPU'larında 2–3 katı sürebilir; maliyeti araç başına 1 sentin çok altında.
+- **Bitişik araçları ayırıyor:** Kutu aracı tam kapsadığında komşu aracı temizledi (01, 30, 39, 41, 43, 46).
+- **Ama başka yerleri bozuyor:**
+  - Kutunun dışında kalan her şeyi siliyor: dar kutularda aracın ucunu (04, 13, 16, 23, 25, 31, 36) ve kutunun üstündeki anten uçlarını.
+  - Bazı fotoğraflarda komşu araçtan küçük parçalar bıraktı (29, 46).
+- **Denenen iki düzeltme:**
+  - Kutuyu %10 büyütünce SAM 2 birçok fotoğrafta zemini ya da arka planı seçti.
+  - 3 aday maskeden seçmek hasarı azalttı ama gidermedi.
+- **Net etkisi:** Her iki sağlayıcıda da kabul oranını düşürüyor.
+
+### Plana göre karar
+
+- **Sağlayıcı:** Photoroom. BiRefNet'in en az 10 puan önde olması gerekiyordu; tersine 16,7 puan geride kaldı. Antenler, siyah aynalar ve camlarda Photoroom belirgin şekilde iyi.
+- **Geçme çizgisi tutmadı:** Photoroom tüm sette %79,2 (hedef %90), `crowded`'da %74,4 (hedef %80). Plana göre burada duruldu; seçenekler kullanıcıya götürüldü.
+- **Kullanıcı kararı (12 Kasım 2026): Photoroom ve rötuş adımı.** Diğer seçenekler otomatik çözüm aramaya devam etmek (örneğin SAM 2'yi nokta ipuçlarıyla denemek) ya da sonucu olduğu gibi kabul etmekti.
+  - **Rötuş adımı:** Personel işlenmiş fotoğrafta kalan parçaya (komşu araç, tabela, kablo) dokunup siler. 10 hatanın neredeyse hepsi araçtan ayrı duran ya da kolayca seçilebilen parçalar.
+  - **Çekim uyarısı:** Başka bir aracın tespit kutusu hedef araca değiyorsa uygulama açıyı değiştirmeyi önerir. Canlı tespit zaten çalıştığı için ek model gerekmiyor.
+  - **Tasarıma etkisi:** Tasarımın 7.2 bölümünde rötuş adımı yok. M2 planı yazılırken bu bölüm güncellenir.
+- **Cam:** Belirgin cam sorunu Photoroom'da %8, eşik %30. M2'ye ayrı bir cam karıştırma adımı gerekmiyor.
+- **Kırpma ve SAM 2:** İkisi de sonucu kötüleştirdiği için plandaki biçimleriyle kullanılmayacak. Hedef aracı ayırmanın asıl engeli tespit kutusunun aracı tam kapsamaması.
+- **Setin sınırları:**
+  - Set galeriden daha kalabalık: 48 fotoğrafın 39'u `crowded`.
+  - Kendi çekimimizdeki 10 fotoğraf bilerek sıkışık park yerlerinde çekildi.
+  - Karar, M2'den önce galerinin kendi fotoğraflarıyla yeniden doğrulanır.
 
 ## Plaka köşeleri
 
