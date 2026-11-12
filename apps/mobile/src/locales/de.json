@@ -218,6 +218,8 @@
     "title": "Lizenzen",
     "templates": "3D-Vorlagen",
     "detector": "Fahrzeugerkennung",
-    "by": "{{author}} · {{license}}"
+    "by": "von {{author}}",
+    "adapted": "Die Umrisse im Kamerabild wurden aus diesem 3D-Modell erzeugt und verändert.",
+    "license": "Lizenz: {{license}}"
   }
 }

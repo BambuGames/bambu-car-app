@@ -24,13 +24,14 @@ import { getMeta, setMeta } from '../local/meta';
 import { canUseWide, shouldDetect, zoomFor } from './camera';
 import { parseDetections } from './detections';
 import { MODEL, useDetectorModel } from './detector';
-import { hfovFromFocal35 } from './exif';
-import { center, pickTarget, scaleBox, silhouetteScale, width, type Detection } from './geometry';
+import { plausibleHfov } from './exif';
+import { center, pickTarget, scaleBox, silhouetteScale, uprightToBuffer, width, type Detection } from './geometry';
 import {
   createAutoCapture,
   createRateMonitor,
   createSpaceAdvisor,
   evaluateGuidance,
+  horizonDeg,
   tiltFromGravity,
   type GuidanceMessage,
   type GuidanceWarning,
@@ -59,12 +60,14 @@ export function useGuidedCamera({
   slot,
   bodyType,
   active,
+  busy,
   onAuto,
 }: {
   vehicleId: string;
   slot: Slot;
   bodyType: BodyType;
-  active: boolean; // false while a photo is being reviewed or the screen is not shown
+  active: boolean; // camera running: false under the review sheet or when the screen is not shown
+  busy: boolean; // a photo is being taken, saved or reviewed: detection rests, the camera keeps running
   onAuto: () => void;
 }) {
   const { db } = useSession();
@@ -73,10 +76,11 @@ export function useGuidedCamera({
   const permission = useCameraPermission();
   const device = useCameraDevice('back', { physicalDevices: ['ultra-wide-angle', 'wide-angle'] });
   const wideAvailable = device != null && canUseWide(device);
+  const wideHere = wideAvailable && exterior && wideAllowed(slot as ExteriorSlot);
 
   const [mode, setMode] = useState<CaptureMode>('normal');
   const effectiveMode: CaptureMode =
-    mode === 'wide' && exterior && wideAvailable && wideAllowed(slot as ExteriorSlot) ? 'wide' : 'normal';
+    mode === 'wide' && wideHere ? 'wide' : 'normal';
   const template: Template | null = exterior ? templateFor(bodyType, slot as ExteriorSlot, effectiveMode) : null;
 
   // The phone's own field of view per lens, read from its first photo's EXIF; the template's until then.
@@ -109,10 +113,7 @@ export function useGuidedCamera({
     pixelLayout: 'interleaved',
   });
   const [gate] = useState(() => ({ active: createSynchronizable(false), last: createSynchronizable(0) }));
-  const runDetection = active && exterior && template !== null;
-  useEffect(() => {
-    gate.active.setBlocking(runDetection);
-  }, [gate, runDetection]);
+  const runDetection = active && !busy && exterior && template !== null;
 
   const latest = useRef<{ raw: RawDetection[]; at: number }>({ raw: [], at: 0 });
   const rate = useRef(createRateMonitor());
@@ -152,11 +153,14 @@ export function useGuidedCamera({
               sum += 0.299 * pixels[i] + 0.587 * pixels[i + 1] + 0.114 * pixels[i + 2];
               n++;
             }
+          // The model saw the frame upright; the conversion wants raw buffer points (180° off in one landscape grip).
+          const a = uprightToBuffer(d.box.x0, d.box.y0, frame.orientation);
+          const b = uprightToBuffer(d.box.x1, d.box.y1, frame.orientation);
           raw.push({
             cls: d.cls,
             score: d.score,
-            p0: frame.convertFramePointToCameraPoint({ x: d.box.x0 * frame.width, y: d.box.y0 * frame.height }),
-            p1: frame.convertFramePointToCameraPoint({ x: d.box.x1 * frame.width, y: d.box.y1 * frame.height }),
+            p0: frame.convertFramePointToCameraPoint({ x: a.x * frame.width, y: a.y * frame.height }),
+            p1: frame.convertFramePointToCameraPoint({ x: b.x * frame.width, y: b.y * frame.height }),
             luma: n > 0 ? sum / n : 0,
           });
         }
@@ -171,7 +175,12 @@ export function useGuidedCamera({
       }
     },
   });
-  const photoOutput = usePhotoOutput({ targetResolution: CommonResolutions.UHD_4_3, qualityPrioritization: 'balanced' });
+  // 'native' is HEIC on iPhones; uploads, EXIF reading and processing expect JPEG.
+  const photoOutput = usePhotoOutput({
+    targetResolution: CommonResolutions.UHD_4_3,
+    qualityPrioritization: 'balanced',
+    containerFormat: 'jpeg',
+  });
 
   // The preview sits in a 4:3 box the size of the photo frame, so view points / box size = photo coordinates.
   const preview = useRef({ width: 0, height: 0 });
@@ -208,9 +217,16 @@ export function useGuidedCamera({
   const target = useRef<LiveDetection | null>(null);
   const auto = useRef(createAutoCapture());
   const space = useRef(createSpaceAdvisor(false));
+  // Detection starts or stops (busy, detail slot, focus): each start is a fresh step.
+  // Paused time is not slowness, old boxes and a fired auto shot do not carry over, and the advisor offers
+  // the 0.5x lens only where this slot has it (the device itself loads after the first render).
   useEffect(() => {
-    space.current = createSpaceAdvisor(wideAvailable); // the device loads after the first render
-  }, [wideAvailable]);
+    gate.active.setBlocking(runDetection);
+    rate.current.pause();
+    latest.current = { raw: [], at: 0 };
+    auto.current.reset();
+    space.current = createSpaceAdvisor(wideHere);
+  }, [gate, runDetection, wideHere]);
   const focus = useRef({ at: 0, still: 0, last: null as { x: number; y: number } | null });
   // The loop below runs in an interval; it reads this render's values from here.
   const noDetector = detectorError !== null; // no model even on the CPU: simple mode at once
@@ -273,11 +289,12 @@ export function useGuidedCamera({
     autoTaken: boolean,
     capturedAt: string,
   ): Promise<{ taken: TakenPhoto; info: CaptureInfo }> => {
-    gate.active.setBlocking(false);
+    gate.active.setBlocking(false); // at once; busy follows with the next render
     const box = target.current?.box ?? null;
+    const g = motion.current.g;
     const taken = await takePhoto(photoOutput, { vehicleId, slot, capturedAt, target: box, exterior });
-    if (taken.focal35 && db) {
-      const measured = hfovFromFocal35(taken.focal35);
+    const measured = plausibleHfov(taken.focal35, effectiveMode);
+    if (measured !== null && db) {
       setHfov((h) => ({ ...h, [effectiveMode]: measured }));
       await setMeta(db, `hfov.${effectiveMode}`, String(measured));
     }
@@ -286,8 +303,8 @@ export function useGuidedCamera({
       mode: effectiveMode,
       hfovDeg: deviceHfov,
       focal35: taken.focal35,
-      rollDeg: guidance.rollDeg,
-      pitchDeg: guidance.pitchDeg,
+      rollDeg: horizonDeg(g),
+      pitchDeg: tiltFromGravity(g).pitchDeg,
       targetBox: box ? [box.x0, box.y0, box.x1, box.y1] : null,
       simpleMode: simple,
       auto: autoTaken,
@@ -322,7 +339,7 @@ export function useGuidedCamera({
     expected,
     mode: effectiveMode,
     setMode,
-    wideAvailable: wideAvailable && exterior && wideAllowed(slot as ExteriorSlot),
+    wideAvailable: wideHere,
     guidance,
     simple,
     advice,

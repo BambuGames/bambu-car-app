@@ -1,4 +1,4 @@
-import { iou, intersects, pickTarget, scaleBox, silhouetteScale, type Detection } from './geometry';
+import { iou, intersects, pickTarget, scaleBox, silhouetteScale, uprightToBuffer, type Detection } from './geometry';
 
 const car = (box: Detection['box'], score = 0.9): Detection => ({ cls: 'car', score, box });
 
@@ -41,4 +41,12 @@ test('pickTarget ignores persons and low scores', () => {
   const expected = { x0: 0.3, y0: 0.4, x1: 0.7, y1: 0.8 };
   const person: Detection = { cls: 'person', score: 0.9, box: expected };
   expect(pickTarget([person, car(expected, 0.4)], expected)).toBeNull();
+});
+
+test('uprightToBuffer maps a point on the upright model input back to the raw frame', () => {
+  // Inverse of VisionCamera's frame-to-camera counter-rotation (FrameCoordinateSystemConverter).
+  expect(uprightToBuffer(0.2, 0.3, 'up')).toEqual({ x: 0.2, y: 0.3 });
+  expect(uprightToBuffer(0.2, 0.3, 'down')).toEqual({ x: 0.8, y: 0.7 });
+  expect(uprightToBuffer(0.2, 0.3, 'left')).toEqual({ x: 0.3, y: 0.8 });
+  expect(uprightToBuffer(0.2, 0.3, 'right')).toEqual({ x: 0.7, y: 0.2 });
 });

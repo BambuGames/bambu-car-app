@@ -218,6 +218,8 @@
     "title": "Licences",
     "templates": "3D templates",
     "detector": "Vehicle detection",
-    "by": "{{author}} · {{license}}"
+    "by": "by {{author}}",
+    "adapted": "The outlines in the camera view were made from this 3D model and changed.",
+    "license": "Licence: {{license}}"
   }
 }

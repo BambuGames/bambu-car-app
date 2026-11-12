@@ -4,6 +4,7 @@ import {
   createRateMonitor,
   createSpaceAdvisor,
   evaluateGuidance,
+  horizonDeg,
   tiltFromGravity,
 } from './guidance';
 
@@ -127,4 +128,27 @@ test('space advisor suggests wide mode, then asks for more space', () => {
   noWide.update(1.3, 'normal', 0);
   expect(noWide.update(1.3, 'normal', 2000)).toBe('needsSpace');
   expect(noWide.update(null, 'normal', 2100)).toBeNull();
+});
+
+test('rate monitor ignores time while detection is paused on purpose', () => {
+  const m = createRateMonitor();
+  for (let t = 0; t <= 1000; t += 100) m.tick(t); // detecting at 10 per second
+  m.pause(); // a photo is being taken and saved
+  expect(m.isSimple(6000)).toBe(false);
+  for (let t = 6000; t <= 7000; t += 100) m.tick(t); // detecting again
+  expect(m.isSimple(7000)).toBe(false);
+});
+
+test('a detail or interior shot gets no level message', () => {
+  const g = evaluateGuidance(input({ expected: null, target: null, tilt: { rollDeg: 20, pitchDeg: 70 } }));
+  expect(g.message).toBeNull();
+});
+
+test('horizonDeg is signed the same way on both landscape sides', () => {
+  const g = (deg: number, side: 1 | -1) => ({ x: side * 9.81 * Math.cos(rad(deg)), y: side * 9.81 * Math.sin(rad(deg)) });
+  expect(horizonDeg(g(5, 1))).toBeCloseTo(5);
+  expect(horizonDeg(g(5, -1))).toBeCloseTo(5);
+  expect(horizonDeg(g(-3, 1))).toBeCloseTo(-3);
+  expect(horizonDeg(g(-3, -1))).toBeCloseTo(-3);
+  expect(horizonDeg(g(0, 1))).toBeCloseTo(0);
 });

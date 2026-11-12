@@ -72,6 +72,7 @@ export default function CaptureScreen() {
     bodyType: vehicle?.bodyType ?? 'other',
     // The session must keep running while a photo is taken and saved; it rests only under the review sheet.
     active: focused && review === null && vehicle !== null,
+    busy,
     onAuto: () => shoot(true),
   });
 

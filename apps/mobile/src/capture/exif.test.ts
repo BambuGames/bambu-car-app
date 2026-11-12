@@ -1,4 +1,4 @@
-import { focal35FromJpeg, hfovFromFocal35 } from './exif';
+import { focal35FromJpeg, hfovFromFocal35, plausibleHfov } from './exif';
 
 // A minimal JPEG: SOI, a JFIF APP0, an APP1 Exif segment whose IFD0 points to an Exif IFD holding
 // FocalLengthIn35mmFilm (0xA405, SHORT), then EOI.
@@ -40,4 +40,13 @@ test('returns null without EXIF', () => {
 test('hfovFromFocal35 matches the main and ultra wide template angles', () => {
   expect(hfovFromFocal35(26)).toBeCloseTo(67.3, 1);
   expect(hfovFromFocal35(13)).toBeCloseTo(106.2, 1);
+});
+
+test('plausibleHfov keeps only focal lengths a phone lens can have for the mode', () => {
+  expect(plausibleHfov(26, 'normal')).toBeCloseTo(hfovFromFocal35(26));
+  expect(plausibleHfov(13, 'wide')).toBeCloseTo(hfovFromFocal35(13));
+  expect(plausibleHfov(14279, 'normal')).toBeNull(); // the emulator's EXIF
+  expect(plausibleHfov(13, 'normal')).toBeNull();
+  expect(plausibleHfov(26, 'wide')).toBeNull();
+  expect(plausibleHfov(null, 'normal')).toBeNull();
 });

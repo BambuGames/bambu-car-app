@@ -1,6 +1,8 @@
 // The camera's field of view comes from the photo's EXIF 35 mm equivalent focal length, so the silhouette
 // can be scaled to each phone (design 6.3).
 
+import type { CaptureMode } from '../domain/templates';
+
 const EXIF_IFD_POINTER = 0x8769;
 const FOCAL_35MM = 0xa405;
 
@@ -45,3 +47,12 @@ function readFocal(view: DataView, tiff: number, end: number): number | null {
 // Horizontal field of view of a 4:3 photo: 34.6 mm is the width of a 4:3 frame whose diagonal matches
 // the 43.27 mm diagonal of 35 mm film, which the equivalent focal length refers to.
 export const hfovFromFocal35 = (f35: number): number => (2 * Math.atan(34.6 / (2 * f35)) * 180) / Math.PI;
+
+// 35 mm-equivalent focal lengths a phone's main (normal) and ultra-wide (wide) lens can have. One bad EXIF
+// value (the emulator reports 14279 mm) would otherwise be stored and break the silhouette for good.
+const FOCAL_RANGE: Record<CaptureMode, [number, number]> = { normal: [18, 40], wide: [10, 18] };
+
+export function plausibleHfov(f35: number | null, mode: CaptureMode): number | null {
+  const [lo, hi] = FOCAL_RANGE[mode];
+  return f35 !== null && f35 >= lo && f35 <= hi ? hfovFromFocal35(f35) : null;
+}

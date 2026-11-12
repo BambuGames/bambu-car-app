@@ -40,3 +40,13 @@ export function pickTarget(dets: Detection[], expected: Box): Detection | null {
   if (iou(byIou.box, expected) > 0) return byIou;
   return vehicles.reduce((best, d) => (area(d.box) > area(best.box) ? d : best));
 }
+
+// The resizer turns each frame upright before the model sees it; VisionCamera's frame-to-camera conversion
+// wants a point in the raw buffer. Inverse of its counter-rotation per frame orientation (normalized points).
+export function uprightToBuffer(x: number, y: number, orientation: 'up' | 'down' | 'left' | 'right'): { x: number; y: number } {
+  'worklet';
+  if (orientation === 'down') return { x: 1 - x, y: 1 - y };
+  if (orientation === 'left') return { x: y, y: 1 - x };
+  if (orientation === 'right') return { x: 1 - y, y: x };
+  return { x, y };
+}

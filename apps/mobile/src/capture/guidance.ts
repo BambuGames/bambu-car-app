@@ -39,6 +39,14 @@ export function tiltFromGravity(g: { x: number; y: number; z: number }): { rollD
   };
 }
 
+// Signed horizon for straightening in processing (design 6.3, 7.2): degrees from the photo's down to true down,
+// counter-clockwise positive as seen on screen, so > 0 means the horizon rises to the right. Measured against
+// the nearer landscape axis, so it reads the same on both landscape sides and if a platform flips the vector.
+export function horizonDeg(g: { x: number; y: number }): number {
+  const a = (Math.atan2(g.y, g.x) * 180) / Math.PI;
+  return a - Math.round(a / 180) * 180;
+}
+
 function carMessage(target: Detection | null, expected: Box): GuidanceMessage | null {
   if (!target) return 'noCar';
   const ratio = width(target.box) / width(expected);
@@ -78,7 +86,8 @@ export function evaluateGuidance(i: {
     if (touching.some((o) => o.cls !== 'person')) warnings.push('otherVehicle');
     if (i.lumaOnTarget !== null && i.lumaOnTarget < TOLERANCES.minLuma) warnings.push('lowLight');
   }
-  const level = i.tilt.rollDeg <= TOLERANCES.rollDeg && i.tilt.pitchDeg <= TOLERANCES.pitchDeg;
+  // Detail and interior shots (no template) point down or up by design: no level check there.
+  const level = i.expected === null || (i.tilt.rollDeg <= TOLERANCES.rollDeg && i.tilt.pitchDeg <= TOLERANCES.pitchDeg);
   if (!message && !level) message = 'holdLevel';
   if (!message && checksCar) message = carMessage(target, i.expected!);
 
@@ -134,6 +143,12 @@ export function createRateMonitor(minPerSec = 4, forMs = 3000) {
     attempt(now: number) {
       started = true;
       observe(now);
+    },
+    // Detection is off on purpose (photo being taken, review sheet, detail slot): that time is not slowness.
+    pause() {
+      ticks = [];
+      started = false;
+      belowSince = null;
     },
     isSimple(now: number): boolean {
       if (!simple && started) observe(now);

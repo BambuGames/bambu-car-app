@@ -8,6 +8,12 @@ import { colors, fontSize, space } from '../../ui/theme';
 
 type Credit = { model: string; author: string; license: string; link: string };
 
+// The licence texts both licences ask to point to.
+const LICENSE_LINKS: Record<string, string> = {
+  'CC BY 4.0': 'https://creativecommons.org/licenses/by/4.0/',
+  'Apache-2.0': 'https://www.apache.org/licenses/LICENSE-2.0',
+};
+
 const DETECTOR: Credit = {
   model: 'EfficientDet-Lite0, EfficientDet-Lite2',
   author: 'The TensorFlow Authors',
@@ -15,15 +21,24 @@ const DETECTOR: Credit = {
   link: 'https://github.com/google/automl/tree/master/efficientdet',
 };
 
-function Entry({ credit }: { credit: Credit }) {
+function Link({ url, label }: { url: string; label?: string }) {
+  return (
+    <Pressable accessibilityRole="link" onPress={() => Linking.openURL(url)}>
+      <Text style={styles.link}>{label ?? url}</Text>
+    </Pressable>
+  );
+}
+
+function Entry({ credit, note }: { credit: Credit; note?: string }) {
   const { t } = useTranslation();
+  const licenseLink = LICENSE_LINKS[credit.license];
   return (
     <View style={styles.entry}>
       <Text style={styles.model}>{credit.model}</Text>
-      <Text style={styles.meta}>{t('licenses.by', { author: credit.author, license: credit.license })}</Text>
-      <Pressable accessibilityRole="link" onPress={() => Linking.openURL(credit.link)}>
-        <Text style={styles.link}>{credit.link}</Text>
-      </Pressable>
+      <Text style={styles.meta}>{t('licenses.by', { author: credit.author })}</Text>
+      {note ? <Text style={styles.meta}>{note}</Text> : null}
+      <Link url={credit.link} />
+      {licenseLink ? <Link url={licenseLink} label={t('licenses.license', { license: credit.license })} /> : null}
     </View>
   );
 }
@@ -36,7 +51,7 @@ export default function Licenses() {
         {t('licenses.templates')}
       </Text>
       {TEMPLATE_CREDITS.map((c) => (
-        <Entry key={c.bodyType} credit={c} />
+        <Entry key={c.bodyType} credit={c} note={t('licenses.adapted')} />
       ))}
       <Text style={styles.section} accessibilityRole="header">
         {t('licenses.detector')}

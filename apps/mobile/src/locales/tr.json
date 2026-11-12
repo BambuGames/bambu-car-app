@@ -218,6 +218,8 @@
     "title": "Lisanslar",
     "templates": "3D şablonlar",
     "detector": "Araç tespiti",
-    "by": "{{author}} · {{license}}"
+    "by": "{{author}}",
+    "adapted": "Kameradaki silüetler bu 3D modelden üretildi ve değiştirildi.",
+    "license": "Lisans: {{license}}"
   }
 }

@@ -7,8 +7,8 @@ export type CaptureInfo = {
   mode: CaptureMode;
   hfovDeg: number;
   focal35: number | null;
-  rollDeg: number;
-  pitchDeg: number;
+  rollDeg: number; // signed horizon, > 0 rises to the right (horizonDeg); processing straightens by it
+  pitchDeg: number; // magnitude only: up and down read differently per platform
   targetBox: [number, number, number, number] | null;
   simpleMode: boolean;
   auto: boolean;
