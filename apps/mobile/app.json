@@ -3,13 +3,16 @@
     "name": "bambu-car-app",
     "slug": "bambu-car-app",
     "version": "1.0.0",
-    "orientation": "portrait",
+    "orientation": "default",
     "icon": "./assets/images/icon.png",
     "scheme": "bambucarapp",
     "userInterfaceStyle": "light",
     "ios": {
       "icon": "./assets/expo.icon",
-      "bundleIdentifier": "com.bambugames.carapp"
+      "bundleIdentifier": "com.bambugames.carapp",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Die Kamera wird für die Fahrzeugfotos verwendet."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -19,7 +22,10 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.bambugames.carapp"
+      "package": "com.bambugames.carapp",
+      "permissions": [
+        "android.permission.CAMERA"
+      ]
     },
     "web": {
       "output": "server",
@@ -36,7 +42,23 @@
         }
       ],
       "expo-sqlite",
-      "expo-localization"
+      "expo-localization",
+      [
+        "react-native-fast-tflite",
+        {
+          "enableAndroidGpuLibraries": true
+        }
+      ],
+      "expo-asset",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "minSdkVersion": 26
+          }
+        }
+      ],
+      "./plugins/withResizerShaders"
     ],
     "experiments": {
       "typedRoutes": true,

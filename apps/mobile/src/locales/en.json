@@ -72,7 +72,8 @@
     "deleteBody": "Your access is deleted and cannot be restored. Your gallery's vehicles are kept.",
     "deletePending_one": "{{count}} change on this device has not been uploaded yet and will be lost.",
     "deletePending_other": "{{count}} changes on this device have not been uploaded yet and will be lost.",
-    "deleteOffline": "Deleting the account needs an internet connection."
+    "deleteOffline": "Deleting the account needs an internet connection.",
+    "licenses": "Licences"
   },
   "noGallery": {
     "title": "No gallery",
@@ -144,5 +145,79 @@
     "interior_trunk": "Trunk",
     "interior_headliner": "Headliner",
     "interior_other": "Other interior"
+  },
+  "capture": {
+    "loading": "Preparing the camera",
+    "permission": "The app needs access to the camera for the vehicle photos.",
+    "allowCamera": "Allow camera access",
+    "openSettings": "Open settings",
+    "ready": "Good – hold the phone still",
+    "shutter": "Take photo",
+    "auto": "Automatic",
+    "simple": "Automatic off: press the shutter",
+    "wide": "Tight space (0.5x)",
+    "normal": "Normal (1x)",
+    "finish": "Done",
+    "saving": "Saving",
+    "failed": "The photo could not be taken. Please try again.",
+    "messages": {
+      "personInFrame": "Someone is at the car – wait a moment",
+      "holdLevel": "Hold the phone level",
+      "noCar": "Bring the car into the frame",
+      "moveCloser": "Move closer",
+      "moveBack": "Step back a little",
+      "panLeft": "Turn a little to the left",
+      "panRight": "Turn a little to the right",
+      "lower": "Lower the phone a little",
+      "raise": "Raise the phone a little"
+    },
+    "warnings": {
+      "otherVehicle": "Another vehicle touches this car. Change the angle if you can.",
+      "lowLight": "Little light on the car"
+    },
+    "advice": {
+      "suggestWide": "Not enough room? Use tight space (0.5x).",
+      "needsSpace": "The car does not fit in the frame from here. It needs more room in front of it."
+    },
+    "qc": {
+      "title": "Please check",
+      "blurry": "The photo is blurry.",
+      "dark": "The photo is too dark.",
+      "overexposed": "The photo is overexposed.",
+      "cutOff": "The car runs out of the frame.",
+      "aspect": "The photo is not 4:3.",
+      "retake": "Retake",
+      "useAnyway": "Use anyway"
+    },
+    "finishMissing": {
+      "title": "Exterior photos are missing",
+      "missing": "{{name}} is missing",
+      "finish": "Finish anyway",
+      "continue": "Keep shooting"
+    },
+    "instructions": {
+      "detail_wheel": "Fill the frame with one wheel and its tyre.",
+      "detail_headlights": "Photograph one headlight at an angle from the front.",
+      "detail_taillights": "Photograph one tail light at an angle from the rear.",
+      "detail_trunk_open": "Open the boot and photograph it from behind.",
+      "detail_engine": "Open the bonnet and photograph the engine bay from the front.",
+      "detail_roof": "Photograph the roof or sunroof from a raised position.",
+      "detail_other": "Photograph another detail, for example damage.",
+      "interior_cockpit": "Photograph the cockpit through the open driver's door.",
+      "interior_console": "Photograph the centre console and screen.",
+      "interior_instruments": "Photograph the steering wheel and instruments with the ignition on.",
+      "interior_front_seats": "Photograph the front seats through the door.",
+      "interior_rear_seats": "Photograph the rear seats through the rear door.",
+      "interior_door": "Photograph the inside of a door.",
+      "interior_trunk": "Photograph the inside of the boot.",
+      "interior_headliner": "Photograph the headliner.",
+      "interior_other": "Photograph another interior detail."
+    }
+  },
+  "licenses": {
+    "title": "Licences",
+    "templates": "3D templates",
+    "detector": "Vehicle detection",
+    "by": "{{author}} · {{license}}"
   }
 }

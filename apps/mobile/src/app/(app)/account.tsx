@@ -1,4 +1,5 @@
 import * as Network from 'expo-network';
+import { router } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, StyleSheet, Text, View } from 'react-native';
@@ -63,6 +64,7 @@ export default function Account() {
           <Row label={t('account.role')} value={t(`account.roles.${membership.role}`)} />
         </>
       ) : null}
+      <Button variant="secondary" label={t('account.licenses')} onPress={() => router.push('/licenses')} />
       <Button variant="secondary" label={t('account.signOut')} onPress={signOut} />
       <Button variant="danger" label={t('account.delete')} onPress={confirmDelete} loading={busy} />
       {error ? <Notice kind="error" text={error} /> : null}

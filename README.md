@@ -87,6 +87,58 @@ adb shell am start -n com.bambugames.carapp/.MainActivity
   adb shell am force-stop com.bambugames.carapp && adb shell am start -n com.bambugames.carapp/.MainActivity
   ```
 
+## Kamera ve cihaz
+
+Çekim ekranı VisionCamera, resizer ve TFLite kullanır. Bunlar yerel kod içerir; yukarıdaki geliştirme derlemeleri gerekir.
+
+### Derleme gereksinimleri
+
+- **iOS:** Resizer'ın Metal kodu için Xcode'un Metal araç seti gerekir. Her Xcode için bir kez:
+
+  ```bash
+  DEVELOPER_DIR=$HOME/Downloads/Xcode-26.6.app/Contents/Developer xcodebuild -downloadComponent MetalToolchain
+  ```
+
+- **Android:** Resizer'ın Vulkan gölgelendiricisi NDK'daki `glslc` ile derlenir. `apps/mobile/plugins/withResizerShaders.js` prebuild sırasında `local.properties`'e `glslc.dir` yazar. Önce `GLSLC_DIR` ortam değişkenine, yoksa `$ANDROID_HOME/ndk/<sürüm>/shader-tools/<sistem>` klasörüne bakar; bulamazsa prebuild durur. EAS dahil her derleme makinesinde NDK kurulu olmalı.
+- Android `minSdkVersion` 26'dır (resizer bunu istiyor). `app.json`'da `expo-build-properties` ile ayarlı.
+
+### Modeller ve şablonlar
+
+- **Araç tespiti:** `apps/mobile/assets/models/` altındaki TensorFlow EfficientDet-Lite modelleri (Apache-2.0; tespit son işleme adımı modelin içinde). iOS'ta Lite2 CPU'da, Android'de Lite0 GPU'da çalışır. GPU açılmazsa model CPU'da yüklenir.
+- **Şablonlar:** `tools/templates/models/` altındaki GLB dosyalarından üretilir. Kaynaklar ve lisanslar `tools/templates/models/SOURCES.md` dosyasında.
+
+  ```bash
+  tools/templates/.venv/bin/python tools/templates/templates.py kombi
+  tools/templates/.venv/bin/python tools/templates/templates.py export-app
+  ```
+
+  İkinci komut `apps/mobile/src/templates/templates.generated.ts` dosyasını yazar. Model yazarları uygulamada Konto → Lizenzen ekranında listelenir.
+
+### Telefona kurulum
+
+- **iPhone:** Mac ile bir kez kabloyla eşleştikten sonra aynı Wi-Fi'da kurulur. İmza için geliştirici hesabı Xcode'a eklenmiş ve ekip projede seçilmiş olmalı. İlk derleme profili oluşturur ve telefonu ekibe ekler.
+
+  ```bash
+  xcrun devicectl list devices
+  cd apps/mobile/ios
+  DEVELOPER_DIR=$HOME/Downloads/Xcode-26.6.app/Contents/Developer LANG=en_US.UTF-8 xcodebuild -workspace bambucarapp.xcworkspace -scheme bambucarapp -configuration Debug -destination 'id=<UDID>' -derivedDataPath build -allowProvisioningUpdates -allowProvisioningDeviceRegistration
+  xcrun devicectl device install app --device <UDID> build/Build/Products/Debug-iphoneos/bambucarapp.app
+  ```
+
+- **Android (11 ve sonrası):** Telefonda Geliştirici seçenekleri → Kablosuz hata ayıklama → "Eşleme koduyla cihaz eşle". Ekrandaki adres ve kodla:
+
+  ```bash
+  adb pair <ip>:<eşleme portu>
+  adb connect <ip>:<port>
+  ```
+
+  Sonra Android bölümündeki `adb reverse` ve kurulum komutları çalıştırılır. Samsung'da adb güncellemesi, telefonda Play Protect onayı verilene kadar bekler.
+
+### Simülatör ve emülatör sınırları
+
+- iOS simülatöründe kamera yoktur; çekim ekranı iPhone'da denenir.
+- Android emülatörü sanal kamerayla çekim, kalite kontrolü ve yüklemeyi gösterir. Emülatörün GPU'su kamera karesini resizer'a veremez ve GPU delegesini açamaz. Bu yüzden tespit çalışmaz ve ekran 3 saniye sonra basit moda geçer. Yönlendirme ve otomatik çekim gerçek telefonda denenir.
+
 ## Geliştirme hesapları
 
 Hesaplar seed'den gelir. Hepsinin şifresi `dev-password-1`.

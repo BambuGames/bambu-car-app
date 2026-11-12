@@ -58,8 +58,10 @@ export default function AppLayout() {
           }}
         />
         <Stack.Screen name="vehicles/new" options={{ title: t('vehicles.new') }} />
-        <Stack.Screen name="vehicles/[id]" options={{ title: '' }} />
+        <Stack.Screen name="vehicles/[id]/index" options={{ title: '' }} />
+        <Stack.Screen name="vehicles/[id]/capture" options={{ headerShown: false }} />
         <Stack.Screen name="account" options={{ title: t('account.title') }} />
+        <Stack.Screen name="licenses" options={{ title: t('licenses.title') }} />
       </Stack>
     </SyncProvider>
   );

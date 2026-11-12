@@ -1,7 +1,9 @@
 import '../lib/i18n';
 
 import { Stack } from 'expo-router';
+import * as ScreenOrientation from 'expo-screen-orientation';
 import { StatusBar } from 'expo-status-bar';
+import { useEffect } from 'react';
 import { View } from 'react-native';
 
 import { SessionProvider, useSession } from '../lib/session';
@@ -23,6 +25,10 @@ function RootStack() {
 }
 
 export default function RootLayout() {
+  // The app is portrait; the capture screen switches to landscape while it is open.
+  useEffect(() => {
+    ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
+  }, []);
   return (
     <SessionProvider>
       <StatusBar style="dark" />

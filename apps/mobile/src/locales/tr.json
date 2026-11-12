@@ -72,7 +72,8 @@
     "deleteBody": "Erişiminiz silinir ve geri getirilemez. Galerinizin araçları silinmez.",
     "deletePending_one": "Bu cihazdaki {{count}} değişiklik henüz yüklenmedi ve kaybolacak.",
     "deletePending_other": "Bu cihazdaki {{count}} değişiklik henüz yüklenmedi ve kaybolacak.",
-    "deleteOffline": "Hesabı silmek için internet bağlantısı gerekiyor."
+    "deleteOffline": "Hesabı silmek için internet bağlantısı gerekiyor.",
+    "licenses": "Lisanslar"
   },
   "noGallery": {
     "title": "Galeri yok",
@@ -144,5 +145,79 @@
     "interior_trunk": "Bagaj",
     "interior_headliner": "Tavan döşemesi",
     "interior_other": "Diğer iç mekân"
+  },
+  "capture": {
+    "loading": "Kamera hazırlanıyor",
+    "permission": "Araç fotoğrafları için uygulamanın kameraya erişmesi gerekiyor.",
+    "allowCamera": "Kameraya izin ver",
+    "openSettings": "Ayarları aç",
+    "ready": "Tamam – telefonu sabit tutun",
+    "shutter": "Fotoğraf çek",
+    "auto": "Otomatik",
+    "simple": "Otomatik kapalı: deklanşöre basın",
+    "wide": "Dar alan (0,5x)",
+    "normal": "Normal (1x)",
+    "finish": "Bitti",
+    "saving": "Kaydediliyor",
+    "failed": "Fotoğraf çekilemedi. Lütfen tekrar deneyin.",
+    "messages": {
+      "personInFrame": "Araçta bir kişi var – biraz bekleyin",
+      "holdLevel": "Telefonu düz tutun",
+      "noCar": "Aracı çerçeveye alın",
+      "moveCloser": "Yaklaşın",
+      "moveBack": "Biraz geri gidin",
+      "panLeft": "Biraz sola çevirin",
+      "panRight": "Biraz sağa çevirin",
+      "lower": "Telefonu biraz indirin",
+      "raise": "Telefonu biraz kaldırın"
+    },
+    "warnings": {
+      "otherVehicle": "Başka bir araç bu araca değiyor. Mümkünse açıyı değiştirin.",
+      "lowLight": "Araçta ışık az"
+    },
+    "advice": {
+      "suggestWide": "Yer dar mı? Dar alan (0,5x) modunu kullanın.",
+      "needsSpace": "Araç buradan kadraja sığmıyor. Önünde daha fazla boşluk gerekiyor."
+    },
+    "qc": {
+      "title": "Lütfen kontrol edin",
+      "blurry": "Fotoğraf bulanık.",
+      "dark": "Fotoğraf çok karanlık.",
+      "overexposed": "Fotoğrafta ışık patlaması var.",
+      "cutOff": "Araç kadraj dışına taşıyor.",
+      "aspect": "Fotoğraf 4:3 değil.",
+      "retake": "Yeniden çek",
+      "useAnyway": "Yine de kullan"
+    },
+    "finishMissing": {
+      "title": "Eksik dış fotoğraflar var",
+      "missing": "{{name}} eksik",
+      "finish": "Yine de bitir",
+      "continue": "Çekime devam et"
+    },
+    "instructions": {
+      "detail_wheel": "Bir jantı lastiğiyle kadrajı doldurarak çekin.",
+      "detail_headlights": "Bir farı önden çaprazdan çekin.",
+      "detail_taillights": "Bir stop lambasını arkadan çaprazdan çekin.",
+      "detail_trunk_open": "Bagajı açıp arkadan çekin.",
+      "detail_engine": "Kaputu açıp motor bölmesini önden çekin.",
+      "detail_roof": "Tavanı veya sunroofu yüksek bir yerden çekin.",
+      "detail_other": "Başka bir detayı çekin, örneğin bir hasarı.",
+      "interior_cockpit": "Açık sürücü kapısından kokpiti çekin.",
+      "interior_console": "Orta konsolu ve ekranı çekin.",
+      "interior_instruments": "Kontak açıkken direksiyonu ve göstergeleri çekin.",
+      "interior_front_seats": "Ön koltukları kapıdan çekin.",
+      "interior_rear_seats": "Arka koltukları arka kapıdan çekin.",
+      "interior_door": "Bir kapının içini çekin.",
+      "interior_trunk": "Bagajın içini çekin.",
+      "interior_headliner": "Tavan döşemesini çekin.",
+      "interior_other": "İç mekândan başka bir detayı çekin."
+    }
+  },
+  "licenses": {
+    "title": "Lisanslar",
+    "templates": "3D şablonlar",
+    "detector": "Araç tespiti",
+    "by": "{{author}} · {{license}}"
   }
 }

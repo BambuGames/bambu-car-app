@@ -1,4 +1,5 @@
 // accent: primary actions only · danger: errors and deleting · pending: uploads still waiting.
+// guide / ready: the capture silhouette while guiding and once everything holds.
 export const colors = {
   background: '#FFFFFF',
   surface: '#F4F4F5',
@@ -8,6 +9,8 @@ export const colors = {
   accent: '#0B57D0',
   danger: '#B3261E',
   pending: '#8A5A00',
+  guide: '#FFFFFF',
+  ready: '#2E9E4F',
 } as const;
 
 export const space = [4, 8, 12, 16, 24, 32] as const;

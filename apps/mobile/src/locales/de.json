@@ -72,7 +72,8 @@
     "deleteBody": "Ihr Zugang wird gelöscht und kann nicht wiederhergestellt werden. Die Fahrzeuge Ihrer Galerie bleiben erhalten.",
     "deletePending_one": "{{count}} Änderung auf diesem Gerät ist noch nicht hochgeladen und geht verloren.",
     "deletePending_other": "{{count}} Änderungen auf diesem Gerät sind noch nicht hochgeladen und gehen verloren.",
-    "deleteOffline": "Zum Löschen des Kontos ist eine Internetverbindung nötig."
+    "deleteOffline": "Zum Löschen des Kontos ist eine Internetverbindung nötig.",
+    "licenses": "Lizenzen"
   },
   "noGallery": {
     "title": "Keine Galerie",
@@ -144,5 +145,79 @@
     "interior_trunk": "Kofferraum",
     "interior_headliner": "Dachhimmel",
     "interior_other": "Weiteres innen"
+  },
+  "capture": {
+    "loading": "Kamera wird vorbereitet",
+    "permission": "Für die Fahrzeugfotos braucht die App Zugriff auf die Kamera.",
+    "allowCamera": "Kamerazugriff erlauben",
+    "openSettings": "Einstellungen öffnen",
+    "ready": "Passt – Telefon ruhig halten",
+    "shutter": "Foto aufnehmen",
+    "auto": "Automatisch",
+    "simple": "Automatik aus: Auslöser drücken",
+    "wide": "Engstelle (0,5x)",
+    "normal": "Normal (1x)",
+    "finish": "Fertig",
+    "saving": "Wird gespeichert",
+    "failed": "Das Foto konnte nicht aufgenommen werden. Bitte noch einmal versuchen.",
+    "messages": {
+      "personInFrame": "Person am Fahrzeug – kurz warten",
+      "holdLevel": "Telefon gerade halten",
+      "noCar": "Fahrzeug in den Rahmen bringen",
+      "moveCloser": "Näher herangehen",
+      "moveBack": "Etwas zurückgehen",
+      "panLeft": "Etwas nach links schwenken",
+      "panRight": "Etwas nach rechts schwenken",
+      "lower": "Telefon etwas senken",
+      "raise": "Telefon etwas anheben"
+    },
+    "warnings": {
+      "otherVehicle": "Ein anderes Fahrzeug berührt das Fahrzeug. Wenn möglich, Blickwinkel ändern.",
+      "lowLight": "Wenig Licht auf dem Fahrzeug"
+    },
+    "advice": {
+      "suggestWide": "Zu wenig Abstand? Engstelle (0,5x) nutzen.",
+      "needsSpace": "Das Fahrzeug passt hier nicht ins Bild. Es braucht mehr Platz davor."
+    },
+    "qc": {
+      "title": "Bitte prüfen",
+      "blurry": "Das Foto ist unscharf.",
+      "dark": "Das Foto ist zu dunkel.",
+      "overexposed": "Das Foto ist überbelichtet.",
+      "cutOff": "Das Fahrzeug ragt aus dem Bild.",
+      "aspect": "Das Foto hat nicht das Format 4:3.",
+      "retake": "Neu aufnehmen",
+      "useAnyway": "Trotzdem verwenden"
+    },
+    "finishMissing": {
+      "title": "Es fehlen noch Außenfotos",
+      "missing": "{{name}} fehlt",
+      "finish": "Trotzdem beenden",
+      "continue": "Weiter fotografieren"
+    },
+    "instructions": {
+      "detail_wheel": "Eine Felge mit Reifen formatfüllend fotografieren.",
+      "detail_headlights": "Einen Scheinwerfer von vorne schräg fotografieren.",
+      "detail_taillights": "Eine Rückleuchte von hinten schräg fotografieren.",
+      "detail_trunk_open": "Kofferraum öffnen und von hinten fotografieren.",
+      "detail_engine": "Motorhaube öffnen und den Motorraum von vorne fotografieren.",
+      "detail_roof": "Dach oder Schiebedach von einer erhöhten Position fotografieren.",
+      "detail_other": "Ein weiteres Detail fotografieren, zum Beispiel einen Schaden.",
+      "interior_cockpit": "Durch die geöffnete Fahrertür das Cockpit fotografieren.",
+      "interior_console": "Mittelkonsole und Bildschirm fotografieren.",
+      "interior_instruments": "Lenkrad und Instrumente bei eingeschalteter Zündung fotografieren.",
+      "interior_front_seats": "Die Vordersitze durch die Tür fotografieren.",
+      "interior_rear_seats": "Die Rücksitze durch die hintere Tür fotografieren.",
+      "interior_door": "Die Innenseite einer Tür fotografieren.",
+      "interior_trunk": "Den Kofferraum von innen fotografieren.",
+      "interior_headliner": "Den Dachhimmel fotografieren.",
+      "interior_other": "Ein weiteres Detail im Innenraum fotografieren."
+    }
+  },
+  "licenses": {
+    "title": "Lizenzen",
+    "templates": "3D-Vorlagen",
+    "detector": "Fahrzeugerkennung",
+    "by": "{{author}} · {{license}}"
   }
 }

@@ -1,17 +1,17 @@
-import { Stack, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { router, Stack, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { missingExterior } from '../../../domain/progress';
-import { DETAIL_SLOTS, EXTERIOR_SLOTS, INTERIOR_SLOTS, type Slot } from '../../../domain/slots';
-import type { Vehicle } from '../../../domain/vehicle';
-import { useSession } from '../../../lib/session';
-import { listPhotos, type PhotoRow } from '../../../local/photos';
-import { getVehicle } from '../../../local/vehicles';
-import { useSync } from '../../../sync/SyncProvider';
-import { Notice } from '../../../ui/Notice';
-import { colors, fontSize, space } from '../../../ui/theme';
+import { missingExterior } from '../../../../domain/progress';
+import { DETAIL_SLOTS, EXTERIOR_SLOTS, INTERIOR_SLOTS, type Slot } from '../../../../domain/slots';
+import type { Vehicle } from '../../../../domain/vehicle';
+import { useSession } from '../../../../lib/session';
+import { listPhotos, type PhotoRow } from '../../../../local/photos';
+import { getVehicle } from '../../../../local/vehicles';
+import { useSync } from '../../../../sync/SyncProvider';
+import { Notice } from '../../../../ui/Notice';
+import { colors, fontSize, space } from '../../../../ui/theme';
 
 const SECTIONS: { key: 'exterior' | 'details' | 'interior'; slots: readonly Slot[] }[] = [
   { key: 'exterior', slots: EXTERIOR_SLOTS },
@@ -19,7 +19,7 @@ const SECTIONS: { key: 'exterior' | 'details' | 'interior'; slots: readonly Slot
   { key: 'interior', slots: INTERIOR_SLOTS },
 ];
 
-// Shot list of one vehicle. Tapping a step to shoot it comes with the camera (M1b).
+// Shot list of one vehicle. Tapping a step opens the camera on that step.
 export default function VehicleScreen() {
   const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -77,10 +77,15 @@ export default function VehicleScreen() {
           {section.slots.map((slot) => {
             const state = bySlot.get(slot)?.uploadState ?? 'missing';
             return (
-              <View key={slot} style={styles.row}>
+              <Pressable
+                key={slot}
+                accessibilityRole="button"
+                onPress={() => router.push({ pathname: '/vehicles/[id]/capture', params: { id: vehicle.id, slot } })}
+                style={({ pressed }) => [styles.row, pressed && styles.pressed]}
+              >
                 <Text style={styles.slot}>{t(`slots.${slot}`)}</Text>
                 <Text style={[styles.state, state === 'failed' && styles.failed]}>{t(`photoState.${state}`)}</Text>
-              </View>
+              </Pressable>
             );
           })}
         </View>
@@ -107,4 +112,5 @@ const styles = StyleSheet.create({
   slot: { flexShrink: 1, fontSize: fontSize.body, color: colors.text },
   state: { fontSize: fontSize.small, color: colors.textMuted, textAlign: 'right' },
   failed: { color: colors.danger },
+  pressed: { backgroundColor: colors.surface },
 });
