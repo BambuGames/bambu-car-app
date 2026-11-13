@@ -1,3 +1,4 @@
+import { Image } from 'expo-image';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -7,6 +8,7 @@ import { uploadSummary } from '../../domain/progress';
 import { EXTERIOR_SLOTS } from '../../domain/slots';
 import { useSession } from '../../lib/session';
 import { listVehicles, type VehicleListItem } from '../../local/vehicles';
+import { useCovers } from '../../studio/useCovers';
 import { useSync } from '../../sync/SyncProvider';
 import { Button } from '../../ui/Button';
 import { colors, fontSize, space } from '../../ui/theme';
@@ -16,6 +18,7 @@ export default function Vehicles() {
   const { db, membership } = useSession();
   const { pending, failed, online, subscribe } = useSync();
   const [items, setItems] = useState<VehicleListItem[] | null>(null);
+  const covers = useCovers(membership?.galleryId);
 
   // Load on focus, then again after every sync run while shown: pulled vehicles and finished uploads change the list.
   useFocusEffect(
@@ -53,8 +56,15 @@ export default function Vehicles() {
         <Pressable
           accessibilityRole="button"
           onPress={() => router.push(`/vehicles/${item.id}`)}
-          style={({ pressed }) => [styles.row, pressed && styles.pressed]}
+          style={({ pressed }) => [styles.row, styles.withCover, pressed && styles.pressed]}
         >
+          <Image
+            source={covers[item.id] ? { uri: covers[item.id]!.url, cacheKey: covers[item.id]!.path } : undefined}
+            style={styles.cover}
+            contentFit="cover"
+            accessible={false}
+          />
+          <View style={styles.rowText}>
           <Text style={styles.name}>
             {item.make} {item.model}
           </Text>
@@ -67,6 +77,7 @@ export default function Vehicles() {
               .filter(Boolean)
               .join(' · ')}
           </Text>
+          </View>
         </Pressable>
       )}
     />
@@ -75,6 +86,9 @@ export default function Vehicles() {
 
 const styles = StyleSheet.create({
   list: { padding: space[3] },
+  withCover: { flexDirection: 'row', alignItems: 'center', gap: space[3] },
+  rowText: { flex: 1, gap: space[0] },
+  cover: { width: 64, height: 48, borderRadius: 4, backgroundColor: colors.surface },
   header: { gap: space[2], paddingBottom: space[3] },
   summary: { fontSize: fontSize.small, color: colors.pending },
   empty: { fontSize: fontSize.body, color: colors.textMuted },

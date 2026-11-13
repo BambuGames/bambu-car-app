@@ -2,6 +2,7 @@ import { Link, Stack } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { canManageGallery } from '../../lib/roles';
 import { useSession } from '../../lib/session';
 import { SyncProvider } from '../../sync/SyncProvider';
 import { Button } from '../../ui/Button';
@@ -60,7 +61,17 @@ export default function AppLayout() {
         <Stack.Screen name="vehicles/new" options={{ title: t('vehicles.new') }} />
         <Stack.Screen name="vehicles/[id]/index" options={{ title: '' }} />
         <Stack.Screen name="vehicles/[id]/capture" options={{ headerShown: false }} />
+        <Stack.Screen name="vehicles/[id]/studio" options={{ title: t('studio.title') }} />
+        <Stack.Screen name="vehicles/[id]/photo/[photoId]" options={{ title: '' }} />
+        <Stack.Screen name="vehicles/[id]/plates" options={{ title: '' }} />
+        <Stack.Screen name="vehicles/[id]/touch-up" options={{ title: '' }} />
         <Stack.Screen name="account" options={{ title: t('account.title') }} />
+        {/* The owner's screens (design 9); staff who open one by address land on the account screen. */}
+        <Stack.Protected guard={canManageGallery(membership)} redirectTo="/account">
+          <Stack.Screen name="credits" options={{ title: t('credits.title') }} />
+          <Stack.Screen name="gallery/settings" options={{ title: t('gallerySettings.title') }} />
+          <Stack.Screen name="gallery/members" options={{ title: t('members.title') }} />
+        </Stack.Protected>
         <Stack.Screen name="licenses" options={{ title: t('licenses.title') }} />
       </Stack>
     </SyncProvider>

@@ -51,6 +51,14 @@
       ],
       "expo-asset",
       [
+        "expo-image-picker",
+        {
+          "photosPermission": "Für das Logo und das Kennzeichen-Banner der Galerie.",
+          "cameraPermission": "Die Kamera wird für die Fahrzeugfotos verwendet.",
+          "microphonePermission": false
+        }
+      ],
+      [
         "expo-build-properties",
         {
           "android": {

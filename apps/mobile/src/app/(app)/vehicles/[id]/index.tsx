@@ -10,6 +10,7 @@ import { useSession } from '../../../../lib/session';
 import { listPhotos, type PhotoRow } from '../../../../local/photos';
 import { getVehicle } from '../../../../local/vehicles';
 import { useSync } from '../../../../sync/SyncProvider';
+import { Button } from '../../../../ui/Button';
 import { Notice } from '../../../../ui/Notice';
 import { colors, fontSize, space } from '../../../../ui/theme';
 
@@ -59,6 +60,7 @@ export default function VehicleScreen() {
 
   const bySlot = new Map(photos.map((p) => [p.slot, p]));
   const missing = missingExterior(photos).length;
+  const uploaded = photos.some((p) => p.uploadState === 'uploaded' || p.uploadState === 'remote');
 
   return (
     <ScrollView contentContainerStyle={styles.content} contentInsetAdjustmentBehavior="automatic">
@@ -69,6 +71,12 @@ export default function VehicleScreen() {
       <Text style={styles.summary}>
         {missing > 0 ? t('vehicle.missingExterior', { count: missing }) : t('vehicle.exteriorComplete')}
       </Text>
+      <Button
+        label={t('studio.open')}
+        onPress={() => router.push({ pathname: '/vehicles/[id]/studio', params: { id: vehicle.id } })}
+        disabled={!uploaded}
+      />
+      {!uploaded && photos.length > 0 ? <Text style={styles.meta}>{t('studio.needsUpload')}</Text> : null}
       {SECTIONS.map((section) => (
         <View key={section.key} style={styles.section}>
           <Text style={styles.sectionTitle} accessibilityRole="header">

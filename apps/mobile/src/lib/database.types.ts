@@ -165,14 +165,14 @@ isOneToOne: false
                   ]
                 },"vehicles": {
                   Row: {
-                    "background_id": string | null,"body_type": Database["public"]['Enums']["body_type"],"created_at": string,"created_by": string | null,"credit_charged_at": string | null,"details": NonNullable<Json>,"gallery_id": string,"id": string,"make": string,"model": string,"status": Database["public"]['Enums']["vehicle_status"],"tone_enabled": boolean,"updated_at": string
+                    "background_id": string | null,"body_type": Database["public"]['Enums']["body_type"],"created_at": string,"created_by": string | null,"credit_charged_at": string | null,"details": NonNullable<Json>,"gallery_id": string,"id": string,"make": string,"model": string,"originals_count": number,"status": Database["public"]['Enums']["vehicle_status"],"tone_enabled": boolean,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "background_id"?: string | null,"body_type": Database["public"]['Enums']["body_type"],"created_at"?: string,"created_by"?: string | null,"credit_charged_at"?: string | null,"details"?: NonNullable<Json>,"gallery_id": string,"id"?: string,"make": string,"model": string,"status"?: Database["public"]['Enums']["vehicle_status"],"tone_enabled"?: boolean,"updated_at"?: string
+                    "background_id"?: string | null,"body_type": Database["public"]['Enums']["body_type"],"created_at"?: string,"created_by"?: string | null,"credit_charged_at"?: string | null,"details"?: NonNullable<Json>,"gallery_id": string,"id"?: string,"make": string,"model": string,"originals_count"?: number,"status"?: Database["public"]['Enums']["vehicle_status"],"tone_enabled"?: boolean,"updated_at"?: string
                   }
                   Update: {
-                    "background_id"?: string | null,"body_type"?: Database["public"]['Enums']["body_type"],"created_at"?: string,"created_by"?: string | null,"credit_charged_at"?: string | null,"details"?: NonNullable<Json>,"gallery_id"?: string,"id"?: string,"make"?: string,"model"?: string,"status"?: Database["public"]['Enums']["vehicle_status"],"tone_enabled"?: boolean,"updated_at"?: string
+                    "background_id"?: string | null,"body_type"?: Database["public"]['Enums']["body_type"],"created_at"?: string,"created_by"?: string | null,"credit_charged_at"?: string | null,"details"?: NonNullable<Json>,"gallery_id"?: string,"id"?: string,"make"?: string,"model"?: string,"originals_count"?: number,"status"?: Database["public"]['Enums']["vehicle_status"],"tone_enabled"?: boolean,"updated_at"?: string
                   }
                   Relationships: [
                     {
@@ -206,6 +206,9 @@ isOneToOne: false
                            },
 "admin_refund_vehicle":
 { Args: { "p_note": string,"p_vehicle_id": string }; Returns: number
+                           },
+"admin_user_id_by_email":
+{ Args: { "p_email": string }; Returns: string
                            },
 "gallery_credit_balance":
 { Args: { "p_gallery_id": string }; Returns: number

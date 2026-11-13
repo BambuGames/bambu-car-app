@@ -6,6 +6,7 @@ from worker.compose import compose, contact_shadow, encode_jpeg
 
 WHITE = {"kind": "studio", "wall": "#FFFFFF", "floor": "#F2F2F2"}
 DARK = {"kind": "studio", "wall": "#2B2D31", "floor": "#1E1F22"}
+GREY = {"kind": "studio", "wall": "#E9EAEC", "floor": "#DCDDE0"}
 
 
 def test_studio_background_has_wall_floor_and_horizon():
@@ -15,6 +16,14 @@ def test_studio_background_has_wall_floor_and_horizon():
     assert np.allclose(bg[-1, 0], (0x22, 0x1F, 0x1E), atol=2)  # floor
     assert np.allclose(bg[900, 100], bg[0, 100], atol=2)  # still wall above the horizon
     assert np.abs(bg[1010, 100].astype(int) - bg[0, 100].astype(int)).max() >= 8  # floor below it
+
+
+def test_the_studio_has_no_visible_seam():
+    # The three platform studios (processing migration): no row may step by more than 2 levels, or the
+    # horizon shows as a line.
+    for spec in (WHITE, GREY, DARK):
+        column = render_background(spec)[:, 0].astype(int)
+        assert np.abs(np.diff(column, axis=0)).max() <= 2, spec
 
 
 def test_an_image_background_is_cropped_to_four_by_three():

@@ -153,6 +153,8 @@ Hesaplar seed'den gelir. Hepsinin şifresi `dev-password-1`.
 
 ## Yerelde birini davet etme
 
+Galeri sahibi personeli uygulamadan davet eder (Konto → Mitarbeitende, aşağıda "Stüdyo ve galeri"). Aşağıdaki yol, bir galerinin ilk sahibini açarken ya da uygulama dışında gerekir.
+
 1. Studio'yu açın (http://127.0.0.1:54323). Authentication → Invite user ile e-postayı girin.
    - Kodla yapmak isterseniz `supabase.auth.admin.inviteUserByEmail(email)` aynı işi görür. Bunun için service role anahtarı gerekir.
 2. Davet e-postası Mailpit'e düşer (http://127.0.0.1:54324). E-postada 6 haneli bir kod vardır.
@@ -277,6 +279,32 @@ set -a && eval "$(npx supabase status -o env)" && set +a && services/image-worke
 
 - İlk komut M0 fotoğraflarından 8 açılık bir test aracı kurar ve işlemeyi sahip hesabıyla başlatır. Testgalerie'ye örnek bir logo ve banner da yükler. `--details` eklenirse aynı fotoğraflar detay ve iç mekân adımlarına konur; Photoroom'a gidilmez, para harcanmaz.
 - İkinci komut orijinalleri ve çıktıları yan yana koyar: `services/image-worker/out/<araç id>.png`.
+
+## Stüdyo ve galeri
+
+- **İnternet:** Stüdyo, sonuçlar, plaka kontrolü, rötuş, kredi, galeri ayarları ve personel ekranları internet ister. Çevrimdışıyken stüdyo bunu yazar; çekim ve yükleme kuyruğu çevrimdışı çalışmaya devam eder.
+- **Sahip ve personel:**
+  - Hesap ekranındaki "Galerie verwalten" bölümünü (Guthaben, Galerie-Einstellungen, Mitarbeitende) yalnız sahip görür.
+  - Personel bu ekranların adresini elle açarsa hesap ekranına döner. Sunucuda da RLS ve `gallery-members` fonksiyonu yalnız sahibe izin verir.
+  - Personel araç açar, çeker, işler, plakayı ve rötuşu düzeltir.
+- **Galeri ayarları:** Her değişiklik hemen kaydedilir ve sonraki işlemede kullanılır. Daha önce işlenmiş araçlar stüdyoda "Neu rendern" ile kredisiz güncellenir.
+- **Personel daveti:**
+  - Yeni adrese 6 haneli kodlu davet e-postası gider. Yerelde Mailpit'e düşer (http://127.0.0.1:54324).
+  - Hesabı olan kişi e-postasız eklenir.
+  - Başka bir galeride üye olan hesap eklenemez, çünkü uygulama hesap başına bir galeri okur.
+  - Çıkarılan kişinin hesabı silinmez.
+- **Rötuş:** Yalnız maskesi olan dış açılarda görünür. Silmeler orijinalin koordinatlarında saklanır; her çizimde saklı maskeye yeniden uygulanır, Photoroom'a gidilmez.
+- **Yeni geliştirme derlemesi:** M2b `expo-image-picker` ekledi. Eski derleme logo ya da banner seçerken çalışmaz, iki platformda da yeni derleme gerekir:
+
+  ```bash
+  cd apps/mobile && npx expo prebuild --clean
+  ```
+
+  Ardından yukarıdaki Android Gradle komutu ve iOS komutu çalıştırılır. `expo run:ios`'ta `--port` ile `--no-bundler` birlikte kullanılamaz.
+- **Emülatörde logo ve banner denemesi:**
+  - Test görseli galeriye şöyle eklenir: `adb push <dosya> /sdcard/Pictures/`, ardından `adb shell content call --method scan_volume --uri content://media --arg external_primary`.
+  - Android'in fotoğraf seçicisi izin istemez. Banner, plaka oranında (520:110) sistemin kırpma ekranından geçer.
+  - iOS'ta kırpma ekranı kare olduğu için banner'ın ortası alınır.
 
 ## Elle uçtan uca kontrol
 

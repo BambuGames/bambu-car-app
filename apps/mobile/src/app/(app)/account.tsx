@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 
 import { authErrorKey } from '../../domain/authErrors';
+import { canManageGallery } from '../../lib/roles';
 import { useSession } from '../../lib/session';
 import { pendingCount } from '../../local/outbox';
 import { Button } from '../../ui/Button';
@@ -64,6 +65,16 @@ export default function Account() {
           <Row label={t('account.role')} value={t(`account.roles.${membership.role}`)} />
         </>
       ) : null}
+      {canManageGallery(membership) ? (
+        <View style={styles.section}>
+          <Text style={styles.heading} accessibilityRole="header">
+            {t('account.manage')}
+          </Text>
+          <Button variant="secondary" label={t('credits.title')} onPress={() => router.push('/credits')} />
+          <Button variant="secondary" label={t('gallerySettings.title')} onPress={() => router.push('/gallery/settings')} />
+          <Button variant="secondary" label={t('members.title')} onPress={() => router.push('/gallery/members')} />
+        </View>
+      ) : null}
       <Button variant="secondary" label={t('account.licenses')} onPress={() => router.push('/licenses')} />
       <Button variant="secondary" label={t('account.signOut')} onPress={signOut} />
       <Button variant="danger" label={t('account.delete')} onPress={confirmDelete} loading={busy} />
@@ -76,4 +87,6 @@ const styles = StyleSheet.create({
   row: { gap: space[0] },
   label: { fontSize: fontSize.small, color: colors.textMuted },
   value: { fontSize: fontSize.body, color: colors.text },
+  section: { gap: space[2] },
+  heading: { fontSize: fontSize.body, fontWeight: '600', color: colors.text, marginTop: space[2] },
 });
