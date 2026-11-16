@@ -65,6 +65,7 @@ export default function AppLayout() {
         <Stack.Screen name="vehicles/[id]/photo/[photoId]" options={{ title: '' }} />
         <Stack.Screen name="vehicles/[id]/plates" options={{ title: '' }} />
         <Stack.Screen name="vehicles/[id]/touch-up" options={{ title: '' }} />
+        <Stack.Screen name="vehicles/[id]/export" options={{ title: t('export.title') }} />
         <Stack.Screen name="account" options={{ title: t('account.title') }} />
         {/* The owner's screens (design 9); staff who open one by address land on the account screen. */}
         <Stack.Protected guard={canManageGallery(membership)} redirectTo="/account">

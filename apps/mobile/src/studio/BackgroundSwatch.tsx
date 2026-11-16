@@ -9,14 +9,27 @@ import type { BackgroundSpec } from './api';
 const W = 96;
 const H = 72;
 
-export function BackgroundSwatch({ spec, name, selected, onPress }: { spec: BackgroundSpec; name: string; selected: boolean; onPress: () => void }) {
+export function BackgroundSwatch({
+  spec,
+  name,
+  selected,
+  disabled = false,
+  onPress,
+}: {
+  spec: BackgroundSpec;
+  name: string;
+  selected: boolean;
+  disabled?: boolean;
+  onPress: () => void;
+}) {
   return (
     <Pressable
       accessibilityRole="radio"
-      accessibilityState={{ selected }}
+      accessibilityState={{ selected, disabled }}
       accessibilityLabel={name}
       onPress={onPress}
-      style={styles.item}
+      disabled={disabled}
+      style={[styles.item, disabled && styles.disabled]}
     >
       <View style={[styles.frame, selected && styles.selected]}>
         {spec.kind === 'studio' ? (
@@ -43,4 +56,5 @@ const styles = StyleSheet.create({
   canvas: { width: W, height: H, borderRadius: radius - 2, overflow: 'hidden' },
   placeholder: { backgroundColor: colors.surface },
   name: { fontSize: fontSize.small, color: colors.text },
+  disabled: { opacity: 0.5 },
 });

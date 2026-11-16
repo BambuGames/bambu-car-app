@@ -64,3 +64,9 @@ test('a retaken original gets a new cache key although its path stays', () => {
   const retake = photo({ original_path: 'g/v/front.jpg', captured_at: '2026-11-12T11:00:00Z' });
   expect(originalKey(first)).not.toBe(originalKey(retake));
 });
+
+test('processBlocker waits while the local upload count is unknown', () => {
+  const photos = [photo({ process_status: 'unprocessed' })];
+  expect(processBlocker({ online: true, pendingUploads: null, photos, now: NOW })).toBe('checking');
+  expect(processBlocker({ online: false, pendingUploads: null, photos, now: NOW })).toBe('offline');
+});

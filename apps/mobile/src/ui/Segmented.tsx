@@ -34,9 +34,9 @@ export function Segmented<T extends string>({
 
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', borderWidth: 1, borderColor: colors.border, borderRadius: radius, overflow: 'hidden' },
-  option: { flex: 1, minHeight: 44, paddingVertical: space[2], alignItems: 'center', justifyContent: 'center' },
+  option: { flex: 1, minHeight: 44, paddingVertical: space[2], paddingHorizontal: space[1], alignItems: 'center', justifyContent: 'center' },
   selected: { backgroundColor: colors.text },
-  text: { fontSize: fontSize.body, color: colors.text },
+  text: { fontSize: fontSize.body, color: colors.text, textAlign: 'center' },
   selectedText: { color: colors.background },
   disabled: { color: colors.textMuted },
 });

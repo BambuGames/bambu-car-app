@@ -240,7 +240,8 @@
     "retry": "Yeniden dene",
     "blocked": {
       "offline": "İşlemek için internet bağlantısı gerekiyor.",
-      "uploading": "{{count}} fotoğraf hâlâ yükleniyor. Sonra işleyebilirsiniz.",
+      "uploading_one": "{{count}} fotoğraf hâlâ yükleniyor. Sonra işleyebilirsiniz.",
+      "uploading_other": "{{count}} fotoğraf hâlâ yükleniyor. Sonra işleyebilirsiniz.",
       "running": "Fotoğraflar şu an işleniyor.",
       "nothing": "Bütün fotoğraflar işlendi."
     },
@@ -249,7 +250,8 @@
       "photo_limit": "Bu araç için çok fazla fotoğraf çekildi. Lütfen Bambu Games ile iletişime geçin.",
       "offline": "İşlemek için internet bağlantısı gerekiyor.",
       "not_member": "Bu araç sizin galerinize ait değil.",
-      "internal": "İşleme başlatılamadı. Lütfen yeniden deneyin."
+      "internal": "İşleme başlatılamadı. Lütfen yeniden deneyin.",
+      "no_credit_owner": "Krediniz bitti. Yeni krediyi Bambu Games verir."
     },
     "status": {
       "unprocessed": "Henüz işlenmedi",
@@ -270,7 +272,9 @@
     "plateCheck": "Plakayı kontrol et",
     "reshot": "Yeniden çekildi, henüz işlenmedi",
     "retake": "Yeniden çek",
-    "results": "Sonuçlar"
+    "results": "Sonuçlar",
+    "loadFailed": "Araç bilgileri yüklenemedi.",
+    "optionsFailed": "Değişiklik kaydedilmedi. Lütfen tekrar deneyin."
   },
   "plates": {
     "open": "Plakaları kontrol et ({{count}})",
@@ -382,5 +386,40 @@
       "offline": "İnternet bağlantısı yok. Bağlantı gelince tekrar deneyin.",
       "internal": "Olmadı. Lütfen yeniden deneyin."
     }
+  },
+  "export": {
+    "title": "Dışa aktar",
+    "version": "Sürüm",
+    "versions": {
+      "watermarked": "Filigranlı",
+      "plain": "Filigransız",
+      "originals": "Orijinaller"
+    },
+    "nothing": "Bu sürüm için henüz fotoğraf yok.",
+    "selected": "{{total}} fotoğraftan {{count}} seçili",
+    "selectAll": "Tümünü seç",
+    "selectNone": "Seçimi kaldır",
+    "save": "Fotoğraflara kaydet ({{count}})",
+    "saving": "{{count}} fotoğraftan {{done}} kaydedildi",
+    "saved_one": "1 fotoğraf kaydedildi.",
+    "saved_other": "{{count}} fotoğraf kaydedildi.",
+    "savedWithFailures": "{{saved}} kaydedildi, {{failed}} kaydedilemedi. Lütfen yeniden deneyin.",
+    "denied": "Uygulamanın fotoğraf kaydetme izni yok. Lütfen ayarlardan izin verin.",
+    "openSettings": "Ayarları aç",
+    "link": "İndirme linkini paylaş",
+    "linkHint": "Link, seçilen fotoğrafları ZIP dosyası olarak indirir; örneğin bilgisayarda. {{date}} tarihine kadar geçerli.",
+    "share": "Paylaş",
+    "shareFailed": "Fotoğraf paylaşılamadı. Lütfen yeniden deneyin.",
+    "errors": {
+      "not_member": "Bu araç galerinize ait değil.",
+      "nothing_to_export": "Bu seçimde bu sürümden fotoğraf yok.",
+      "worker_unreachable": "Link şu an oluşturulamadı. Lütfen bir dakika sonra yeniden deneyin.",
+      "offline": "İnternet bağlantısı yok. Bağlantı gelince tekrar deneyin.",
+      "internal": "Olmadı. Lütfen yeniden deneyin."
+    }
+  },
+  "legal": {
+    "privacy": "Gizlilik politikası",
+    "imprint": "Künye"
   }
 }

@@ -1,5 +1,5 @@
 // The studio's server calls (M2a: process-vehicle, photo and vehicle columns, signed URLs). Online only.
-import { FunctionsHttpError, type SupabaseClient } from '@supabase/supabase-js';
+import { FunctionsFetchError, FunctionsHttpError, type SupabaseClient } from '@supabase/supabase-js';
 
 import type { Database, Json } from '../lib/database.types';
 import type { Point } from './geometry';
@@ -60,7 +60,8 @@ export function createStudioApi(client: SupabaseClient<Database>) {
         const status = (error.context as Response).status;
         return { error: HTTP_ERRORS[status] ?? 'internal' };
       }
-      return { error: 'offline' }; // the request never reached the function
+      // Only a request that never reached the function is offline; a relay error means it crashed or would not start.
+      return { error: error instanceof FunctionsFetchError ? 'offline' : 'internal' };
     },
 
     /** Queues one photo again (a plate or touch-up fix); throws the reason when it could not be queued. */
@@ -88,3 +89,26 @@ export function createStudioApi(client: SupabaseClient<Database>) {
 }
 
 export type StudioApi = ReturnType<typeof createStudioApi>;
+
+/** Stores a touch-up and queues the photo's re-render. When it cannot be queued, the earlier edits go back,
+ *  so leaving the editor leaves the row as it was; throws the reason (a ProcessError as the message). */
+export async function saveAndRender(
+  api: Pick<StudioApi, 'saveMaskEdits' | 'renderPhoto'>,
+  a: { vehicleId: string; photoId: string; edits: MaskEdit[]; previous: MaskEdit[] },
+): Promise<void> {
+  await api.saveMaskEdits(a.photoId, a.edits);
+  try {
+    await api.renderPhoto(a.vehicleId, a.photoId);
+  } catch (e) {
+    await api.saveMaskEdits(a.photoId, a.previous).catch(() => {});
+    throw e;
+  }
+}
+
+const PROCESS_ERRORS: readonly string[] = ['no_credit', 'photo_limit', 'not_member', 'offline', 'internal'] satisfies ProcessError[];
+
+/** The reason to show for a failed studio call: the ProcessError it carries, else offline or internal. */
+export function processErrorOf(e: unknown, online: boolean): ProcessError {
+  const reason = e instanceof Error ? e.message : '';
+  return PROCESS_ERRORS.includes(reason) ? (reason as ProcessError) : online ? 'internal' : 'offline';
+}

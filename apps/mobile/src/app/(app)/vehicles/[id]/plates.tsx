@@ -1,5 +1,6 @@
 // Plate quick check (design 7.4, M0 decision): every placed banner and every plate not found, one by one.
 // "Passt" confirms; adjusting the corners or "no plate" re-renders that photo (no credit, no Photoroom).
+import * as Network from 'expo-network';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -9,6 +10,7 @@ import { ScrollView, StyleSheet, Text } from 'react-native';
 import { defaultPlateQuad, originalToOutput, outputToOriginal, type Point } from '../../../../studio/geometry';
 import { plateQueue } from '../../../../studio/order';
 import { PlateEditor } from '../../../../studio/PlateEditor';
+import { StudioLoadState } from '../../../../studio/LoadState';
 import { studioApi, useStudio } from '../../../../studio/useStudio';
 import { Button } from '../../../../ui/Button';
 import { Notice } from '../../../../ui/Notice';
@@ -17,7 +19,9 @@ import { colors, fontSize, radius, space } from '../../../../ui/theme';
 export default function PlatesScreen() {
   const { t } = useTranslation();
   const { id, photoId } = useLocalSearchParams<{ id: string; photoId?: string }>();
-  const { data, refresh } = useStudio(id);
+  const { data, error, refresh } = useStudio(id);
+  const network = Network.useNetworkState();
+  const online = network.isConnected !== false && network.isInternetReachable !== false;
   const [editing, setEditing] = useState<Point[] | null>(null);
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -42,7 +46,7 @@ export default function PlatesScreen() {
     };
   }, [outputPath]);
 
-  if (!data) return null;
+  if (!data) return <StudioLoadState error={error} online={online} onRetry={refresh} />;
   if (!photo) {
     return (
       <ScrollView contentContainerStyle={styles.content}>
@@ -60,6 +64,10 @@ export default function PlatesScreen() {
     setFailed(false);
     try {
       await action();
+      if (photoId) {
+        router.back(); // single-photo mode: back to the photo it was opened from
+        return;
+      }
       setRetry(null);
       setDone((d) => [...d, photo.id]);
       setEditing(null);

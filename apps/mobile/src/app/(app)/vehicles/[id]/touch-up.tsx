@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
-import type { ProcessError } from '../../../../studio/api';
+import { processErrorOf, saveAndRender, type ProcessError } from '../../../../studio/api';
 import type { Picture } from '../../../../studio/CompareImage';
 import type { MaskEdit } from '../../../../studio/status';
 import { TouchUpEditor } from '../../../../studio/TouchUpEditor';
@@ -37,18 +37,17 @@ export default function TouchUpScreen() {
     };
   }, [output]);
 
-  // True once the edits are stored and the photo is queued; the editor then leaves.
+  // True once the edits are stored and the photo is queued; the editor then leaves. When it cannot be queued
+  // the row keeps its earlier edits, so "Verwerfen" really leaves it unchanged.
   const save = async (edits: MaskEdit[]) => {
     setError(null);
     try {
-      await studioApi.saveMaskEdits(photoId, edits);
-    } catch {
-      setError(online ? 'internal' : 'offline');
+      await saveAndRender(studioApi, { vehicleId: id, photoId, edits, previous: photo?.mask_edits ?? [] });
+      return true;
+    } catch (e) {
+      setError(processErrorOf(e, online));
       return false;
     }
-    const result = await studioApi.startProcessing({ vehicleId: id, photoId });
-    if ('error' in result) setError(result.error);
-    return !('error' in result);
   };
 
   return (

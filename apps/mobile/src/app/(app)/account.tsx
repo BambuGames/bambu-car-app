@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 
 import { authErrorKey } from '../../domain/authErrors';
+import { legalLinks, openLegal } from '../../lib/legal';
 import { canManageGallery } from '../../lib/roles';
 import { useSession } from '../../lib/session';
 import { pendingCount } from '../../local/outbox';
@@ -76,6 +77,9 @@ export default function Account() {
         </View>
       ) : null}
       <Button variant="secondary" label={t('account.licenses')} onPress={() => router.push('/licenses')} />
+      {legalLinks().map((link) => (
+        <Button key={link.key} variant="secondary" label={t(`legal.${link.key}`)} onPress={() => openLegal(link.url)} />
+      ))}
       <Button variant="secondary" label={t('account.signOut')} onPress={signOut} />
       <Button variant="danger" label={t('account.delete')} onPress={confirmDelete} loading={busy} />
       {error ? <Notice kind="error" text={error} /> : null}

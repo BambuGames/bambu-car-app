@@ -42,6 +42,7 @@ export default function MembersScreen() {
 
   const invite = async () => {
     const address = email.trim();
+    if (busy || address === '') return; // Enter in the field bypasses the button's loading state
     setBusy(true);
     setResult(null);
     const r = await inviteMember(supabase, galleryId, address);

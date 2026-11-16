@@ -240,7 +240,8 @@
     "retry": "Erneut versuchen",
     "blocked": {
       "offline": "Für das Bearbeiten wird eine Internetverbindung benötigt.",
-      "uploading": "{{count}} Fotos werden noch hochgeladen. Danach können Sie bearbeiten.",
+      "uploading_one": "{{count}} Foto wird noch hochgeladen. Danach können Sie bearbeiten.",
+      "uploading_other": "{{count}} Fotos werden noch hochgeladen. Danach können Sie bearbeiten.",
       "running": "Die Fotos werden gerade bearbeitet.",
       "nothing": "Alle Fotos sind bearbeitet."
     },
@@ -249,7 +250,8 @@
       "photo_limit": "Für dieses Fahrzeug wurden zu viele Fotos aufgenommen. Bitte wenden Sie sich an Bambu Games.",
       "offline": "Für das Bearbeiten wird eine Internetverbindung benötigt.",
       "not_member": "Dieses Fahrzeug gehört nicht zu Ihrer Galerie.",
-      "internal": "Die Bearbeitung konnte nicht gestartet werden. Bitte versuchen Sie es erneut."
+      "internal": "Die Bearbeitung konnte nicht gestartet werden. Bitte versuchen Sie es erneut.",
+      "no_credit_owner": "Ihr Guthaben ist aufgebraucht. Neues Guthaben erhalten Sie von Bambu Games."
     },
     "status": {
       "unprocessed": "Noch nicht bearbeitet",
@@ -270,7 +272,9 @@
     "plateCheck": "Kennzeichen prüfen",
     "reshot": "Neu aufgenommen, noch nicht bearbeitet",
     "retake": "Neu aufnehmen",
-    "results": "Ergebnisse"
+    "results": "Ergebnisse",
+    "loadFailed": "Die Fahrzeugdaten konnten nicht geladen werden.",
+    "optionsFailed": "Die Änderung wurde nicht gespeichert. Bitte versuchen Sie es erneut."
   },
   "plates": {
     "open": "Kennzeichen prüfen ({{count}})",
@@ -382,5 +386,40 @@
       "offline": "Keine Internetverbindung. Bitte versuchen Sie es erneut, sobald Sie online sind.",
       "internal": "Das hat nicht geklappt. Bitte versuchen Sie es erneut."
     }
+  },
+  "export": {
+    "title": "Exportieren",
+    "version": "Version",
+    "versions": {
+      "watermarked": "Mit Wasserzeichen",
+      "plain": "Ohne Wasserzeichen",
+      "originals": "Originale"
+    },
+    "nothing": "Für diese Version gibt es noch keine Fotos.",
+    "selected": "{{count}} von {{total}} ausgewählt",
+    "selectAll": "Alle auswählen",
+    "selectNone": "Auswahl aufheben",
+    "save": "In Fotos sichern ({{count}})",
+    "saving": "{{done}} von {{count}} gesichert",
+    "saved_one": "1 Foto gesichert.",
+    "saved_other": "{{count}} Fotos gesichert.",
+    "savedWithFailures": "{{saved}} gesichert, {{failed}} nicht gesichert. Bitte versuchen Sie es erneut.",
+    "denied": "Die App darf keine Fotos sichern. Bitte erlauben Sie es in den Einstellungen.",
+    "openSettings": "Einstellungen öffnen",
+    "link": "Download-Link teilen",
+    "linkHint": "Der Link lädt die ausgewählten Fotos als ZIP-Datei, zum Beispiel am Computer. Gültig bis {{date}}.",
+    "share": "Teilen",
+    "shareFailed": "Das Foto konnte nicht geteilt werden. Bitte versuchen Sie es erneut.",
+    "errors": {
+      "not_member": "Dieses Fahrzeug gehört nicht zu Ihrer Galerie.",
+      "nothing_to_export": "Für diese Auswahl gibt es keine Fotos in dieser Version.",
+      "worker_unreachable": "Der Link konnte gerade nicht erstellt werden. Bitte versuchen Sie es in einer Minute erneut.",
+      "offline": "Keine Internetverbindung. Bitte versuchen Sie es erneut, sobald Sie online sind.",
+      "internal": "Das hat nicht geklappt. Bitte versuchen Sie es erneut."
+    }
+  },
+  "legal": {
+    "privacy": "Datenschutzerklärung",
+    "imprint": "Impressum"
   }
 }

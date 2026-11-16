@@ -1,6 +1,6 @@
 -- Gallery isolation, data integrity and storage access for the core schema.
 begin;
-select plan(11);
+select plan(12);
 
 -- Fixtures, created as postgres (RLS does not apply).
 insert into auth.users (id, email) values
@@ -90,6 +90,10 @@ select is_empty(
   'select id from public.vehicles',
   'anon sees no vehicles'
 );
+
+reset role;
+select ok((select count(*) from public.makes) >= 30 and exists (select 1 from public.makes where name = 'Volkswagen'),
+  'the vehicle catalog comes with the migrations');
 
 select * from finish();
 rollback;

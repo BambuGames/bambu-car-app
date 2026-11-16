@@ -7,10 +7,12 @@ import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 
+import { canManageGallery } from '../../../../lib/roles';
 import { useSession } from '../../../../lib/session';
 import { listPhotos } from '../../../../local/photos';
 import type { ProcessError } from '../../../../studio/api';
 import { BackgroundSwatch } from '../../../../studio/BackgroundSwatch';
+import { StudioLoadState } from '../../../../studio/LoadState';
 import { coverPhoto, orderPhotos } from '../../../../studio/order';
 import { isStuck, processBlocker, summarize, type StudioPhoto } from '../../../../studio/status';
 import { studioApi, useStudio } from '../../../../studio/useStudio';
@@ -24,14 +26,15 @@ const NOT_RECOGNISED = new Set(['empty_mask', 'car_too_small']);
 export default function StudioScreen() {
   const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { db } = useSession();
+  const { db, membership } = useSession();
   const { subscribe } = useSync();
   const { data, error, refresh, now } = useStudio(id);
   const network = Network.useNetworkState();
   const online = network.isConnected !== false && network.isInternetReachable !== false;
-  const [pendingUploads, setPendingUploads] = useState(0);
+  const [pendingUploads, setPendingUploads] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<ProcessError | null>(null);
+  const [optionsFailed, setOptionsFailed] = useState(false);
   const [thumbs, setThumbs] = useState<Record<string, string>>({});
 
   // Thumbnails of the processed photos; the image cache is keyed by path, so new signed URLs do not reload.
@@ -74,22 +77,17 @@ export default function StudioScreen() {
     else refresh();
   };
 
-  const chooseBackground = async (backgroundId: string) => {
-    await studioApi.setStudioOptions(id, { backgroundId });
-    refresh();
-  };
-  const setTone = async (toneEnabled: boolean) => {
-    await studioApi.setStudioOptions(id, { toneEnabled });
+  const setOptions = async (options: { backgroundId?: string; toneEnabled?: boolean }) => {
+    setOptionsFailed(false);
+    try {
+      await studioApi.setStudioOptions(id, options);
+    } catch {
+      setOptionsFailed(true);
+    }
     refresh();
   };
 
-  if (!data) {
-    return (
-      <View style={styles.content}>
-        <Notice kind={error ? 'error' : 'info'} text={online ? (error ? t('studio.errors.internal') : t('studio.loading')) : t('studio.blocked.offline')} />
-      </View>
-    );
-  }
+  if (!data) return <StudioLoadState error={error} online={online} onRetry={refresh} />;
 
   const photos = orderPhotos(data.photos);
   const summary = summarize(photos, now);
@@ -104,7 +102,14 @@ export default function StudioScreen() {
       </Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.swatches} accessibilityRole="radiogroup">
         {data.backgrounds.map((b) => (
-          <BackgroundSwatch key={b.id} spec={b.spec} name={b.name} selected={b.id === selected} onPress={() => chooseBackground(b.id)} />
+          <BackgroundSwatch
+            key={b.id}
+            spec={b.spec}
+            name={b.name}
+            selected={b.id === selected}
+            disabled={!online}
+            onPress={() => setOptions({ backgroundId: b.id })}
+          />
         ))}
       </ScrollView>
 
@@ -113,13 +118,24 @@ export default function StudioScreen() {
           <Text style={styles.label}>{t('studio.tone')}</Text>
           <Text style={styles.hint}>{t('studio.toneHint')}</Text>
         </View>
-        <Switch value={data.vehicle.tone_enabled} onValueChange={setTone} accessibilityLabel={t('studio.tone')} />
+        <Switch
+          value={data.vehicle.tone_enabled}
+          onValueChange={(toneEnabled) => setOptions({ toneEnabled })}
+          disabled={!online}
+          accessibilityLabel={t('studio.tone')}
+        />
       </View>
+      {optionsFailed ? <Notice kind="error" text={t('studio.optionsFailed')} /> : null}
 
       <Button label={t('studio.process')} onPress={() => start({})} disabled={blocker !== null} loading={busy} />
-      {blocker ? <Notice text={t(`studio.blocked.${blocker}`, { count: pendingUploads })} /> : null}
+      {blocker && blocker !== 'checking' ? <Notice text={t(`studio.blocked.${blocker}`, { count: pendingUploads ?? 0 })} /> : null}
       {!blocker && !data.vehicle.credit_charged_at ? <Notice text={t('studio.firstCharge')} /> : null}
-      {message ? <Notice kind="error" text={t(`studio.errors.${message}`)} /> : null}
+      {message ? (
+        <Notice
+          kind="error"
+          text={t(message === 'no_credit' && canManageGallery(membership) ? 'studio.errors.no_credit_owner' : `studio.errors.${message}`)}
+        />
+      ) : null}
       {summary.done > 0 ? (
         <View style={styles.rerender}>
           <Button variant="secondary" label={t('studio.rerender')} onPress={() => start({ rerender: true })} disabled={!online || busy} />
@@ -132,6 +148,9 @@ export default function StudioScreen() {
           label={t('plates.open', { count: summary.plateChecks })}
           onPress={() => router.push({ pathname: '/vehicles/[id]/plates', params: { id } })}
         />
+      ) : null}
+      {summary.done > 0 ? (
+        <Button variant="secondary" label={t('export.title')} onPress={() => router.push({ pathname: '/vehicles/[id]/export', params: { id } })} />
       ) : null}
       {summary.total > 0 ? (
         <Text style={styles.heading} accessibilityRole="header">

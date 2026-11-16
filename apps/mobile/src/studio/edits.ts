@@ -21,7 +21,7 @@ export const toOriginalStroke = (p: Placement, outputPoints: Point[], brushOutpu
 // The other way, to draw a stored stroke over the output.
 export const toOutputRadius = (p: Placement, radius: number): number => (radius * scale(p) * p.src[0]) / OUTPUT.width;
 
-export const undo =(edits: MaskEdit[]): MaskEdit[] => edits.slice(0, -1);
+export const undo = (edits: MaskEdit[]): MaskEdit[] => edits.slice(0, -1);
 
 export function simplify(points: Point[], minStep = 0.004): Point[] {
   const kept: Point[] = [];

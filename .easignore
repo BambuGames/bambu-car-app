@@ -1,0 +1,40 @@
+# EAS uploads the repository for a build; this file replaces .gitignore for that upload, so it repeats it.
+# --- .gitignore ---
+spikes/
+.venv/
+__pycache__/
+.pytest_cache/
+.DS_Store
+.env
+tools/templates/models/*
+!tools/templates/models/SOURCES.md
+node_modules/
+.gcloud/
+.env.cloud
+# --- apps/mobile/.gitignore ---
+apps/mobile/.expo/
+apps/mobile/dist/
+apps/mobile/web-build/
+apps/mobile/expo-env.d.ts
+apps/mobile/.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.pem
+.metro-health-check*
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+.env*.local
+*.tsbuildinfo
+apps/mobile/ios/
+apps/mobile/android/
+# --- not needed by the app build ---
+services/
+supabase/
+docs/
+tools/
+.superpowers/

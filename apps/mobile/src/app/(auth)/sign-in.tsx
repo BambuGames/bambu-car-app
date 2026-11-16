@@ -1,14 +1,17 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { authErrorKey } from '../../domain/authErrors';
 import { isValidEmail } from '../../domain/validation';
+import { legalLinks, openLegal } from '../../lib/legal';
 import { supabase } from '../../lib/supabase';
 import { Button } from '../../ui/Button';
 import { Notice } from '../../ui/Notice';
 import { Screen } from '../../ui/Screen';
 import { TextField } from '../../ui/TextField';
+import { colors, fontSize, space } from '../../ui/theme';
 
 export default function SignIn() {
   const { t } = useTranslation();
@@ -58,6 +61,18 @@ export default function SignIn() {
       <Button label={t('auth.signIn.submit')} onPress={submit} loading={busy} />
       <Button variant="secondary" label={t('auth.signIn.acceptInvite')} onPress={() => router.push('/accept-invite')} />
       <Button variant="secondary" label={t('auth.signIn.forgotPassword')} onPress={() => router.push('/reset-password')} />
+      <View style={styles.legal}>
+        {legalLinks().map((link) => (
+          <Pressable key={link.key} accessibilityRole="link" hitSlop={space[2]} onPress={() => openLegal(link.url)}>
+            <Text style={styles.legalText}>{t(`legal.${link.key}`)}</Text>
+          </Pressable>
+        ))}
+      </View>
     </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  legal: { flexDirection: 'row', justifyContent: 'center', gap: space[4] },
+  legalText: { fontSize: fontSize.small, color: colors.textMuted, textDecorationLine: 'underline' },
+});

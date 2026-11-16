@@ -10,6 +10,9 @@
     "ios": {
       "icon": "./assets/expo.icon",
       "bundleIdentifier": "com.bambugames.carapp",
+      "config": {
+        "usesNonExemptEncryption": false
+      },
       "infoPlist": {
         "NSCameraUsageDescription": "Die Kamera wird für die Fahrzeugfotos verwendet."
       }
@@ -25,6 +28,13 @@
       "package": "com.bambugames.carapp",
       "permissions": [
         "android.permission.CAMERA"
+      ],
+      "blockedPermissions": [
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_MEDIA_VIDEO",
+        "android.permission.READ_MEDIA_AUDIO",
+        "android.permission.READ_MEDIA_VISUAL_USER_SELECTED",
+        "android.permission.ACCESS_MEDIA_LOCATION"
       ]
     },
     "web": {
@@ -59,6 +69,15 @@
         }
       ],
       [
+        "expo-media-library",
+        {
+          "photosPermission": "Für das Logo und das Kennzeichen-Banner der Galerie.",
+          "savePhotosPermission": "Zum Sichern der bearbeiteten Fahrzeugfotos in Ihren Fotos.",
+          "isAccessMediaLocationEnabled": false,
+          "granularPermissions": []
+        }
+      ],
+      [
         "expo-build-properties",
         {
           "android": {
@@ -66,7 +85,14 @@
           }
         }
       ],
-      "./plugins/withResizerShaders"
+      "./plugins/withResizerShaders",
+      "expo-sharing",
+      [
+        "@sentry/react-native",
+        {
+          "url": "https://de.sentry.io/"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

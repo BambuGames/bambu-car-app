@@ -240,7 +240,8 @@
     "retry": "Try again",
     "blocked": {
       "offline": "Processing needs an internet connection.",
-      "uploading": "{{count}} photos are still uploading. You can process them afterwards.",
+      "uploading_one": "{{count}} photo is still uploading. You can process it afterwards.",
+      "uploading_other": "{{count}} photos are still uploading. You can process them afterwards.",
       "running": "The photos are being processed.",
       "nothing": "All photos are processed."
     },
@@ -249,7 +250,8 @@
       "photo_limit": "Too many photos were taken for this vehicle. Please contact Bambu Games.",
       "offline": "Processing needs an internet connection.",
       "not_member": "This vehicle does not belong to your gallery.",
-      "internal": "Processing could not be started. Please try again."
+      "internal": "Processing could not be started. Please try again.",
+      "no_credit_owner": "Your credit is used up. Bambu Games provides new credit."
     },
     "status": {
       "unprocessed": "Not processed yet",
@@ -270,7 +272,9 @@
     "plateCheck": "Check plate",
     "reshot": "Retaken, not processed yet",
     "retake": "Retake",
-    "results": "Results"
+    "results": "Results",
+    "loadFailed": "The vehicle could not be loaded.",
+    "optionsFailed": "The change was not saved. Please try again."
   },
   "plates": {
     "open": "Check plates ({{count}})",
@@ -382,5 +386,40 @@
       "offline": "No internet connection. Please try again once you are online.",
       "internal": "That did not work. Please try again."
     }
+  },
+  "export": {
+    "title": "Export",
+    "version": "Version",
+    "versions": {
+      "watermarked": "With watermark",
+      "plain": "Without watermark",
+      "originals": "Originals"
+    },
+    "nothing": "There are no photos for this version yet.",
+    "selected": "{{count}} of {{total}} selected",
+    "selectAll": "Select all",
+    "selectNone": "Clear selection",
+    "save": "Save to Photos ({{count}})",
+    "saving": "{{done}} of {{count}} saved",
+    "saved_one": "1 photo saved.",
+    "saved_other": "{{count}} photos saved.",
+    "savedWithFailures": "{{saved}} saved, {{failed}} not saved. Please try again.",
+    "denied": "The app may not save photos. Please allow it in the settings.",
+    "openSettings": "Open settings",
+    "link": "Share download link",
+    "linkHint": "The link downloads the selected photos as a ZIP file, for example on a computer. Valid until {{date}}.",
+    "share": "Share",
+    "shareFailed": "The photo could not be shared. Please try again.",
+    "errors": {
+      "not_member": "This vehicle does not belong to your gallery.",
+      "nothing_to_export": "This selection has no photos in this version.",
+      "worker_unreachable": "The link could not be created right now. Please try again in a minute.",
+      "offline": "No internet connection. Please try again once you are online.",
+      "internal": "That did not work. Please try again."
+    }
+  },
+  "legal": {
+    "privacy": "Privacy policy",
+    "imprint": "Imprint"
   }
 }

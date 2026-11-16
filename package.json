@@ -7,7 +7,7 @@
     "db:reset": "supabase db reset",
     "db:test": "supabase test db",
     "db:types": "supabase gen types > apps/mobile/src/lib/database.types.ts",
-    "test:int": "set -a && eval \"$(supabase status -o env)\" && set +a && node --test 'supabase/tests/integration/*.test.ts'",
+    "test:int": "set -a && eval \"$(supabase status -o env)\" && set +a && node --test --test-concurrency=1 'supabase/tests/integration/*.test.ts'",
     "test:int:mobile": "set -a && eval \"$(supabase status -o env)\" && set +a && cd apps/mobile && npm run test:int"
   },
   "devDependencies": {

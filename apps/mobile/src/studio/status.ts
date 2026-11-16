@@ -42,11 +42,13 @@ export function summarize(photos: StudioPhoto[], now: number) {
   };
 }
 
-export type Blocker = 'offline' | 'uploading' | 'running' | 'nothing';
+export type Blocker = 'offline' | 'checking' | 'uploading' | 'running' | 'nothing';
 
-// Why "Bearbeiten" is off, or null when it may run. Photos still on the phone would be left out silently.
-export function processBlocker(s: { online: boolean; pendingUploads: number; photos: StudioPhoto[]; now: number }): Blocker | null {
+// Why "Bearbeiten" is off, or null when it may run. Photos still on the phone would be left out silently, so
+// it stays off ('checking', no message) until the phone's upload queue has been counted (pendingUploads null).
+export function processBlocker(s: { online: boolean; pendingUploads: number | null; photos: StudioPhoto[]; now: number }): Blocker | null {
   if (!s.online) return 'offline';
+  if (s.pendingUploads === null) return 'checking';
   if (s.pendingUploads > 0) return 'uploading';
   const work = s.photos.some((p) => p.process_status === 'unprocessed' || p.process_status === 'failed' || isStuck(p, s.now));
   if (work) return null;

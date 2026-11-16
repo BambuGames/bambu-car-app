@@ -294,13 +294,14 @@ set -a && eval "$(npx supabase status -o env)" && set +a && services/image-worke
   - Başka bir galeride üye olan hesap eklenemez, çünkü uygulama hesap başına bir galeri okur.
   - Çıkarılan kişinin hesabı silinmez.
 - **Rötuş:** Yalnız maskesi olan dış açılarda görünür. Silmeler orijinalin koordinatlarında saklanır; her çizimde saklı maskeye yeniden uygulanır, Photoroom'a gidilmez.
-- **Yeni geliştirme derlemesi:** M2b `expo-image-picker` ekledi. Eski derleme logo ya da banner seçerken çalışmaz, iki platformda da yeni derleme gerekir:
+- **Yeni geliştirme derlemesi:** M2b `expo-image-picker`, M2c `expo-media-library`, `expo-sharing` ve `@sentry/react-native` ekledi. Eski derleme bu modüller olmadan açılışta düşer (geliştirmede expo-router bütün ekranları baştan yükler), iki platformda da yeni derleme gerekir:
 
   ```bash
   cd apps/mobile && npx expo prebuild --clean
   ```
 
   Ardından yukarıdaki Android Gradle komutu ve iOS komutu çalıştırılır. `expo run:ios`'ta `--port` ile `--no-bundler` birlikte kullanılamaz.
+  Sentry'nin sembol yüklemesi Debug derlemesinde kendiliğinden atlanır; yerelde Release derlenirse önüne `SENTRY_DISABLE_AUTO_UPLOAD=true` eklenir (yükleme yalnız EAS'te, Task 11'deki anahtarla yapılır).
 - **Emülatörde logo ve banner denemesi:**
   - Test görseli galeriye şöyle eklenir: `adb push <dosya> /sdcard/Pictures/`, ardından `adb shell content call --method scan_volume --uri content://media --arg external_primary`.
   - Android'in fotoğraf seçicisi izin istemez. Banner, plaka oranında (520:110) sistemin kırpma ekranından geçer.
