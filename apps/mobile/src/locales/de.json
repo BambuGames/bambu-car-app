@@ -240,6 +240,7 @@
     "retry": "Erneut versuchen",
     "blocked": {
       "offline": "Für das Bearbeiten wird eine Internetverbindung benötigt.",
+      "unchecked": "Die Fotos auf diesem Gerät konnten nicht geprüft werden.",
       "uploading_one": "{{count}} Foto wird noch hochgeladen. Danach können Sie bearbeiten.",
       "uploading_other": "{{count}} Fotos werden noch hochgeladen. Danach können Sie bearbeiten.",
       "running": "Die Fotos werden gerade bearbeitet.",

@@ -10,7 +10,7 @@ import { colors, space } from '../ui/theme';
 export function StudioLoadState({ error, online, onRetry }: { error: string | null; online: boolean; onRetry: () => Promise<void> }) {
   const { t } = useTranslation();
   const [retrying, setRetrying] = useState(false);
-  const text = online ? t(error ? 'studio.loadFailed' : 'studio.loading') : t('studio.blocked.offline');
+  const text = online ? t(error ? 'studio.loadFailed' : 'studio.loading') : t('common.offline');
 
   const retry = async () => {
     setRetrying(true);

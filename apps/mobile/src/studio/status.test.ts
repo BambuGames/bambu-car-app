@@ -70,3 +70,9 @@ test('processBlocker waits while the local upload count is unknown', () => {
   expect(processBlocker({ online: true, pendingUploads: null, photos, now: NOW })).toBe('checking');
   expect(processBlocker({ online: false, pendingUploads: null, photos, now: NOW })).toBe('offline');
 });
+
+test('processBlocker says so when the phone could not count its waiting photos', () => {
+  const photos = [photo({ process_status: 'unprocessed' })];
+  expect(processBlocker({ online: true, pendingUploads: 'failed', photos, now: NOW })).toBe('unchecked');
+  expect(processBlocker({ online: false, pendingUploads: 'failed', photos, now: NOW })).toBe('offline');
+});

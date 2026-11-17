@@ -240,6 +240,7 @@
     "retry": "Try again",
     "blocked": {
       "offline": "Processing needs an internet connection.",
+      "unchecked": "The photos on this phone could not be checked.",
       "uploading_one": "{{count}} photo is still uploading. You can process it afterwards.",
       "uploading_other": "{{count}} photos are still uploading. You can process them afterwards.",
       "running": "The photos are being processed.",

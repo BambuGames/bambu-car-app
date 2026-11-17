@@ -22,6 +22,8 @@ class Store(Protocol):
 
     def remove(self, bucket: str, paths: list[str]) -> None: ...
 
+    def list_files(self, bucket: str, prefix: str) -> list[str]: ...
+
 
 class SupabaseStore:
     def __init__(self, url: str, service_key: str, client: httpx.Client | None = None):
@@ -70,6 +72,13 @@ class SupabaseStore:
         r = self.http.post(self._object(bucket, path), content=data,
                            headers={**self.headers, "Content-Type": content_type, "x-upsert": "true"})
         r.raise_for_status()
+
+    def list_files(self, bucket: str, prefix: str) -> list[str]:
+        """Paths of the files directly in a folder (no subfolders), up to 1000."""
+        r = self.http.post(f"{self.url}/storage/v1/object/list/{bucket}",
+                           json={"prefix": prefix, "limit": 1000, "offset": 0}, headers=self.headers)
+        r.raise_for_status()
+        return [f"{prefix}/{o['name']}" for o in r.json() if o.get("id")]
 
     def remove(self, bucket: str, paths: list[str]) -> None:
         if paths:

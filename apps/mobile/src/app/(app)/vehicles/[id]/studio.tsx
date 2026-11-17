@@ -31,7 +31,7 @@ export default function StudioScreen() {
   const { data, error, refresh, now } = useStudio(id);
   const network = Network.useNetworkState();
   const online = network.isConnected !== false && network.isInternetReachable !== false;
-  const [pendingUploads, setPendingUploads] = useState<number | null>(null);
+  const [pendingUploads, setPendingUploads] = useState<number | null | 'failed'>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<ProcessError | null>(null);
   const [optionsFailed, setOptionsFailed] = useState(false);
@@ -50,22 +50,22 @@ export default function StudioScreen() {
     };
   }, [data]);
 
-  // Photos still on this phone: processing now would leave them out.
+  // Photos still on this phone: processing now would leave them out. Counted again on every sync change and
+  // from the retry button when the phone's database could not be read.
+  const countWaiting = useCallback(async () => {
+    if (!db || !id) return;
+    try {
+      const rows = await listPhotos(db, id);
+      setPendingUploads(rows.filter((r) => ['pending', 'uploading', 'failed'].includes(r.uploadState)).length);
+    } catch {
+      setPendingUploads('failed');
+    }
+  }, [db, id]);
   useFocusEffect(
     useCallback(() => {
-      if (!db || !id) return;
-      let active = true;
-      const load = () =>
-        listPhotos(db, id).then((rows) => {
-          if (active) setPendingUploads(rows.filter((r) => ['pending', 'uploading', 'failed'].includes(r.uploadState)).length);
-        });
-      load();
-      const unsubscribe = subscribe(load);
-      return () => {
-        active = false;
-        unsubscribe();
-      };
-    }, [db, id, subscribe]),
+      countWaiting();
+      return subscribe(countWaiting);
+    }, [countWaiting, subscribe]),
   );
 
   const start = async (body: { photoId?: string; rerender?: boolean }) => {
@@ -128,7 +128,13 @@ export default function StudioScreen() {
       {optionsFailed ? <Notice kind="error" text={t('studio.optionsFailed')} /> : null}
 
       <Button label={t('studio.process')} onPress={() => start({})} disabled={blocker !== null} loading={busy} />
-      {blocker && blocker !== 'checking' ? <Notice text={t(`studio.blocked.${blocker}`, { count: pendingUploads ?? 0 })} /> : null}
+      {blocker && blocker !== 'checking' ? (
+        <Notice
+          kind={blocker === 'unchecked' ? 'error' : 'info'}
+          text={t(`studio.blocked.${blocker}`, { count: typeof pendingUploads === 'number' ? pendingUploads : 0 })}
+        />
+      ) : null}
+      {blocker === 'unchecked' ? <Button variant="secondary" label={t('studio.retry')} onPress={countWaiting} /> : null}
       {!blocker && !data.vehicle.credit_charged_at ? <Notice text={t('studio.firstCharge')} /> : null}
       {message ? (
         <Notice

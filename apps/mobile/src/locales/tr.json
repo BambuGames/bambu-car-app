@@ -240,6 +240,7 @@
     "retry": "Yeniden dene",
     "blocked": {
       "offline": "İşlemek için internet bağlantısı gerekiyor.",
+      "unchecked": "Bu telefondaki fotoğraflar kontrol edilemedi.",
       "uploading_one": "{{count}} fotoğraf hâlâ yükleniyor. Sonra işleyebilirsiniz.",
       "uploading_other": "{{count}} fotoğraf hâlâ yükleniyor. Sonra işleyebilirsiniz.",
       "running": "Fotoğraflar şu an işleniyor.",

@@ -76,26 +76,36 @@ export default function ExportScreen() {
   const save = async () => {
     setMessage(null);
     setProgress({ done: 0, count: items.length });
-    const result = await saveToPhotos(items, deviceSaveDeps, (done) => setProgress({ done, count: items.length }));
-    setProgress(null);
-    if (result.status === 'denied') setMessage({ kind: 'error', text: t('export.denied'), settings: true });
-    else if (result.failed === 0) setMessage({ kind: 'info', text: t('export.saved', { count: result.saved }) });
-    else setMessage({ kind: 'error', text: t('export.savedWithFailures', { saved: result.saved, failed: result.failed }) });
+    try {
+      const result = await saveToPhotos(items, deviceSaveDeps, (done) => setProgress({ done, count: items.length }));
+      if (result.status === 'denied') setMessage({ kind: 'error', text: t('export.denied'), settings: true });
+      else if (result.failed === 0) setMessage({ kind: 'info', text: t('export.saved', { count: result.saved }) });
+      else setMessage({ kind: 'error', text: t('export.savedWithFailures', { saved: result.saved, failed: result.failed }) });
+    } catch {
+      setMessage({ kind: 'error', text: t('export.errors.internal') }); // the permission request itself failed
+    } finally {
+      setProgress(null);
+    }
   };
 
   const shareLink = async () => {
     setMessage(null);
     setLinkBusy(true);
-    const result = await createExportLink(supabase, { vehicleId: id, version, photoIds: items.map((i) => i.photoId) });
-    setLinkBusy(false);
-    if ('error' in result) {
-      setMessage({ kind: 'error', text: t(`export.errors.${result.error}`) });
-      return;
+    try {
+      const result = await createExportLink(supabase, { vehicleId: id, version, photoIds: items.map((i) => i.photoId) });
+      if ('error' in result) {
+        setMessage({ kind: 'error', text: t(`export.errors.${result.error}`) });
+        return;
+      }
+      const date = new Date(result.expiresAt).toLocaleDateString(i18n.language, { day: '2-digit', month: '2-digit', year: 'numeric' });
+      const hint = t('export.linkHint', { date });
+      setMessage({ kind: 'info', text: hint });
+      await Share.share({ message: `${hint}\n${result.url}` });
+    } catch {
+      setMessage({ kind: 'error', text: t('export.errors.internal') }); // the share sheet could not open
+    } finally {
+      setLinkBusy(false);
     }
-    const date = new Date(result.expiresAt).toLocaleDateString(i18n.language, { day: '2-digit', month: '2-digit', year: 'numeric' });
-    const hint = t('export.linkHint', { date });
-    setMessage({ kind: 'info', text: hint });
-    await Share.share({ message: `${hint}\n${result.url}` });
   };
 
   return (
@@ -154,7 +164,7 @@ export default function ExportScreen() {
         disabled={items.length === 0 || !online || busy}
       />
       <Button variant="secondary" label={t('export.link')} onPress={shareLink} loading={linkBusy} disabled={items.length === 0 || !online || busy} />
-      {!online ? <Notice text={t('studio.blocked.offline')} /> : null}
+      {!online ? <Notice text={t('common.offline')} /> : null}
       {message ? <Notice kind={message.kind} text={message.text} /> : null}
       {message?.settings ? <Button variant="secondary" label={t('export.openSettings')} onPress={() => Linking.openSettings()} /> : null}
     </ScrollView>

@@ -40,10 +40,8 @@ export const deviceSaveDeps: SaveDeps = {
 
 /** Opens the share sheet (AirDrop, mail, cloud drives) for one photo file. */
 export async function sharePhoto(bucket: ExportItem['bucket'], path: string, name: string): Promise<void> {
+  // The file stays in the cache: on Android the receiving app may read it after the sheet has closed, and the
+  // system clears the cache itself.
   const uri = await toCache(await signedUrl(bucket, path), name);
-  try {
-    await Sharing.shareAsync(uri, { mimeType: 'image/jpeg', UTI: 'public.jpeg' });
-  } finally {
-    removeFile(uri);
-  }
+  await Sharing.shareAsync(uri, { mimeType: 'image/jpeg', UTI: 'public.jpeg' });
 }

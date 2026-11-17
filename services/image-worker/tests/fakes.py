@@ -39,6 +39,9 @@ class MemoryStore:
         for path in paths:
             self.files.pop((bucket, path), None)
 
+    def list_files(self, bucket: str, prefix: str) -> list[str]:
+        return [p for b, p in self.files if b == bucket and p.rsplit("/", 1)[0] == prefix]
+
 
 class FakePhotoroom:
     """Returns a mask per call from `mask_for(jpeg)`; remembers every image it was sent."""
