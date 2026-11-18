@@ -19,7 +19,7 @@ from worker import plate as plates_mod
 from worker import tone
 from worker.backgrounds import render_background
 from worker.compose import compose, contact_shadow, encode_jpeg, warp
-from worker.imaging import OUT_SIZE, apply_edits, bbox, keep_target, load_upright, placement, straighten
+from worker.imaging import OUT_SIZE, apply_edits, bbox, keep_target, load_upright, placement, solid, straighten
 from worker.photoroom import PhotoroomError
 from worker.store import Store
 from worker.templates import template_box
@@ -28,6 +28,8 @@ from worker.watermark import apply_watermark
 log = logging.getLogger("worker.pipeline")
 
 EXTERIOR = {"front_left_45", "front", "front_right_45", "right", "rear_right_45", "rear", "rear_left_45", "left"}
+# Details where a plate can show; interiors and the other details only gave false banners (phone round 1).
+PLATE_DETAIL_SLOTS = {"detail_headlights", "detail_taillights", "detail_trunk_open"}
 NO_PLATE_EXPECTED = {"left", "right"}  # a side view, detail or interior without a plate is not flagged
 DEFAULT_BACKGROUND = {"kind": "studio", "wall": "#FFFFFF", "floor": "#F2F2F2"}
 ANALYSIS_THREADS = 4  # Photoroom answers in about a second; analyse a few photos at once
@@ -68,7 +70,7 @@ def _folder(photo: dict) -> str:
 def _analyze(store: Store, photo: dict, photoroom, detector) -> dict:
     """Fields to store for a photo that has not been analysed since its original was taken."""
     image = load_upright(_download(store, "originals", photo["original_path"]))
-    found = detector.detect(image)
+    found = detector.detect(image) if photo["slot"] in EXTERIOR | PLATE_DETAIL_SLOTS else []
     h, w = image.shape[:2]
     fields: dict = {}
     if photo["slot"] in EXTERIOR:
@@ -77,6 +79,7 @@ def _analyze(store: Store, photo: dict, photoroom, detector) -> dict:
         alpha = photoroom.mask(encode_jpeg(plates_mod.cover(image, [box for _, box in found]), 92))
         if alpha.shape != (h, w):
             alpha = cv2.resize(alpha, (w, h), interpolation=cv2.INTER_LINEAR)
+        alpha = plates_mod.restore_covered(alpha, [box for _, box in found])
         target = (photo.get("capture") or {}).get("targetBox")
         alpha = keep_target(alpha, tuple(target) if target else None)
         # Checked here, before anything is stored: an empty mask must not pull the set's tone target.
@@ -105,6 +108,7 @@ def _analyze(store: Store, photo: dict, photoroom, detector) -> dict:
 def _render(store: Store, photo: dict, vehicle: dict, ctx: dict, now_ms: int) -> dict:
     image = load_upright(_download(store, "originals", photo["original_path"]))
     h, w = image.shape[:2]
+    clip = None  # the banner stays on the car where there is a car mask
     if photo["slot"] in EXTERIOR:
         alpha = cv2.imdecode(np.frombuffer(_download(store, "processed", photo["mask_path"]), np.uint8), cv2.IMREAD_GRAYSCALE)
         if alpha is None or alpha.shape != (h, w):
@@ -122,6 +126,7 @@ def _render(store: Store, photo: dict, vehicle: dict, ctx: dict, now_ms: int) ->
         if ctx["target"] is not None and photo.get("tone_stats"):
             car = tone.apply(car, tone.correction(photo["tone_stats"], ctx["target"]), car_alpha)
         out = compose(ctx["background"], car, car_alpha, contact_shadow(car_alpha))
+        clip = solid(car_alpha)
     else:
         # Detail and interior (design 7.3): the photo itself, 4:3, with the set's mean tone correction.
         crop_w, crop_h = min(w, h * 4 // 3), min(h, w * 3 // 4)
@@ -134,7 +139,7 @@ def _render(store: Store, photo: dict, vehicle: dict, ctx: dict, now_ms: int) ->
     corners = photo.get("plate_corners")
     if ctx["banner"] is not None and corners and photo.get("plate_status") in ("auto", "confirmed"):
         px = np.array([[x * w, y * h, 1.0] for x, y in corners])
-        out = plates_mod.warp_banner(out, ctx["banner"], (m @ px.T).T)
+        out = plates_mod.warp_banner(out, ctx["banner"], (m @ px.T).T, clip)
 
     marked = apply_watermark(out, ctx["logo"], ctx["watermark"])
     folder = _folder(photo)

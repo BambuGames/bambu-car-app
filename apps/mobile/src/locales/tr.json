@@ -158,6 +158,7 @@
     "simple": "Otomatik kapalı: deklanşöre basın",
     "wide": "Dar alan (0,5x)",
     "normal": "Normal (1x)",
+    "wideHint": "Ultra geniş açı: Parmaklarınızı kadraj kenarından uzak tutun.",
     "finish": "Bitti",
     "saving": "Kaydediliyor",
     "failed": "Fotoğraf çekilemedi. Lütfen tekrar deneyin.",
@@ -187,6 +188,7 @@
       "overexposed": "Fotoğrafta ışık patlaması var.",
       "cutOff": "Araç kadraj dışına taşıyor.",
       "aspect": "Fotoğraf 4:3 değil.",
+      "tilted": "Telefon çok eğikti. Araç bu yüzden bozuk görünüyor.",
       "retake": "Yeniden çek",
       "useAnyway": "Yine de kullan"
     },
@@ -300,6 +302,7 @@
     "remove": "Parçayı kaldır",
     "erase": "Sil",
     "removeHint": "Araca ait olmayan bir parçaya dokunun; örneğin kenarda kalan komşu araç.",
+    "removeJoined": "Bu parça araca bağlı. Önce „Sil“ ile ayırın, sonra üzerine dokunun.",
     "eraseHint": "Kaybolması gereken kalıntıların üzerini boyayın.",
     "brush": "Fırça boyutu",
     "small": "Küçük",

@@ -11,6 +11,7 @@ from tests.fakes import FakeDetector, FakePhotoroom, MemoryStore
 from worker.backgrounds import render_background
 from worker.photoroom import PhotoroomError
 from worker.pipeline import run
+from worker.plate import cover_box
 
 W, H = 800, 600
 CAR = (200, 250, 600, 450)
@@ -238,3 +239,22 @@ def test_a_stale_mask_fails_instead_of_misplacing():
     store.photo_rows["p1"].update({"mask_path": "g1/v1/p1/mask.png", "plate_status": "none", "tone_stats": {"L": 50, "a": 0, "b": 0}})
     go(store, photoroom, detector, ["p1"])
     assert (store.photo_rows["p1"]["process_status"], store.photo_rows["p1"]["process_error"]) == ("failed", "stale_mask")
+
+
+def test_a_plate_cut_out_of_the_mask_is_put_back():
+    mask = shape_mask()
+    x0, y0, x1, y1 = cover_box(PLATE, W, H)
+    mask[y0:y1, x0:x1] = 0
+    store, photoroom, detector = setup([{"id": "p1", "slot": "front", "index": 1, "mask": mask}])
+    go(store, photoroom, detector, ["p1"])
+    row = store.photo_rows["p1"]
+    assert row["plate_status"] == "auto"
+    stored = cv2.imdecode(np.frombuffer(store.files[("processed", row["mask_path"])], np.uint8), cv2.IMREAD_GRAYSCALE)
+    assert stored[(PLATE[1] + PLATE[3]) // 2, (PLATE[0] + PLATE[2]) // 2] == 255
+
+
+@pytest.mark.parametrize("slot, status", [("interior_cockpit", "none"), ("detail_engine", "none"), ("detail_taillights", "auto")])
+def test_plates_are_searched_only_where_a_plate_can_show(slot, status):
+    store, photoroom, detector = setup([{"id": "p1", "slot": slot, "index": 1}])  # the detector finds PLATE
+    go(store, photoroom, detector, ["p1"])
+    assert store.photo_rows["p1"]["plate_status"] == status

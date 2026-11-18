@@ -1,5 +1,6 @@
 // Dragging plate corners (design 7.4): a corner stays inside the photo and the quad never folds over itself.
 import type { Point } from './geometry';
+import type { View } from './viewport';
 
 const cross = (o: Point, a: Point, b: Point) => (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
 
@@ -20,7 +21,7 @@ const MAX_ZOOM = 4;
 /** The part of the photo the corner editor shows: zoomed so the plate spans about 60 % of the frame (a plate
  * is short and wide, so whole-photo handles would cover it and each other), centred on it, inside the photo.
  * x, y: top-left of the view, 0–1 of the photo; the view is 1/scale wide and high. */
-export function plateView(quad: Point[]): { x: number; y: number; scale: number } {
+export function plateView(quad: Point[]): View {
   const xs = quad.map((p) => p.x);
   const ys = quad.map((p) => p.y);
   const width = Math.max(...xs) - Math.min(...xs);

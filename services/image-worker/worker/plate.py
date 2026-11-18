@@ -137,17 +137,48 @@ def refine_corners(image: np.ndarray, box: Box) -> np.ndarray:
     return box_corners if best is None else _extend_eu_strip(image, best)
 
 
+def cover_box(box: Box, w: int, h: int) -> Box | None:
+    """The area `cover` paints over: the plate box grown by 10 % on each side, inside the image."""
+    x0, y0, x1, y1 = box
+    gx, gy = (x1 - x0) * 0.1, (y1 - y0) * 0.1
+    bx0, by0, bx1, by1 = int(max(0, x0 - gx)), int(max(0, y0 - gy)), int(min(w, x1 + gx)), int(min(h, y1 + gy))
+    return None if bx1 <= bx0 or by1 <= by0 else (bx0, by0, bx1, by1)
+
+
 def cover(image: np.ndarray, boxes: list[Box]) -> np.ndarray:
-    """Makes every found plate unreadable (each box grown by 10 %) before the photo leaves for Photoroom."""
+    """Makes every found plate unreadable before the photo leaves for Photoroom."""
     out = image.copy()
     h, w = out.shape[:2]
-    for x0, y0, x1, y1 in boxes:
-        gx, gy = (x1 - x0) * 0.1, (y1 - y0) * 0.1
-        bx0, by0, bx1, by1 = int(max(0, x0 - gx)), int(max(0, y0 - gy)), int(min(w, x1 + gx)), int(min(h, y1 + gy))
-        if bx1 <= bx0 or by1 <= by0:
+    for box in boxes:
+        grown = cover_box(box, w, h)
+        if grown is None:
             continue
+        bx0, by0, bx1, by1 = grown
         region = out[by0:by1, bx0:bx1]
         out[by0:by1, bx0:bx1] = np.broadcast_to(region.reshape(-1, 3).mean(axis=0).astype(np.uint8), region.shape)
+    return out
+
+
+def restore_covered(alpha: np.ndarray, boxes: list[Box]) -> np.ndarray:
+    """Puts covered plates back into the car mask. The flat cover often reads as background to Photoroom
+    (a bright plate on a dark car), which leaves a hole or a notch and hides the plate from pick_target.
+    Inside each covered box a pixel is filled only when there is car on both sides of it, along its row or
+    its column, within a ring around the box: holes and notches close, the car's outline never grows, and
+    a plate on another car, with no car around it, stays out."""
+    out = alpha.copy()
+    h, w = out.shape
+    for box in boxes:
+        grown = cover_box(box, w, h)
+        if grown is None:
+            continue
+        bx0, by0, bx1, by1 = grown
+        t = max(3, (by1 - by0) // 2)
+        rx0, ry0, rx1, ry1 = max(0, bx0 - t), max(0, by0 - t), min(w, bx1 + t), min(h, by1 + t)
+        car = alpha[ry0:ry1, rx0:rx1] >= 128
+        rows = np.logical_or.accumulate(car, axis=1) & np.logical_or.accumulate(car[:, ::-1], axis=1)[:, ::-1]
+        cols = np.logical_or.accumulate(car, axis=0) & np.logical_or.accumulate(car[::-1], axis=0)[::-1]
+        between = (rows | cols)[by0 - ry0:by1 - ry0, bx0 - rx0:bx1 - rx0]
+        out[by0:by1, bx0:bx1][between] = 255
     return out
 
 
@@ -161,11 +192,14 @@ def pick_target(plates: list[tuple[float, Box]], alpha: np.ndarray) -> Box | Non
     return None if best is None else best[1]
 
 
-def warp_banner(canvas: np.ndarray, banner_rgba: np.ndarray, corners: np.ndarray) -> np.ndarray:
-    """The gallery's banner warped onto the four plate corners (homography) and alpha-blended."""
+def warp_banner(canvas: np.ndarray, banner_rgba: np.ndarray, corners: np.ndarray, clip: np.ndarray | None = None) -> np.ndarray:
+    """The gallery's banner warped onto the four plate corners (homography) and alpha-blended. With `clip`
+    (the car's alpha on the canvas) it never reaches past the car, e.g. a plate found at a side view's edge."""
     bh, bw = banner_rgba.shape[:2]
     m = cv2.getPerspectiveTransform(np.float32([[0, 0], [bw, 0], [bw, bh], [0, bh]]), np.float32(corners))
     size = (canvas.shape[1], canvas.shape[0])
     color = cv2.warpPerspective(banner_rgba[..., :3], m, size, flags=cv2.INTER_LINEAR)
     alpha = cv2.warpPerspective(banner_rgba[..., 3], m, size, flags=cv2.INTER_LINEAR).astype(np.float32)[..., None] / 255
+    if clip is not None:
+        alpha *= clip.astype(np.float32)[..., None] / 255
     return np.clip(color * alpha + canvas * (1 - alpha), 0, 255).astype(np.uint8)

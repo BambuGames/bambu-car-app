@@ -109,7 +109,7 @@ export default function ExportScreen() {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.content}>
+    <ScrollView contentContainerStyle={styles.content} contentInsetAdjustmentBehavior="automatic">
       <Segmented
         label={t('export.version')}
         value={version}

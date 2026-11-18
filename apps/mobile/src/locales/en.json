@@ -158,6 +158,7 @@
     "simple": "Automatic off: press the shutter",
     "wide": "Tight space (0.5x)",
     "normal": "Normal (1x)",
+    "wideHint": "Ultra-wide: keep your fingers away from the edge of the frame.",
     "finish": "Done",
     "saving": "Saving",
     "failed": "The photo could not be taken. Please try again.",
@@ -187,6 +188,7 @@
       "overexposed": "The photo is overexposed.",
       "cutOff": "The car runs out of the frame.",
       "aspect": "The photo is not 4:3.",
+      "tilted": "The phone was strongly tilted, so the car looks distorted.",
       "retake": "Retake",
       "useAnyway": "Use anyway"
     },
@@ -300,6 +302,7 @@
     "remove": "Remove piece",
     "erase": "Erase",
     "removeHint": "Tap a piece that does not belong to the vehicle, such as a cut-off neighbouring car.",
+    "removeJoined": "This part is joined to the car. Separate it with “Erase” first, then tap it.",
     "eraseHint": "Paint over leftovers that should disappear.",
     "brush": "Brush size",
     "small": "Small",

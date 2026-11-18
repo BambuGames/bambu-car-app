@@ -3,7 +3,7 @@ import math
 import cv2
 import numpy as np
 
-from worker.plate import cover, pick_target, refine_corners, warp_banner
+from worker.plate import cover, cover_box, pick_target, refine_corners, restore_covered, warp_banner
 
 
 def drawn_plate(angle_deg=6.0):
@@ -66,3 +66,58 @@ def test_banner_lands_on_the_corners():
     out = warp_banner(canvas, banner, corners)
     assert out[205, 300].tolist() == [0, 0, 255]
     assert out[180 - 6, 300].tolist() == [0, 0, 0]
+
+
+def test_restore_fills_a_plate_hole_inside_the_car():
+    alpha = np.zeros((200, 300), np.uint8)
+    alpha[50:180, 40:260] = 255
+    box = (120, 120, 180, 135)
+    x0, y0, x1, y1 = cover_box(box, 300, 200)
+    alpha[y0:y1, x0:x1] = 0  # Photoroom took the flat cover for background
+    out = restore_covered(alpha, [box])
+    assert out[127, 150] == 255 and out[10, 10] == 0
+
+
+def test_restore_fills_a_plate_hole_at_the_cars_edge():
+    alpha = np.zeros((200, 300), np.uint8)
+    alpha[50:180, 100:260] = 255
+    box = (98, 120, 158, 135)  # rear plate seen at an angle, at the car's left outline
+    x0, y0, x1, y1 = cover_box(box, 300, 200)
+    alpha[y0:y1, x0:x1] = 0
+    assert restore_covered(alpha, [box])[127, 130] == 255
+
+
+def test_restore_leaves_a_plate_off_the_car():
+    alpha = np.zeros((200, 300), np.uint8)
+    alpha[50:180, 150:290] = 255
+    out = restore_covered(alpha, [(20, 120, 80, 135)])  # a plate on another car, on the background
+    assert out[127, 50] == 0
+
+
+def test_banner_stays_on_the_car():
+    canvas = np.zeros((100, 100, 3), np.uint8)
+    banner = np.zeros((10, 40, 4), np.uint8)
+    banner[..., 2], banner[..., 3] = 255, 255
+    clip = np.zeros((100, 100), np.uint8)
+    clip[:, :50] = 255  # the car ends at x = 50
+    out = warp_banner(canvas, banner, np.float32([[10, 40], [90, 40], [90, 60], [10, 60]]), clip)
+    assert out[50, 30, 2] > 200 and out[50, 70].sum() == 0
+
+
+def test_banner_is_not_clipped_without_a_mask():
+    canvas = np.zeros((100, 100, 3), np.uint8)
+    banner = np.zeros((10, 40, 4), np.uint8)
+    banner[..., 2], banner[..., 3] = 255, 255
+    out = warp_banner(canvas, banner, np.float32([[10, 40], [90, 40], [90, 60], [10, 60]]))
+    assert out[50, 70, 2] > 200
+
+
+def test_restore_never_fills_past_the_cars_outline():
+    alpha = np.zeros((200, 300), np.uint8)
+    alpha[50:180, 100:260] = 255
+    box = (70, 120, 130, 135)  # half the plate past the car's left outline
+    x0, y0, x1, y1 = cover_box(box, 300, 200)
+    alpha[y0:y1, x0:x1] = 0
+    out = restore_covered(alpha, [box])
+    assert out[127, 120] == 255  # the notch in the car is closed
+    assert not out[:, :100].any()  # nothing outside the car

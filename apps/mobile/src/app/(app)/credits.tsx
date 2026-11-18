@@ -51,6 +51,7 @@ export default function CreditsScreen() {
 
   return (
     <FlatList
+      contentInsetAdjustmentBehavior="automatic"
       contentContainerStyle={styles.content}
       data={credits.entries}
       keyExtractor={(e, i) => `${e.created_at}-${i}`}

@@ -21,7 +21,7 @@ import { templateFor, wideAllowed, type Box, type CaptureMode, type Template } f
 import type { BodyType } from '../domain/vehicle';
 import { useSession } from '../lib/session';
 import { getMeta, setMeta } from '../local/meta';
-import { canUseWide, shouldDetect, zoomFor } from './camera';
+import { canUseWide, hfovAfterCrop, shouldDetect, zoomFor } from './camera';
 import { parseDetections } from './detections';
 import { MODEL, useDetectorModel } from './detector';
 import { plausibleHfov } from './exif';
@@ -54,6 +54,9 @@ export type Guidance = {
   rollDeg: number;
   pitchDeg: number;
 };
+
+// Gravity before the first sensor reading (a phone lying flat): no tilt is known yet, so none is judged.
+const NO_READING = { x: 0, y: 0, z: -9.81 };
 
 export function useGuidedCamera({
   vehicleId,
@@ -196,7 +199,7 @@ export function useGuidedCamera({
   };
 
   // Motion sensors: gravity for the tilt, rotation rate for steadiness.
-  const motion = useRef({ g: { x: 0, y: 0, z: -9.81 }, rate: 0 });
+  const motion = useRef({ g: NO_READING, rate: 0 });
   useEffect(() => {
     if (!active) return;
     DeviceMotion.setUpdateInterval(100);
@@ -292,8 +295,10 @@ export function useGuidedCamera({
     gate.active.setBlocking(false); // at once; busy follows with the next render
     const box = target.current?.box ?? null;
     const g = motion.current.g;
-    const taken = await takePhoto(photoOutput, { vehicleId, slot, capturedAt, target: box, exterior });
-    const measured = plausibleHfov(taken.focal35, effectiveMode);
+    const taken = await takePhoto(photoOutput, { vehicleId, slot, capturedAt, target: box, exterior, tilt: g === NO_READING ? null : tiltFromGravity(g) });
+    const exifHfov = plausibleHfov(taken.focal35, effectiveMode);
+    // EXIF describes the whole delivered frame; a photo cut to 4:3 sees less of it.
+    const measured = exifHfov !== null && taken.cropShare < 1 ? hfovAfterCrop(exifHfov, taken.cropShare) : exifHfov;
     if (measured !== null && db) {
       setHfov((h) => ({ ...h, [effectiveMode]: measured }));
       await setMeta(db, `hfov.${effectiveMode}`, String(measured));

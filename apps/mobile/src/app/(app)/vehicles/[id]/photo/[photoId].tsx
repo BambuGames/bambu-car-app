@@ -75,7 +75,7 @@ export default function PhotoScreen() {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.content}>
+    <ScrollView contentContainerStyle={styles.content} contentInsetAdjustmentBehavior="automatic">
       <Stack.Screen options={{ title: t(`slots.${photo.slot}`) }} />
       <CompareImage before={pictures.before} after={pictures.after} />
       <Text style={styles.status}>{t(`studio.status.${photo.process_status}`)}</Text>

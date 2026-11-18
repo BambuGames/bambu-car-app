@@ -96,7 +96,7 @@ export default function StudioScreen() {
   const selected = data.vehicle.background_id ?? data.vehicle.gallery?.default_background_id ?? data.backgrounds[0]?.id;
 
   return (
-    <ScrollView contentContainerStyle={styles.content}>
+    <ScrollView contentContainerStyle={styles.content} contentInsetAdjustmentBehavior="automatic">
       <Text style={styles.heading} accessibilityRole="header">
         {t('studio.background')}
       </Text>

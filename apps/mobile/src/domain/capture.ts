@@ -18,7 +18,7 @@ export type CaptureInfo = {
   height: number;
 };
 
-export type QcIssue = 'blurry' | 'dark' | 'overexposed' | 'cutOff' | 'aspect';
+export type QcIssue = 'blurry' | 'dark' | 'overexposed' | 'cutOff' | 'aspect' | 'tilted';
 
 // Stored with the photo (photos.qc): what the check found and whether the user kept it anyway.
 export type QcResult = {

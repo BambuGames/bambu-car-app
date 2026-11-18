@@ -32,13 +32,19 @@ export function SyncProvider({ db, galleryId, children }: { db: Db; galleryId: s
   const [queue, setQueue] = useState({ pending: 0, failed: 0 });
   const [syncing, setSyncing] = useState(false);
 
+  // The catalog is fetched again once per app start, so makes added on the server reach installed apps.
+  // ponytail: cleared on the first online attempt, not its success; a failed fetch waits for the next start.
+  const refreshCatalog = useRef(true);
+
   const scheduler = useMemo(() => {
     const remote = createRemote(supabase, (uri) => new File(uri).arrayBuffer());
     return createSyncScheduler(async () => {
       const online = onlineRef.current;
+      const refresh = online && refreshCatalog.current;
+      if (refresh) refreshCatalog.current = false;
       setSyncing(online);
       try {
-        setQueue(await syncAndCount(db, remote, galleryId, Date.now, online));
+        setQueue(await syncAndCount(db, remote, galleryId, Date.now, online, refresh));
       } finally {
         setSyncing(false);
       }

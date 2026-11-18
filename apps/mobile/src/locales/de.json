@@ -158,6 +158,7 @@
     "simple": "Automatik aus: Auslöser drücken",
     "wide": "Engstelle (0,5x)",
     "normal": "Normal (1x)",
+    "wideHint": "Ultraweitwinkel: Halten Sie die Finger vom Bildrand fern.",
     "finish": "Fertig",
     "saving": "Wird gespeichert",
     "failed": "Das Foto konnte nicht aufgenommen werden. Bitte noch einmal versuchen.",
@@ -187,6 +188,7 @@
       "overexposed": "Das Foto ist überbelichtet.",
       "cutOff": "Das Fahrzeug ragt aus dem Bild.",
       "aspect": "Das Foto hat nicht das Format 4:3.",
+      "tilted": "Das Telefon war stark geneigt. Das Fahrzeug wirkt dadurch verzerrt.",
       "retake": "Neu aufnehmen",
       "useAnyway": "Trotzdem verwenden"
     },
@@ -300,6 +302,7 @@
     "remove": "Teil entfernen",
     "erase": "Radieren",
     "removeHint": "Tippen Sie auf ein Teil, das nicht zum Fahrzeug gehört, etwa ein angeschnittenes Nachbarauto.",
+    "removeJoined": "Dieses Teil hängt am Fahrzeug. Trennen Sie es zuerst mit „Radieren“ ab und tippen Sie es dann an.",
     "eraseHint": "Malen Sie über Reste, die verschwinden sollen.",
     "brush": "Pinselgröße",
     "small": "Klein",

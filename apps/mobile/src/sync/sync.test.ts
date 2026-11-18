@@ -1,3 +1,4 @@
+import { replaceCatalog, searchMakes } from '../local/catalog';
 import { migrate, type Db } from '../local/db';
 import { hasPending } from '../local/outbox';
 import { listPhotos, savePhoto } from '../local/photos';
@@ -112,4 +113,12 @@ test('syncAndCount tries nothing offline and reports what waits', async () => {
   await vehicle('v1');
   expect(await syncAndCount(db, fake, 'g1', () => T0, false)).toEqual({ pending: 1, failed: 0 });
   expect(fake.calls).toEqual([]);
+});
+
+test('the first sync of a run fetches the catalog again even when the device has one', async () => {
+  await replaceCatalog(db, [{ id: 9, name: 'Opel' }], []);
+  await syncOnce(db, fake, 'g1', () => T0);
+  expect(await searchMakes(db, 'Volks')).toEqual([]); // a normal run leaves a filled catalog alone
+  await syncOnce(db, fake, 'g1', () => T0, true);
+  expect((await searchMakes(db, 'Volks')).map((m) => m.name)).toEqual(['Volkswagen']);
 });

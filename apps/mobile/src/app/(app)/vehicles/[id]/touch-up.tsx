@@ -1,10 +1,11 @@
 // Touch-up of one processed photo (design 7.3): saves the edits and re-renders that photo from its stored
 // mask, without a new background-removal call.
+import { Skia, type SkImage } from '@shopify/react-native-skia';
 import * as Network from 'expo-network';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet } from 'react-native';
 
 import { processErrorOf, saveAndRender, type ProcessError } from '../../../../studio/api';
 import type { Picture } from '../../../../studio/CompareImage';
@@ -24,6 +25,8 @@ export default function TouchUpScreen() {
   const output = photo?.output_path ?? null;
   const [image, setImage] = useState<Picture | null>(null);
   const [error, setError] = useState<ProcessError | null>(null);
+  const maskPath = photo?.mask_path ?? null;
+  const [mask, setMask] = useState<SkImage | null>(null);
 
   useEffect(() => {
     if (!output) return;
@@ -36,6 +39,23 @@ export default function TouchUpScreen() {
       active = false;
     };
   }, [output]);
+
+  // The car mask, so the editor can tell a part joined to the car from one apart (design 7.2.3). A failed
+  // download leaves it null and the editor accepts every tap, as before.
+  useEffect(() => {
+    if (!maskPath) return;
+    let active = true;
+    studioApi
+      .signedUrls('processed', [maskPath])
+      .then((urls) => (urls[maskPath] ? Skia.Data.fromURI(urls[maskPath]) : null))
+      .then((data) => {
+        if (active && data) setMask(Skia.Image.MakeImageFromEncoded(data));
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [maskPath]);
 
   // True once the edits are stored and the photo is queued; the editor then leaves. When it cannot be queued
   // the row keeps its earlier edits, so "Verwerfen" really leaves it unchanged.
@@ -51,17 +71,19 @@ export default function TouchUpScreen() {
   };
 
   return (
-    <View style={styles.content}>
-      <Stack.Screen options={{ title: t('touchUp.title') }} />
+    // Not scrollable: one finger paints. The insets keep the photo below the iOS 26 header, which content runs under.
+    <ScrollView contentContainerStyle={styles.content} contentInsetAdjustmentBehavior="automatic" scrollEnabled={false}>
+      {/* iOS 26 takes any drag to the right as "back"; the header's back button stays, behind the leave guard. */}
+      <Stack.Screen options={{ title: t('touchUp.title'), gestureEnabled: false }} />
       {photo?.placement && image ? (
-        <TouchUpEditor image={image} placement={photo.placement} edits={photo.mask_edits} canSave={online} onSave={save} />
+        <TouchUpEditor image={image} mask={mask} placement={photo.placement} edits={photo.mask_edits} canSave={online} onSave={save} />
       ) : null}
       {!online ? <Notice text={t('studio.blocked.offline')} /> : null}
       {error ? <Notice kind="error" text={t(`studio.errors.${error}`)} /> : null}
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  content: { flex: 1, padding: space[3], gap: space[3], backgroundColor: colors.background },
+  content: { flexGrow: 1, padding: space[3], gap: space[3], backgroundColor: colors.background },
 });

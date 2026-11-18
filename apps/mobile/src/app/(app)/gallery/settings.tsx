@@ -129,7 +129,7 @@ export default function GallerySettingsScreen() {
   const band = watermark.band;
 
   return (
-    <ScrollView contentContainerStyle={styles.content}>
+    <ScrollView contentContainerStyle={styles.content} contentInsetAdjustmentBehavior="automatic">
       {changed ? <Notice text={t('gallerySettings.applies')} /> : null}
       {error ? <Notice kind="error" text={error} /> : null}
 

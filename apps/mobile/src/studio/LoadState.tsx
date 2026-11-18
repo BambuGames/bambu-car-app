@@ -1,7 +1,7 @@
 // What a studio screen shows before its data is there: loading, offline, or a failed load with a retry.
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet } from 'react-native';
 
 import { Button } from '../ui/Button';
 import { Notice } from '../ui/Notice';
@@ -19,10 +19,10 @@ export function StudioLoadState({ error, online, onRetry }: { error: string | nu
   };
 
   return (
-    <View style={styles.content}>
+    <ScrollView contentContainerStyle={styles.content} contentInsetAdjustmentBehavior="automatic">
       <Notice kind={error ? 'error' : 'info'} text={text} />
       {error ? <Button variant="secondary" label={t('studio.retry')} onPress={retry} loading={retrying} /> : null}
-    </View>
+    </ScrollView>
   );
 }
 

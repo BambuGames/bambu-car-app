@@ -45,6 +45,7 @@ export async function syncOnce(
   remote: Remote,
   galleryId: string,
   now: () => number,
+  refreshCatalog = false, // the first run of an app start: a filled catalog may miss makes added since
 ): Promise<{ pushed: number; failed: number; pending: number }> {
   let pushed = 0;
   let failed = 0;
@@ -59,7 +60,7 @@ export async function syncOnce(
     }
   }
 
-  if (await catalogIsEmpty(db)) {
+  if (refreshCatalog || (await catalogIsEmpty(db))) {
     const { makes, models } = await remote.fetchCatalog();
     await replaceCatalog(db, makes, models);
   }
@@ -80,7 +81,8 @@ export async function syncAndCount(
   galleryId: string,
   now: () => number,
   online: boolean,
+  refreshCatalog = false,
 ): Promise<{ pending: number; failed: number }> {
-  if (online) await syncOnce(db, remote, galleryId, now).catch(() => {});
+  if (online) await syncOnce(db, remote, galleryId, now, refreshCatalog).catch(() => {});
   return counts(db);
 }

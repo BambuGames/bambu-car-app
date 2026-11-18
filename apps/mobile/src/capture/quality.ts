@@ -10,6 +10,10 @@ export const QC_LIMITS = {
   maxClippedShare: 0.15,
   edgeMargin: 0.01,
   aspectTolerance: 0.02,
+  // Beyond these the photo cannot be saved by processing: the worker levels a roll up to 20° (MAX_ROLL_DEG),
+  // and a steeper view down distorts the car (phone round 1: 33°).
+  maxRollDeg: 20,
+  maxPitchDeg: 20,
 };
 
 export type QualityMetrics = { meanLuma: number; clippedShare: number; laplacianVar: number };
@@ -51,7 +55,7 @@ export const photoMetrics = (large: QualityMetrics, small: QualityMetrics): Phot
 
 export function qcIssues(
   m: PhotoMetrics,
-  f: { width: number; height: number; target: Box | null; exterior: boolean },
+  f: { width: number; height: number; target: Box | null; exterior: boolean; tilt: { rollDeg: number; pitchDeg: number } | null },
 ): QcIssue[] {
   const issues: QcIssue[] = [];
   if (m.sharpness < QC_LIMITS.minSharpness) issues.push('blurry');
@@ -61,6 +65,8 @@ export function qcIssues(
   const e = QC_LIMITS.edgeMargin;
   if (f.exterior && t && (t.x0 < e || t.y0 < e || t.x1 > 1 - e || t.y1 > 1 - e)) issues.push('cutOff');
   if (Math.abs(f.width / f.height - 4 / 3) > QC_LIMITS.aspectTolerance) issues.push('aspect');
+  const tilt = f.tilt;
+  if (f.exterior && tilt && (tilt.rollDeg > QC_LIMITS.maxRollDeg || tilt.pitchDeg > QC_LIMITS.maxPitchDeg)) issues.push('tilted');
   return issues;
 }
 

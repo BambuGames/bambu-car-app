@@ -8,7 +8,8 @@ import numpy as np
 from PIL import Image, ImageOps
 
 IDENTITY = np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
-MAX_ROLL_DEG = 10  # beyond this the stored tilt is not a hand-held wobble (e.g. a phone held upright)
+MAX_ROLL_DEG = 20  # beyond this the stored tilt is not a hand-held wobble (e.g. a phone held upright);
+# the capture screen is locked to landscape, and round 1 had 11–13° shots left unlevelled at 10
 OUT_SIZE = (2560, 1920)
 
 
@@ -40,10 +41,22 @@ def _keep(alpha: np.ndarray, labels: np.ndarray, keep: list[int]) -> np.ndarray:
     return alpha * mask
 
 
+def solid(alpha: np.ndarray) -> np.ndarray:
+    """The car's outer outline, filled: holes left inside the mask (an uncovered plate) count as car, nothing
+    outside does. The banner is clipped to this, so it never reaches past the car and never gets cut by a hole."""
+    contours, _ = cv2.findContours((alpha >= 128).astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    out = np.zeros_like(alpha)
+    cv2.drawContours(out, contours, -1, 255, thickness=cv2.FILLED)
+    return out
+
+
 def keep_target(alpha: np.ndarray, target_box: tuple[float, float, float, float] | None) -> np.ndarray:
-    """Keeps the mask parts that touch the target car's detection box, without cropping to it: M0 showed
-    the box often misses the car's ends and antenna. Without a box (simple mode) the largest part whose
-    centre lies in the middle 60 % of the photo, else the largest part."""
+    """Keeps the part with the most pixels inside the target car's detection box, plus other parts lying at
+    least half inside it (a mirror or a piece cut off by the mask), without cropping to the box: M0 showed it
+    often misses the car's ends and antenna, which hang on the main part. Spec 7.2.2 keeps every part that
+    touches the box; phone round 1 showed that keeps a parked neighbour reaching into it, so a part mostly
+    outside is dropped. Without a box (simple mode) the largest part whose centre lies in the middle 60 % of
+    the photo, else the largest part."""
     n, labels, stats, centroids = _components(alpha)
     if n <= 1:
         return np.zeros_like(alpha)
@@ -51,11 +64,12 @@ def keep_target(alpha: np.ndarray, target_box: tuple[float, float, float, float]
     parts = range(1, n)
     keep: list[int] = []
     if target_box is not None:
-        bx0, by0, bx1, by1 = target_box[0] * w, target_box[1] * h, target_box[2] * w, target_box[3] * h
-        for i in parts:
-            x, y, cw, ch = stats[i, :4]
-            if x < bx1 and x + cw > bx0 and y < by1 and y + ch > by0:
-                keep.append(i)
+        bx0, by0 = max(0, math.floor(target_box[0] * w)), max(0, math.floor(target_box[1] * h))
+        bx1, by1 = min(w, math.ceil(target_box[2] * w)), min(h, math.ceil(target_box[3] * h))
+        inside = np.bincount(labels[by0:by1, bx0:bx1].ravel(), minlength=n) if bx1 > bx0 and by1 > by0 else np.zeros(n, int)
+        if inside[1:].any():
+            main = 1 + int(np.argmax(inside[1:]))
+            keep = [main] + [i for i in parts if i != main and inside[i] >= 0.5 * stats[i, cv2.CC_STAT_AREA]]
     if not keep:
         central = [i for i in parts if 0.2 * w <= centroids[i][0] <= 0.8 * w and 0.2 * h <= centroids[i][1] <= 0.8 * h]
         keep = [max(central or parts, key=lambda i: stats[i, cv2.CC_STAT_AREA])]

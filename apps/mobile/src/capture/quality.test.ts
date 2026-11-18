@@ -50,6 +50,7 @@ const metrics = (large: Uint8Array) => photoMetrics(analyzeRgba(large, W, H), an
 const photo = (over: Partial<Parameters<typeof qcIssues>[1]> = {}) => ({
   width: 4032,
   height: 3024,
+  tilt: null,
   target: { x0: 0.15, y0: 0.4, x1: 0.85, y1: 0.85 },
   exterior: true,
   ...over,
@@ -91,4 +92,13 @@ test('toRgba reorders the channel layouts the camera can return', () => {
   expect([...toRgba(px([10, 20, 30, 0]), 'RGBX', 1, 1)]).toEqual([10, 20, 30, 255]);
   expect([...toRgba(px([10, 20, 30, 40, 50, 60]), 'RGB', 2, 1)]).toEqual([10, 20, 30, 255, 40, 50, 60, 255]);
   expect(() => toRgba(px([0, 0, 0, 0]), 'unknown', 1, 1)).toThrow();
+});
+
+test('a strongly tilted exterior photo asks for a retake', () => {
+  const m = metrics(checker(30, 220)); // sharp and well exposed: no other issue
+  expect(qcIssues(m, photo({ tilt: { rollDeg: 2, pitchDeg: 33 } }))).toContain('tilted');
+  expect(qcIssues(m, photo({ tilt: { rollDeg: 25, pitchDeg: 5 } }))).toContain('tilted');
+  expect(qcIssues(m, photo({ tilt: { rollDeg: 13, pitchDeg: 16 } }))).not.toContain('tilted');
+  expect(qcIssues(m, photo({ tilt: { rollDeg: 2, pitchDeg: 33 }, exterior: false }))).not.toContain('tilted');
+  expect(qcIssues(m, photo({ tilt: null }))).not.toContain('tilted');
 });

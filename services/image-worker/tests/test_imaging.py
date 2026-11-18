@@ -5,7 +5,7 @@ import cv2
 import numpy as np
 from PIL import Image
 
-from worker.imaging import apply_edits, bbox, keep_target, load_upright, placement, straighten
+from worker.imaging import apply_edits, bbox, keep_target, load_upright, placement, solid, straighten
 
 
 def blob(alpha, x0, y0, x1, y1):
@@ -79,3 +79,28 @@ def test_placement_puts_the_car_on_the_template_box():
 def test_bbox_of_an_empty_mask_is_none():
     assert bbox(np.zeros((10, 10), np.uint8)) is None
     assert bbox(blob(np.zeros((10, 20), np.uint8), 2, 3, 8, 9)) == (2, 3, 8, 9)
+
+
+def test_keep_target_drops_a_neighbour_that_only_grazes_the_box():
+    alpha = blob(blob(np.zeros((100, 200), np.uint8), 20, 30, 120, 90), 130, 30, 200, 90)  # car, neighbour
+    kept = keep_target(alpha, (0.05, 0.25, 0.7, 0.95))  # the box reaches 10 px into the neighbour
+    assert kept[60, 70] == 255 and kept[60, 170] == 0
+
+
+def test_keep_target_keeps_a_detached_piece_inside_the_box():
+    alpha = blob(blob(np.zeros((100, 200), np.uint8), 20, 30, 120, 90), 125, 40, 135, 50)  # car, mirror
+    kept = keep_target(alpha, (0.05, 0.25, 0.75, 0.95))
+    assert kept[45, 130] == 255
+
+
+def test_straighten_levels_a_roll_of_13_degrees():
+    img = np.random.default_rng(0).integers(0, 255, (30, 40, 3), np.uint8)
+    _, _, m = straighten(img, None, 13)
+    assert not np.allclose(m, [[1, 0, 0], [0, 1, 0]])
+
+
+def test_solid_fills_holes_but_not_the_outside():
+    alpha = blob(np.zeros((100, 200), np.uint8), 40, 20, 160, 80)
+    alpha[40:60, 80:120] = 0  # a hole inside the car (an uncovered plate)
+    out = solid(alpha)
+    assert out[50, 100] == 255 and out[10, 10] == 0 and out[50, 30] == 0

@@ -6,6 +6,7 @@ import * as ScreenOrientation from 'expo-screen-orientation';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { SessionProvider, useSession } from '../lib/session';
 import { telemetryOptions } from '../lib/telemetry';
@@ -35,10 +36,13 @@ function RootLayout() {
     ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
   }, []);
   return (
-    <SessionProvider>
-      <StatusBar style="dark" />
-      <RootStack />
-    </SessionProvider>
+    // The editors' pinch and pan (studio/useViewportGestures) need the gesture root.
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SessionProvider>
+        <StatusBar style="dark" />
+        <RootStack />
+      </SessionProvider>
+    </GestureHandlerRootView>
   );
 }
 

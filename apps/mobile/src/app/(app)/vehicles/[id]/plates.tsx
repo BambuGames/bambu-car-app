@@ -49,7 +49,7 @@ export default function PlatesScreen() {
   if (!data) return <StudioLoadState error={error} online={online} onRetry={refresh} />;
   if (!photo) {
     return (
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView contentContainerStyle={styles.content} contentInsetAdjustmentBehavior="automatic">
         <Notice text={t('plates.allChecked')} />
         <Button label={t('plates.back')} onPress={() => router.back()} />
       </ScrollView>
@@ -96,8 +96,9 @@ export default function PlatesScreen() {
     });
 
   return (
-    <ScrollView contentContainerStyle={styles.content} scrollEnabled={!editing}>
-      <Stack.Screen options={{ title: t(`slots.${photo.slot}`) }} />
+    <ScrollView contentContainerStyle={styles.content} contentInsetAdjustmentBehavior="automatic" scrollEnabled={!editing}>
+      {/* iOS 26 takes any drag to the right as "back"; it must not while a corner is dragged. */}
+      <Stack.Screen options={{ title: t(`slots.${photo.slot}`), gestureEnabled: !editing }} />
       {!photoId ? <Text style={styles.count}>{t('plates.remaining', { count: queue.length })}</Text> : null}
       {editing ? (
         <>

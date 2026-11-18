@@ -234,6 +234,7 @@ export default function CaptureScreen() {
                 <Text style={[styles.modeText, cam.mode === m && styles.modeTextSelected]}>{t(`capture.${m}`)}</Text>
               </Pressable>
             ))}
+            {cam.mode === 'wide' ? <Text style={styles.modeHint}>{t('capture.wideHint')}</Text> : null}
           </View>
         ) : null}
         {exterior && !cam.simple ? (
@@ -297,6 +298,7 @@ const styles = StyleSheet.create({
   modeSuggested: { borderColor: colors.accent, borderWidth: 2 },
   modeText: { fontSize: fontSize.small, color: colors.text, textAlign: 'center' },
   modeTextSelected: { color: colors.background },
+  modeHint: { fontSize: fontSize.small, color: colors.textMuted },
   autoRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   autoText: { fontSize: fontSize.small, color: colors.text },
   shutter: {

@@ -71,7 +71,7 @@ export default function MembersScreen() {
     ]);
 
   return (
-    <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+    <ScrollView contentContainerStyle={styles.content} contentInsetAdjustmentBehavior="automatic" keyboardShouldPersistTaps="handled">
       <TextField
         label={t('auth.email')}
         value={email}
