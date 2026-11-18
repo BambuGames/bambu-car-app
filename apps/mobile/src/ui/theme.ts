@@ -16,3 +16,12 @@ export const colors = {
 export const space = [4, 8, 12, 16, 24, 32] as const;
 export const radius = 8;
 export const fontSize = { small: 14, body: 16, title: 22 } as const;
+
+// Damage map fills: only the state, nothing decorative.
+export const damageColors = {
+  original: '#E4E4E7',
+  painted: '#2F6FA8',
+  partly_painted: '#E0A100',
+  replaced: '#7A55B8',
+  damaged: '#B3261E',
+} as const;
