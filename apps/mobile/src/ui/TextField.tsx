@@ -12,7 +12,7 @@ export function TextField({ label, error, ...input }: { label: string; error?: s
         {...input}
         accessibilityLabel={label}
         placeholderTextColor={colors.textMuted}
-        style={[styles.input, error ? styles.inputError : null]}
+        style={[styles.input, input.multiline ? styles.multiline : null, error ? styles.inputError : null]}
       />
       {error ? <Text style={styles.error}>{error}</Text> : null}
     </View>
@@ -32,6 +32,8 @@ const styles = StyleSheet.create({
     color: colors.text,
     backgroundColor: colors.background,
   },
+  // A multiline field grows with its text; without vertical padding it ends at the last line and clips its descenders.
+  multiline: { paddingVertical: space[2], textAlignVertical: 'top' },
   inputError: { borderColor: colors.danger },
   error: { fontSize: fontSize.small, color: colors.danger },
 });

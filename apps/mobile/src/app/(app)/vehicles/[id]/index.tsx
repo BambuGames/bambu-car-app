@@ -8,7 +8,9 @@ import { DETAIL_SLOTS, EXTERIOR_SLOTS, INTERIOR_SLOTS, type Slot } from '../../.
 import type { Vehicle } from '../../../../domain/vehicle';
 import { useSession } from '../../../../lib/session';
 import { listPhotos, type PhotoRow } from '../../../../local/photos';
+import { getListing, type Listing } from '../../../../local/listings';
 import { getVehicle } from '../../../../local/vehicles';
+import { sectionProgress } from '../../../../vehicle/sections';
 import { useSync } from '../../../../sync/SyncProvider';
 import { Button } from '../../../../ui/Button';
 import { Notice } from '../../../../ui/Notice';
@@ -28,6 +30,7 @@ export default function VehicleScreen() {
   const { subscribe } = useSync();
   const [vehicle, setVehicle] = useState<Vehicle | null | undefined>(undefined);
   const [photos, setPhotos] = useState<PhotoRow[]>([]);
+  const [listing, setListing] = useState<Listing | null>(null);
 
   // Load on focus, then again after every sync run while shown: pulled photos and finished uploads change the states.
   useFocusEffect(
@@ -35,10 +38,11 @@ export default function VehicleScreen() {
       if (!db || !id) return;
       let active = true;
       const load = () =>
-        Promise.all([getVehicle(db, id), listPhotos(db, id)]).then(([v, p]) => {
+        Promise.all([getVehicle(db, id), listPhotos(db, id), getListing(db, id)]).then(([v, p, l]) => {
           if (!active) return;
           setVehicle(v);
           setPhotos(p);
+          setListing(l);
         });
       load();
       const unsubscribe = subscribe(load);
@@ -77,6 +81,36 @@ export default function VehicleScreen() {
         disabled={!uploaded}
       />
       {!uploaded && photos.length > 0 ? <Text style={styles.meta}>{t('studio.needsUpload')}</Text> : null}
+      <Pressable
+        accessibilityRole="button"
+        onPress={() => router.push({ pathname: '/vehicles/[id]/data', params: { id: vehicle.id } })}
+        style={({ pressed }) => [styles.row, pressed && styles.pressed]}
+      >
+        <Text style={styles.slot}>{t('vehicleData.title')}</Text>
+        <Text style={styles.state}>{t('vehicleData.progress', sectionProgress(vehicle, listing))}</Text>
+      </Pressable>
+      <Pressable
+        accessibilityRole="button"
+        onPress={() => router.push({ pathname: '/vehicles/[id]/damage', params: { id: vehicle.id } })}
+        style={({ pressed }) => [styles.row, pressed && styles.pressed]}
+      >
+        <Text style={styles.slot}>{t('damage.title')}</Text>
+        <Text style={styles.state}>{vehicle.damageCheckedAt ? t('damage.checked') : t('damage.notChecked')}</Text>
+      </Pressable>
+      <Pressable
+        accessibilityRole="button"
+        onPress={() => router.push({ pathname: '/vehicles/[id]/listing', params: { id: vehicle.id } })}
+        style={({ pressed }) => [styles.row, pressed && styles.pressed]}
+      >
+        <Text style={styles.slot}>{t('listing.title')}</Text>
+      </Pressable>
+      <Pressable
+        accessibilityRole="button"
+        onPress={() => router.push({ pathname: '/vehicles/[id]/report', params: { id: vehicle.id } })}
+        style={({ pressed }) => [styles.row, pressed && styles.pressed]}
+      >
+        <Text style={styles.slot}>{t('report.title')}</Text>
+      </Pressable>
       {SECTIONS.map((section) => (
         <View key={section.key} style={styles.section}>
           <Text style={styles.sectionTitle} accessibilityRole="header">
