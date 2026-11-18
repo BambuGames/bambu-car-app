@@ -447,3 +447,7 @@ max_client_conn = 200
 
 [remotes.production.storage.vector]
 enabled = false
+
+# Called by the pg_cron job through pg_net: there is no user JWT, the function checks x-cron-secret itself.
+[functions.clean-reports]
+verify_jwt = false

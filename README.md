@@ -43,6 +43,49 @@ cd apps/mobile && npx tsc --noEmit && npx jest
 
 `supabase start`, Edge Function'ları yalnızca açılışta bulur. Yeni bir fonksiyondan sonra `npx supabase stop && npx supabase start` çalıştırın. Fonksiyonu düzenlerken `npx supabase functions serve` de iş görür.
 
+### Claude
+
+- `write-listing` (ilan metni) Claude'u resmi `@anthropic-ai/sdk` ile çağırır; ortak kod `supabase/functions/_shared/claude.ts`. Model `claude-opus-5-5`; Claude reddederse sunucu tarafı yedek model dener.
+- **Yerelde gerçek Claude çağrılmaz.**
+  - `supabase/functions/.env`'de `ANTHROPIC_API_KEY=test-key` ve `ANTHROPIC_BASE_URL=http://host.docker.internal:8091` durur.
+  - `npm run test:int` 8091 portunda sahte bir Messages API açar (`supabase/tests/integration/fakeClaude.ts`); port o sırada boş olmalı.
+  - `.env` değişince `npx supabase stop`, ardından `npm run db:start`.
+- **Bulutta:**
+  - Anthropic hesabını ve anahtarını kullanıcı açar. Anahtarı fonksiyon sırrı olarak kendisi girer: `npx supabase secrets set ANTHROPIC_API_KEY=…`. `ANTHROPIC_BASE_URL` bulutta tanımlanmaz.
+  - Buluta sır, migration ya da fonksiyon gönderimi yalnız kullanıcının onayıyla yapılır.
+- Anahtar git'e girmez ve yazdırılmaz. Şasi numarası ilan metni isteğine hiç girmez.
+
+### Rapor temizliği (zamanlanmış iş)
+
+`clean-reports` fonksiyonu, 7 günden uzun açık kalan rapor okumalarının dosyalarını siler ve önerilerini boşaltır. Ardından `reports` kovasında 7 günden eski kalan her dosyayı da siler; okuma kaydı olmayan dosyalar (yükleme yarıda kesildiyse) böylece kalmaz. `pg_cron` işi her gün 03:17'de `pg_net` ile çağırır. Fonksiyon kullanıcı JWT'si taşımaz (`config.toml`'da `verify_jwt = false`); `x-cron-secret` başlığını `CRON_SECRET` ile karşılaştırır. Adres ve sır Vault'ta durur (`clean_reports_url`, `cron_secret`); migration değer içermez.
+
+- **Yerel:**
+  - `supabase/functions/.env`'e rastgele bir `CRON_SECRET=` yazın (`openssl rand -hex 24`), ardından `npx supabase stop` ve `npm run db:start`.
+  - Vault'a aynı değeri girin (veritabanı konteynerinden `kong`'a erişilir):
+
+    ```sql
+    select vault.create_secret('http://kong:8000/functions/v1/clean-reports', 'clean_reports_url');
+    select vault.create_secret('<CRON_SECRET değeri>', 'cron_secret');
+    ```
+  - Var olan bir değeri değiştirmek için `create_secret` hata verir; `update_secret` kullanın:
+
+    ```sql
+    select vault.update_secret((select id from vault.secrets where name = 'cron_secret'), '<yeni değer>');
+    ```
+- **Hatalar nerede görünür:**
+  - `cron.job_run_details`: işin SQL'i çalıştı mı (ör. Vault girdisi eksikse adres boş kalır ve iş burada hata verir).
+  - `net._http_response`: fonksiyonun cevabı (`status_code`, `content`, `timed_out`). Çağrı 60 saniye bekler.
+
+    ```sql
+    select status, return_message, start_time from cron.job_run_details order by start_time desc limit 5;
+    select status_code, content, timed_out, error_msg from net._http_response order by id desc limit 5;
+    ```
+- **Bulut (kullanıcı onayıyla, sonra):**
+  - Rastgele bir sır üretin; `npx supabase secrets set CRON_SECRET=…` ile fonksiyon sırrı olarak girin.
+  - Barındırılan projenin SQL düzenleyicisinde aynı iki Vault girdisini oluşturun; adres `https://<proje-ref>.supabase.co/functions/v1/clean-reports`, sır aynı değer.
+  - `npx supabase functions deploy clean-reports` ile fonksiyonu gönderin. `verify_jwt = false` ayarı `config.toml`'dan gelir.
+- Sır git'e girmez ve yazdırılmaz.
+
 ## Uygulamayı çalıştırma
 
 1. `apps/mobile/.env.example` dosyasını `apps/mobile/.env` adıyla kopyalayın.
