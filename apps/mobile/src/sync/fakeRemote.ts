@@ -1,5 +1,6 @@
 // Test-only in-memory server. Keeps one photo per vehicle and slot, like the real table.
 import type { Vehicle } from '../domain/vehicle';
+import type { Listing, ListingText } from '../local/listings';
 import type { RemotePhoto } from '../local/photos';
 import type { Remote } from './remote';
 
@@ -9,6 +10,8 @@ type StoredPhoto = RemotePhoto & { capture: Record<string, unknown>; qc: Record<
 export class FakeRemote implements Remote {
   calls: { name: Name; args: unknown[] }[] = [];
   vehicles = new Map<string, Vehicle>();
+  listings = new Map<string, Listing>();
+  listingTexts = new Map<string, ListingText & { galleryId: string }>(); // key: listingId/language
   photos = new Map<string, StoredPhoto>(); // key: vehicleId/slot
   files = new Map<string, string>(); // storage path -> local uri that was uploaded
   beforeUpload?: () => Promise<void>; // runs while an upload is in flight
@@ -42,6 +45,21 @@ export class FakeRemote implements Remote {
   async fetchVehicles(galleryId: string) {
     this.record('fetchVehicles', [galleryId]);
     return [...this.vehicles.values()].filter((v) => v.galleryId === galleryId);
+  }
+
+  async upsertListing(l: Listing) {
+    this.record('upsertListing', [l]);
+    this.listings.set(l.id, l);
+  }
+
+  async fetchListings(galleryId: string) {
+    this.record('fetchListings', [galleryId]);
+    return [...this.listings.values()].filter((l) => l.galleryId === galleryId);
+  }
+
+  async fetchListingTexts(galleryId: string) {
+    this.record('fetchListingTexts', [galleryId]);
+    return [...this.listingTexts.values()].filter((t) => t.galleryId === galleryId).map(({ galleryId: _, ...t }) => t);
   }
 
   async fetchPhotos(galleryId: string) {

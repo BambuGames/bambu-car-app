@@ -109,6 +109,52 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"listing_texts": {
+                  Row: {
+                    "description": string,"edited": boolean,"gallery_id": string,"generated_at": string,"language": string,"listing_id": string,"model": string,"title": string,"titles": (string)[],"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "description": string,"edited"?: boolean,"gallery_id": string,"generated_at": string,"language": string,"listing_id": string,"model": string,"title": string,"titles": (string)[],"updated_at"?: string
+                  }
+                  Update: {
+                    "description"?: string,"edited"?: boolean,"gallery_id"?: string,"generated_at"?: string,"language"?: string,"listing_id"?: string,"model"?: string,"title"?: string,"titles"?: (string)[],"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "listing_texts_listing_id_gallery_id_fkey"
+      columns: ["listing_id","gallery_id"]
+isOneToOne: false
+      referencedRelation: "listings"
+      referencedColumns: ["id","gallery_id"]
+    }
+                  ]
+                },"listings": {
+                  Row: {
+                    "created_at": string,"facts_updated_at": string,"gallery_id": string,"id": string,"location": string | null,"price_eur": number | null,"status": string,"updated_at": string,"vat_deductible": boolean | null,"warranty_months": number | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"facts_updated_at"?: string,"gallery_id": string,"id": string,"location"?: string | null,"price_eur"?: number | null,"status"?: string,"updated_at"?: string,"vat_deductible"?: boolean | null,"warranty_months"?: number | null
+                  }
+                  Update: {
+                    "created_at"?: string,"facts_updated_at"?: string,"gallery_id"?: string,"id"?: string,"location"?: string | null,"price_eur"?: number | null,"status"?: string,"updated_at"?: string,"vat_deductible"?: boolean | null,"warranty_months"?: number | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "listings_id_fkey"
+      columns: ["id"]
+isOneToOne: true
+      referencedRelation: "vehicles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "listings_id_gallery_id_fkey"
+      columns: ["id","gallery_id"]
+isOneToOne: true
+      referencedRelation: "vehicles"
+      referencedColumns: ["id","gallery_id"]
+    }
+                  ]
                 },"makes": {
                   Row: {
                     "id": number,"name": string
@@ -163,16 +209,36 @@ isOneToOne: false
       referencedColumns: ["id","gallery_id"]
     }
                   ]
-                },"vehicles": {
+                },"report_reads": {
                   Row: {
-                    "background_id": string | null,"body_type": Database["public"]['Enums']["body_type"],"created_at": string,"created_by": string | null,"credit_charged_at": string | null,"details": NonNullable<Json>,"gallery_id": string,"id": string,"make": string,"model": string,"originals_count": number,"status": Database["public"]['Enums']["vehicle_status"],"tone_enabled": boolean,"updated_at": string
+                    "closed_at": string | null,"created_at": string,"error": string | null,"files": (string)[],"gallery_id": string,"id": string,"status": string,"suggestions": Json | null,"vehicle_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "background_id"?: string | null,"body_type": Database["public"]['Enums']["body_type"],"created_at"?: string,"created_by"?: string | null,"credit_charged_at"?: string | null,"details"?: NonNullable<Json>,"gallery_id": string,"id"?: string,"make": string,"model": string,"originals_count"?: number,"status"?: Database["public"]['Enums']["vehicle_status"],"tone_enabled"?: boolean,"updated_at"?: string
+                    "closed_at"?: string | null,"created_at"?: string,"error"?: string | null,"files": (string)[],"gallery_id": string,"id"?: string,"status": string,"suggestions"?: Json | null,"vehicle_id": string
                   }
                   Update: {
-                    "background_id"?: string | null,"body_type"?: Database["public"]['Enums']["body_type"],"created_at"?: string,"created_by"?: string | null,"credit_charged_at"?: string | null,"details"?: NonNullable<Json>,"gallery_id"?: string,"id"?: string,"make"?: string,"model"?: string,"originals_count"?: number,"status"?: Database["public"]['Enums']["vehicle_status"],"tone_enabled"?: boolean,"updated_at"?: string
+                    "closed_at"?: string | null,"created_at"?: string,"error"?: string | null,"files"?: (string)[],"gallery_id"?: string,"id"?: string,"status"?: string,"suggestions"?: Json | null,"vehicle_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "report_reads_vehicle_id_gallery_id_fkey"
+      columns: ["vehicle_id","gallery_id"]
+isOneToOne: false
+      referencedRelation: "vehicles"
+      referencedColumns: ["id","gallery_id"]
+    }
+                  ]
+                },"vehicles": {
+                  Row: {
+                    "accident_free": boolean | null,"background_id": string | null,"body_type": Database["public"]['Enums']["body_type"],"color_exterior": string | null,"color_interior": string | null,"created_at": string,"created_by": string | null,"credit_charged_at": string | null,"damage": NonNullable<Json>,"damage_checked_at": string | null,"details": NonNullable<Json>,"displacement_ccm": number | null,"drive": string | null,"facts_updated_at": string,"first_registration": string | null,"fuel": string | null,"gallery_id": string,"hu_until": string | null,"id": string,"make": string,"mileage_km": number | null,"model": string,"non_smoker": boolean | null,"originals_count": number,"power_kw": number | null,"previous_owners": number | null,"service_book": boolean | null,"status": Database["public"]['Enums']["vehicle_status"],"tone_enabled": boolean,"transmission": string | null,"updated_at": string,"upholstery": string | null,"variant": string | null,"vin": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "accident_free"?: boolean | null,"background_id"?: string | null,"body_type": Database["public"]['Enums']["body_type"],"color_exterior"?: string | null,"color_interior"?: string | null,"created_at"?: string,"created_by"?: string | null,"credit_charged_at"?: string | null,"damage"?: NonNullable<Json>,"damage_checked_at"?: string | null,"details"?: NonNullable<Json>,"displacement_ccm"?: number | null,"drive"?: string | null,"facts_updated_at"?: string,"first_registration"?: string | null,"fuel"?: string | null,"gallery_id": string,"hu_until"?: string | null,"id"?: string,"make": string,"mileage_km"?: number | null,"model": string,"non_smoker"?: boolean | null,"originals_count"?: number,"power_kw"?: number | null,"previous_owners"?: number | null,"service_book"?: boolean | null,"status"?: Database["public"]['Enums']["vehicle_status"],"tone_enabled"?: boolean,"transmission"?: string | null,"updated_at"?: string,"upholstery"?: string | null,"variant"?: string | null,"vin"?: string | null
+                  }
+                  Update: {
+                    "accident_free"?: boolean | null,"background_id"?: string | null,"body_type"?: Database["public"]['Enums']["body_type"],"color_exterior"?: string | null,"color_interior"?: string | null,"created_at"?: string,"created_by"?: string | null,"credit_charged_at"?: string | null,"damage"?: NonNullable<Json>,"damage_checked_at"?: string | null,"details"?: NonNullable<Json>,"displacement_ccm"?: number | null,"drive"?: string | null,"facts_updated_at"?: string,"first_registration"?: string | null,"fuel"?: string | null,"gallery_id"?: string,"hu_until"?: string | null,"id"?: string,"make"?: string,"mileage_km"?: number | null,"model"?: string,"non_smoker"?: boolean | null,"originals_count"?: number,"power_kw"?: number | null,"previous_owners"?: number | null,"service_book"?: boolean | null,"status"?: Database["public"]['Enums']["vehicle_status"],"tone_enabled"?: boolean,"transmission"?: string | null,"updated_at"?: string,"upholstery"?: string | null,"variant"?: string | null,"vin"?: string | null
                   }
                   Relationships: [
                     {
@@ -212,6 +278,11 @@ isOneToOne: false
                            },
 "gallery_credit_balance":
 { Args: { "p_gallery_id": string }; Returns: number
+                           },
+"old_report_files":
+{ Args: { "p_before": string }; Returns: {
+              "name": string
+            }[]
                            },
 "start_processing":
 { Args: { "p_photo_id"?: string,"p_rerender"?: boolean,"p_vehicle_id": string }; Returns: (string)[]

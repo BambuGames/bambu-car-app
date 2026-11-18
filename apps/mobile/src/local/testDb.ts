@@ -1,7 +1,7 @@
 // Test-only Db on Node's built-in SQLite, with the same interface as the app's expo-sqlite adapter.
 import { DatabaseSync } from 'node:sqlite';
 
-import type { Db, SqlValue } from './db';
+import { oneAtATime, type Db, type SqlValue } from './db';
 
 const handles = new WeakMap<Db, DatabaseSync>();
 
@@ -20,7 +20,7 @@ export function memoryDb(path = ':memory:'): Db {
     async get<T>(sql: string, params: SqlValue[] = []) {
       return (sqlite.prepare(sql).get(...params) as T | undefined) ?? null;
     },
-    async transaction(fn) {
+    transaction: oneAtATime(async (fn) => {
       sqlite.exec('BEGIN');
       try {
         await fn();
@@ -29,7 +29,7 @@ export function memoryDb(path = ':memory:'): Db {
         sqlite.exec('ROLLBACK');
         throw error;
       }
-    },
+    }),
   };
   handles.set(db, sqlite);
   return db;

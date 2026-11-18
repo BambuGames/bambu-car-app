@@ -2,10 +2,12 @@
 import type { Slot } from '../domain/slots';
 import { catalogIsEmpty, replaceCatalog } from '../local/catalog';
 import type { Db } from '../local/db';
-import { complete, counts, fail, hasPending, nextDue, pendingCount, type OutboxItem } from '../local/outbox';
+import { cacheListingText, getListing, upsertRemoteListing } from '../local/listings';
+import { complete, counts, fail, hasPending, nextDue, pendingCount, type OutboxItem, type OutboxKind } from '../local/outbox';
 import { getPhoto, setUploadState, upsertRemotePhoto } from '../local/photos';
 import { getVehicle, upsertRemoteVehicle } from '../local/vehicles';
 import type { Remote } from './remote';
+import type { SyncScheduler } from './scheduler';
 
 export const photoPath = (galleryId: string, vehicleId: string, slot: Slot): string => `${galleryId}/${vehicleId}/${slot}.jpg`;
 
@@ -13,6 +15,13 @@ async function push(db: Db, remote: Remote, item: OutboxItem): Promise<void> {
   if (item.kind === 'vehicle') {
     const vehicle = await getVehicle(db, item.entityId);
     if (vehicle) await remote.upsertVehicle(vehicle);
+    await complete(db, item);
+    return;
+  }
+
+  if (item.kind === 'listing') {
+    const listing = await getListing(db, item.entityId);
+    if (listing) await remote.upsertListing(listing);
     await complete(db, item);
     return;
   }
@@ -64,9 +73,16 @@ export async function syncOnce(
     const { makes, models } = await remote.fetchCatalog();
     await replaceCatalog(db, makes, models);
   }
-  for (const vehicle of await remote.fetchVehicles(galleryId)) {
-    if (!(await hasPending(db, 'vehicle', vehicle.id))) await upsertRemoteVehicle(db, vehicle);
-  }
+  // Check and write in one transaction: a local edit cannot land in between and be overwritten.
+  const vehicles = await remote.fetchVehicles(galleryId);
+  await db.transaction(async () => {
+    for (const vehicle of vehicles) if (!(await hasPending(db, 'vehicle', vehicle.id))) await upsertRemoteVehicle(db, vehicle);
+  });
+  const listings = await remote.fetchListings(galleryId);
+  await db.transaction(async () => {
+    for (const listing of listings) if (!(await hasPending(db, 'listing', listing.id))) await upsertRemoteListing(db, listing);
+  });
+  for (const text of await remote.fetchListingTexts(galleryId)) await cacheListingText(db, text);
   for (const photo of await remote.fetchPhotos(galleryId)) await upsertRemotePhoto(db, photo);
 
   return { pushed, failed, pending: await pendingCount(db) };
@@ -85,4 +101,17 @@ export async function syncAndCount(
 ): Promise<{ pending: number; failed: number }> {
   if (online) await syncOnce(db, remote, galleryId, now, refreshCatalog).catch(() => {});
   return counts(db);
+}
+
+// Syncs now and says whether none of the given entities is left in the outbox, so a caller can go on
+// to the server (generate a text, read a report) knowing it sees the latest local changes.
+export async function flush(
+  db: Db,
+  scheduler: Pick<SyncScheduler, 'request' | 'idle'>,
+  entities: { kind: OutboxKind; id: string }[],
+): Promise<boolean> {
+  scheduler.request();
+  await scheduler.idle();
+  for (const { kind, id } of entities) if (await hasPending(db, kind, id)) return false;
+  return true;
 }

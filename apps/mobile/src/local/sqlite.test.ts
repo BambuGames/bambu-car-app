@@ -53,3 +53,27 @@ test('deleting closes the only connection before removing the file', async () =>
   expect(openDatabaseAsync).toHaveBeenCalledTimes(2);
   await deleteUserDb('u2');
 });
+
+test('transactions on one connection run one after another, also after a failed one', async () => {
+  const db = await openUserDb('u3');
+  const connection = await openDatabaseAsync.mock.results[0].value;
+  const log: string[] = [];
+  connection.withTransactionAsync.mockImplementation(async (fn: () => Promise<void>) => {
+    log.push('begin');
+    try {
+      await fn();
+    } finally {
+      log.push('end');
+    }
+  });
+  const step = (name: string, fail = false) => async () => {
+    log.push(name);
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    if (fail) throw new Error(name);
+  };
+
+  await Promise.allSettled([db.transaction(step('a', true)), db.transaction(step('b')), db.transaction(step('c'))]);
+
+  expect(log).toEqual(['begin', 'a', 'end', 'begin', 'b', 'end', 'begin', 'c', 'end']);
+  await deleteUserDb('u3');
+});

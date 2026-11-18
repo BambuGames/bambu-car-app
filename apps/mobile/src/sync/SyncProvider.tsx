@@ -5,19 +5,20 @@
 // Compiler drops dependencies a callback never reads, and the reload silently stopped.
 import { File } from 'expo-file-system';
 import { useNetworkState } from 'expo-network';
-import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { AppState } from 'react-native';
 
 import { supabase } from '../lib/supabase';
 import type { Db } from '../local/db';
+import type { OutboxKind } from '../local/outbox';
 import { createRemote } from './remote';
 import { createSyncScheduler, type SyncScheduler } from './scheduler';
-import { syncAndCount } from './sync';
+import { flush as flushOutbox, syncAndCount } from './sync';
 
 type SyncState = { pending: number; failed: number; online: boolean; syncing: boolean } & Pick<
   SyncScheduler,
-  'request' | 'subscribe'
->;
+  'request' | 'subscribe' | 'idle'
+> & { flush(entities: { kind: OutboxKind; id: string }[]): Promise<boolean> };
 
 const SyncContext = createContext<SyncState | null>(null);
 const RETRY_MS = 30_000;
@@ -50,7 +51,8 @@ export function SyncProvider({ db, galleryId, children }: { db: Db; galleryId: s
       }
     });
   }, [db, galleryId]);
-  const { request, subscribe } = scheduler;
+  const { request, subscribe, idle } = scheduler;
+  const flush = useCallback((entities: { kind: OutboxKind; id: string }[]) => flushOutbox(db, scheduler, entities), [db, scheduler]);
 
   useEffect(() => {
     request();
@@ -70,8 +72,8 @@ export function SyncProvider({ db, galleryId, children }: { db: Db; galleryId: s
   }, [waiting, request]);
 
   const value = useMemo(
-    () => ({ ...queue, online, syncing, request, subscribe }),
-    [queue, online, syncing, request, subscribe],
+    () => ({ ...queue, online, syncing, request, subscribe, idle, flush }),
+    [queue, online, syncing, request, subscribe, idle, flush],
   );
   return <SyncContext.Provider value={value}>{children}</SyncContext.Provider>;
 }

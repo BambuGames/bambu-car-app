@@ -1,3 +1,5 @@
+import type { DamageMap, VehicleData, VehicleDetails } from './vehicleData';
+
 export type BodyType = 'sedan' | 'kombi' | 'suv' | 'hatchback' | 'other';
 export type VehicleStatus = 'draft' | 'shooting' | 'processing' | 'ready' | 'archived';
 
@@ -8,7 +10,11 @@ export type Vehicle = {
   model: string;
   bodyType: BodyType;
   status: VehicleStatus;
-  details: Record<string, unknown>;
+  data: VehicleData;
+  damage: DamageMap;
+  damageCheckedAt: string | null;
+  details: VehicleDetails;
   createdAt: string;
   updatedAt: string;
+  factsUpdatedAt: string; // last change of what the listing text is written from (see local/vehicles.ts)
 };

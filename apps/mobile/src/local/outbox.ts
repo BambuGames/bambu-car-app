@@ -2,7 +2,7 @@
 // entity's current local row, so a later change only bumps the item's version.
 import type { Db } from './db';
 
-export type OutboxKind = 'vehicle' | 'photo';
+export type OutboxKind = 'vehicle' | 'photo' | 'listing';
 export type OutboxItem = {
   id: number;
   kind: OutboxKind;

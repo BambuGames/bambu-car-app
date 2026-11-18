@@ -2,7 +2,7 @@
 // pending uploads, and they continue when the same person signs in again.
 import * as SQLite from 'expo-sqlite';
 
-import { migrate, type Db, type SqlValue } from './db';
+import { migrate, oneAtATime, type Db, type SqlValue } from './db';
 
 const fileName = (userId: string) => `user-${userId}.db`;
 
@@ -20,8 +20,9 @@ async function connect(userId: string): Promise<Connection> {
     },
     all: <T>(sql: string, params: SqlValue[] = []) => sqlite.getAllAsync<T>(sql, params),
     get: <T>(sql: string, params: SqlValue[] = []) => sqlite.getFirstAsync<T>(sql, params),
-    // ponytail: non-exclusive transaction; switch to withExclusiveTransactionAsync if concurrent writes grow.
-    transaction: (fn) => sqlite.withTransactionAsync(fn),
+    // withTransactionAsync is not exclusive: oneAtATime keeps a second one from starting while one is open.
+    // Plain queries issued meanwhile still run inside the open transaction (same connection).
+    transaction: oneAtATime((fn) => sqlite.withTransactionAsync(fn)),
   };
   await migrate(db);
   return { sqlite, db };

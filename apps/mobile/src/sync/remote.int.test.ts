@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
+import { emptyVehicleData } from '../domain/vehicleData';
 import type { Database } from '../lib/database.types';
 import { createRemote } from './remote';
 import { photoPath } from './sync';
@@ -35,7 +36,7 @@ test('real remote stores a vehicle and photo the gallery can read back and other
 
   await remote.upsertVehicle({
     id, galleryId: TESTGALERIE, make: 'Volkswagen', model: 'Passat', bodyType: 'kombi',
-    status: 'shooting', details: {}, createdAt: now, updatedAt: now,
+    status: 'shooting', data: emptyVehicleData(), damage: {}, damageCheckedAt: null, details: {}, createdAt: now, updatedAt: now, factsUpdatedAt: now,
   });
   const file = join(tmpdir(), `photo-${id}.jpg`);
   await writeFile(file, JPEG);
@@ -55,4 +56,31 @@ test('real remote stores a vehicle and photo the gallery can read back and other
 
   const other = createRemote(await signedIn('other@bambu.test'), readLocal);
   expect(await other.fetchVehicles(TESTGALERIE)).toEqual([]);
+});
+
+test('upsertListing then fetchListings returns the row for gallery members only', async () => {
+  const staff = await signedIn('staff@bambu.test');
+  const remote = createRemote(staff, readLocal);
+  const id = crypto.randomUUID();
+  const now = new Date().toISOString();
+  await remote.upsertVehicle({
+    id, galleryId: TESTGALERIE, make: 'Volkswagen', model: 'Passat', bodyType: 'kombi',
+    status: 'draft', data: { ...emptyVehicleData(), fuel: 'diesel', mileageKm: 1000 }, damage: { hood: 'painted' }, damageCheckedAt: now,
+    details: {}, createdAt: now, updatedAt: now, factsUpdatedAt: now,
+  });
+  await remote.upsertListing({
+    id, galleryId: TESTGALERIE, status: 'draft', priceEur: 15000, vatDeductible: true, warrantyMonths: 12, location: 'Berlin',
+    createdAt: now, updatedAt: now, factsUpdatedAt: now,
+  });
+
+  const listing = (await remote.fetchListings(TESTGALERIE)).find((l) => l.id === id);
+  expect(listing).toMatchObject({ priceEur: 15000, vatDeductible: true, location: 'Berlin' });
+  expect(Date.parse(listing!.factsUpdatedAt)).toBeGreaterThan(0); // the server's stamp, never sent by the app
+  expect((await remote.fetchVehicles(TESTGALERIE)).find((v) => v.id === id)).toMatchObject({
+    data: { fuel: 'diesel', mileageKm: 1000, vin: null }, damage: { hood: 'painted' },
+  });
+  await remote.fetchListingTexts(TESTGALERIE);
+
+  const other = createRemote(await signedIn('other@bambu.test'), readLocal);
+  expect(await other.fetchListings(TESTGALERIE)).toEqual([]);
 });
