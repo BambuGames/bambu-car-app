@@ -9,3 +9,5 @@ tools/templates/models/*
 node_modules/
 .gcloud/
 .env.cloud
+.impeccable/
+.superpowers/brainstorm
