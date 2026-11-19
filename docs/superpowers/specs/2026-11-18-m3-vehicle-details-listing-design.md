@@ -34,7 +34,7 @@ M3'ün kendi işinin yanında bir görevi daha var: ilanı sonraki projelerin ü
 - **Hasar şeması:** Aracın üstten çiziminde parçaya dokunup durumu seçilir.
 - **Ekspertiz raporu:**
   - Raporun PDF'i ya da fotoğrafları yüklenir.
-  - Claude alanları önerir; kullanıcı her öneriyi tek tek kabul ya da reddeder.
+  - Yapay zekâ alanları önerir; kullanıcı her öneriyi tek tek kabul ya da reddeder.
   - Kabul edilmeyen hiçbir şey kaydedilmez (spec 8.3).
 - **İlan metni:**
   - Yalnız kayıtlı alanlardan, Almanca (varsayılan), Türkçe ya da İngilizce üretilir.
@@ -54,7 +54,7 @@ M3'ün kendi işinin yanında bir görevi daha var: ilanı sonraki projelerin ü
 **Başarısızlık sayılacaklar** (spec 2.3'ten devralınan ve bu belgeye özgü olanlar)
 - İlan metnine kayıtlı olmayan bir özelliğin, örneğin araçta olmayan bir donanımın yazılması.
 - Rapordan gelen bir önerinin kullanıcı onaylamadan bir alana yazılması.
-- İlan metni üretimi için Claude'a şasi numarasının ya da plakanın gönderilmesi (spec 8.4).
+- İlan metni üretimi için OpenAI'ya şasi numarasının ya da plakanın gönderilmesi (spec 8.4).
 - Bilgi girişinin internetsiz çalışmaması.
 - Teknolojiye uzak bir personelin uzun formda kaybolması:
   - Form bölümlere ayrılır.
@@ -68,14 +68,14 @@ M3'ün kendi işinin yanında bir görevi daha var: ilanı sonraki projelerin ü
   - Telefonda SQLite ve bir giden kutusuyla (outbox) çevrimdışı senkron.
   - Supabase Frankfurt: Postgres, satır bazlı yetki (RLS), Storage, Realtime, Edge Functions.
 - **Arayüz:** Almanca; Türkçe ve İngilizce de var. /no-slop-ui kuralı geçerli.
-- **Claude:**
-  - Anahtar yalnız sunucuda durur. Varsayılan model `claude-opus-5-5` (spec 8.4). Daha ucuz modele geçmek kullanıcının kararıdır (spec 13).
-  - Ekspertiz raporu Claude'a olduğu gibi gider; yükleme ekranında bu söylenir (spec 8.3, 12).
+- **OpenAI:**
+  - Anahtar yalnız sunucuda durur. Varsayılan model `gpt-6.2-sol` (spec 8.4). Daha ucuz modele geçmek kullanıcının kararıdır (spec 13).
+  - Ekspertiz raporu OpenAI'ya olduğu gibi gider; yükleme ekranında bu söylenir (spec 8.3, 12).
 - **Kredi:** Rapor okuma ve ilan metni kredi istemez (spec 9).
-- **Maliyet tahmini** (spec 13): ilan metni üretim başına ~$0,04, rapor başına ~$0,10–0,15.
-- **Veri bölgesi:** Claude'un ilk taraf API'sinde çıkarım bölgesi bugün yalnız `us` ya da `global` olabiliyor, AB seçeneği yok.
-  - Spec 12 Anthropic'i "ABD; veri işleme sözleşmesi, mümkünse AB çıkarım bölgesi" diye kabul ediyor.
-  - Hukuki inceleme AB içinde işlem şart koşarsa, Claude Google Cloud Vertex AI'nin AB bölgesi üzerinden çağrılır. Cloud Run'la aynı Google Cloud projesi kullanılır. Bu, istemci ve kimlik doğrulama değişikliğidir; uygulamanın geri kalanı etkilenmez.
+- **Maliyet tahmini** (spec 13): ilan metni üretim başına ~$0,02, rapor başına ~$0,05–0,075.
+- **Veri bölgesi:** Şimdilik işleme ABD'de; AB'de işleme yapılmaz.
+  - Spec 12 OpenAI'yı "ABD; veri işleme sözleşmesi, AB işleme bölgesi seçenek" diye kabul ediyor.
+  - Hukuki inceleme AB içinde işlem şart koşarsa, `OPENAI_BASE_URL` ile AB işleme bölgesinin adresi tek satırla verilir. Uygulamanın geri kalanı etkilenmez.
 
 ## 4. Yaklaşımlar
 
@@ -139,7 +139,7 @@ Araç bilgilerinin nasıl tutulacağı üç yolla düşünüldü:
 **Depo:** Raporlar için özel `reports` kovası:
 - yol: `{galeri}/{araç}/{okumaKimliği}/{dosya}`,
 - dosya başına 20 MB sınırı,
-- PDF, JPEG, PNG kabul edilir. Claude HEIC okumadığı için iPhone fotoğrafları telefonda JPEG'e çevrilip yüklenir.
+- PDF, JPEG, PNG kabul edilir. OpenAI HEIC okumadığı için iPhone fotoğrafları telefonda JPEG'e çevrilip yüklenir.
 
 **Saklama (kullanıcı kararı, 18 Kasım 2026):** Rapor dosyaları okunduktan sonra silinir.
 - Bir okumanın bütün önerileri kabul ya da reddedilince dosyaları kovadan silinir ve `report_reads.suggestions` boşaltılır.
@@ -204,13 +204,13 @@ Davranış:
 ### 5.6 Ekspertiz raporu okuma
 
 **Akış:**
-1. Kullanıcı "Bericht auslesen" ile bir PDF ya da bir veya birkaç sayfa fotoğrafı seçer. Ekranda raporun işlenmek üzere Anthropic'e (ABD) gönderileceği yazar (spec 8.3).
+1. Kullanıcı "Bericht auslesen" ile bir PDF ya da bir veya birkaç sayfa fotoğrafı seçer. Ekranda raporun işlenmek üzere OpenAI'ya (ABD) gönderileceği yazar (spec 8.3).
 2. Dosyalar `reports` kovasına yüklenir ve `read-report` Edge Function'ı çağrılır.
 3. Fonksiyon:
    - üyeliği ve günlük sınırı kontrol eder,
    - dosyaları indirir,
-   - Claude'a PDF ya da görüntü olarak gönderir,
-   - yapılandırılmış çıktı (JSON şeması) ister.
+   - OpenAI'ya PDF (`input_file`) ya da görüntü (`input_image`) olarak gönderir; dosyalar `detail: 'high'` ile gider,
+   - yapılandırılmış çıktı (JSON şeması) ister; şemada bütün alanlar zorunludur, isteğe bağlı alanlar `null` olabilir.
 4. Şema, 5.1'deki alan adlarıyla aynıdır; hasar parçaları ve donanım kodları da dahildir. Her öneri değerin yanında raporda geçtiği yeri gösteren kısa bir alıntı taşır.
 5. Uygulama önerileri alan alan gösterir: mevcut değer, önerilen değer, alıntı. Kullanıcı her birini kabul ya da reddeder; "hepsini kabul et" yoktur (spec 8.3).
 6. Kabul edilenler normal alan yazımıyla araca geçer.
@@ -218,9 +218,11 @@ Davranış:
 **Sınırlar ve ayarlar:**
 - **Günlük sınır:** Araç başına günde en fazla 10 okuma. Kredi düşmediği için maliyeti bu sınırlar.
 - **Çağrı ayarları:**
-  - Model `claude-opus-5-5`, efor `high` (okuma doğruluğu önemli).
-  - Reddetme durumuna karşı sunucu tarafı yedek açık: `fallbacks: "default"`, beta `server-side-fallback-2026-07-01`.
-  - Ayrıntılar plan ve uygulamada `claude-api` skill'iyle doğrulanır.
+  - Model `gpt-6.2-sol`, efor `high` (okuma doğruluğu önemli), `max_output_tokens: 16000`.
+  - `store: false`: OpenAI cevapları varsayılan olarak saklar; raporda şasi numarası, plaka ve sahip bilgisi olabilir.
+  - Sunucu tarafı yedek model yoktur; reddedilen istek reddedilmiş kalır (`422 ai_refused`).
+  - Cevap tamamlanmadıysa ya da şema tutmazsa `502 ai_failed`.
+  - Ayrıntılar kurulu `openai` paketinin tiplerinden doğrulanır.
 
 ### 5.7 İlan metni
 
@@ -252,28 +254,28 @@ Davranış:
 - **Bayat metin:** Metin üretildikten sonra aracın ya da ilanın bilgileri değiştiyse, karşılaştırma `facts_updated_at` ile `generated_at` arasındadır. `facts_updated_at` yalnız metne giren bilgiler (araçta şasi numarası dışındaki bilgiler, ilanda satış alanları) değişince ilerler; fotoğraf sayısı, durum ve stüdyo ayarları gibi sunucu işleri onu ilerletmez. Bu durumda metnin üstünde "Die Fahrzeugdaten wurden nach dem Erstellen des Textes geändert" notu ve "Neu erstellen" düğmesi görünür. Kopyalama engellenmez; çünkü değişiklik metni geçersiz kılmayabilir.
 
 **Çağrı ayarları:**
-- Model `claude-opus-5-5`, efor `medium`.
-- Sunucu tarafı yedek açık (5.6'daki gibi).
+- Model `gpt-6.2-sol`, efor `medium`, `max_output_tokens: 16000`, `store: false`.
+- Ret `422 ai_refused`, tamamlanmamış cevap `502 ai_failed`; yedek model yok (5.6'daki gibi).
 
 ### 5.8 Sunucu tarafı
 
 - **Edge Functions:** Yeni iki fonksiyon: `read-report` ve `write-listing`. Bugünkü fonksiyonların kalıbıyla yazılır: üyelik kontrolü, hata kodları, Node `node:test` entegrasyon testleri.
-- **SDK:** Claude çağrıları resmi `@anthropic-ai/sdk` ile yapılır.
-- **Anahtar:** `ANTHROPIC_API_KEY` Supabase fonksiyon sırlarında durur; yerelde git-ignored `supabase/functions/.env`'de.
-- **Testler:** Testlerde Claude çağrısı sahte bir istemciyle değiştirilir. Gerçek çağrı yalnız kullanıcı onayıyla yapılır.
+- **SDK:** OpenAI çağrıları resmi `openai` kütüphanesiyle (Responses API) yapılır.
+- **Anahtar:** `OPENAI_API_KEY` Supabase fonksiyon sırlarında durur; yerelde git-ignored `supabase/functions/.env`'de.
+- **Testler:** Testlerde OpenAI çağrısı sahte bir sunucuyla değiştirilir. Gerçek çağrı yalnız kullanıcı onayıyla yapılır.
 
 ## 6. Uygulayıcıya bırakılanlar
 
 - mobile.de değer listelerinin ve donanım kodu alt kümesinin tam içeriği; yaklaşık 60 yaygın donanım. Kaynak mobile.de satıcı API dokümanı.
 - Ekran yerleşimleri ve form alanlarının sırası (/no-slop-ui ile).
 - Hasar çiziminin SVG'si.
-- Claude talimatlarının metni, JSON şemalarının ayrıntısı, bölüm başlıklarının dillere göre karşılıkları.
+- Model talimatlarının metni, JSON şemalarının ayrıntısı, bölüm başlıklarının dillere göre karşılıkları.
 - Presence kanalında kişi adının nereden okunacağı.
 
 ## 7. Bilinen riskler
 
 - **Fotoğraf rapor:** Telefonla çekilmiş, eğik ya da parlayan bir rapor fotoğrafında okuma doğruluğu düşebilir. Her öneri onaydan geçtiği için yanlış veri kaydedilmez ama kullanıcı vakit kaybeder. Pilot verisiyle ölçülür.
-- **Hukuki inceleme:** Raporun ABD'ye gönderilmesini kabul etmeyebilir. Çözüm yolu 3. bölümde (Vertex AI AB bölgesi).
+- **Hukuki inceleme:** Raporun ABD'ye gönderilmesini kabul etmeyebilir. Çözüm yolu 3. bölümde (`OPENAI_BASE_URL` ile AB işleme bölgesi).
 - **Çevrimdışı son yazan kazanır:** İki cihazda çevrimdışı düzenlemede bir cihazın değişiklikleri kaybolabilir (5.3).
 
 ## 8. Uygulayıcı kontrolünden sonra verilen kararlar (18 Kasım 2026)

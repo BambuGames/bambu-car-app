@@ -1,4 +1,4 @@
-// Report reading (design 5.6): Claude reads an uploaded inspection report (a PDF or photos of its pages) and
+// Report reading (design 5.6): OpenAI reads an uploaded inspection report (a PDF or photos of its pages) and
 // suggests field values, damage states and equipment, each with a short quote from the report. Nothing is
 // written to the vehicle here: the dealer accepts or rejects every suggestion in the app.
 //   POST { vehicle_id, read_id, files }   1–10 paths, each reports/{gallery}/{vehicle_id}/{read_id}/{name}
@@ -8,10 +8,10 @@
 // Errors: 400 bad_request, 401 unauthorized, 403 not_member, 422 ai_refused, 429 daily_limit, 502 ai_failed, 500 internal.
 import { encodeBase64 } from 'jsr:@std/encoding@1/base64'
 import { createClient, type SupabaseClient } from 'jsr:@supabase/supabase-js@2'
-import type Anthropic from 'npm:@anthropic-ai/sdk@1.10.0'
+import type OpenAI from 'npm:openai@7.59.0'
 import { z } from 'npm:zod@4.6.7'
 
-import { askJson } from '../_shared/claude.ts'
+import { askJson } from '../_shared/ai.ts'
 import {
   DAMAGE_PARTS, DAMAGE_STATES, type DamagePart, type DamageState, DRIVES, EQUIPMENT, type Equipment, EXTERIOR_COLORS, FUELS,
   INTERIOR_COLORS, TRANSMISSIONS, UPHOLSTERIES, validateVehicleData, type VehicleData,
@@ -23,7 +23,7 @@ const json = (status: number, body: unknown) =>
 const noSession = { persistSession: false, autoRefreshToken: false }
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const DAILY_LIMIT = 10
-const MAX_BYTES = 20 * 1024 * 1024 // all files together; as base64 they stay under the Messages API request limit
+const MAX_BYTES = 20 * 1024 * 1024 // all files together; as base64 they stay well under OpenAI's 50 MB of files per request
 const QUOTE_MAX = 160
 
 type Field = keyof VehicleData | 'make' | 'model'
@@ -32,7 +32,8 @@ type Suggestion =
   | { kind: 'damage'; part: DamagePart; state: DamageState; quote: string }
   | { kind: 'equipment'; code: Equipment; quote: string }
 
-// The schema keeps Claude to the value lists. Every field is optional (19 of the API's 24 optional parameters).
+// The schema keeps the model to the value lists. OpenAI's strict schemas require every field: one the report
+// does not state comes back null.
 const VALUES = {
   make: z.string(), model: z.string(), variant: z.string(),
   firstRegistration: z.string(), mileageKm: z.int(), fuel: z.enum(FUELS), transmission: z.enum(TRANSMISSIONS),
@@ -46,8 +47,8 @@ const FIELDS = Object.keys(VALUES) as Field[]
 const STATES = DAMAGE_STATES.filter((s): s is Exclude<DamageState, 'original'> => s !== 'original')
 
 // A value outside the schema (a slip, or the test fake) parses as "no suggestion" instead of failing the whole
-// read; `.catch` leaves the JSON schema sent to Claude unchanged.
-const lenient = <T extends z.ZodType>(schema: T) => schema.optional().catch(undefined)
+// read; `.catch` leaves the JSON schema sent to OpenAI unchanged (required, null allowed).
+const lenient = <T extends z.ZodType>(schema: T) => schema.nullable().catch(null)
 const quoted = (field: Field) => lenient(z.object({ value: VALUES[field], quote: z.string() }))
 const Report = z.object({
   ...Object.fromEntries(FIELDS.map((field) => [field, quoted(field)])) as Record<Field, ReturnType<typeof quoted>>,
@@ -57,7 +58,7 @@ const Report = z.object({
 
 const SYSTEM = `You read a used car's inspection or appraisal report for a car dealer and suggest values for the vehicle's data. The dealer checks every suggestion before it is saved.
 
-- Suggest only what the report states explicitly. Do not guess, infer or fill in typical values; leave out whatever the report does not state.
+- Suggest only what the report states explicitly. Do not guess, infer or fill in typical values; leave out whatever the report does not state (a field it does not state is null).
 - Give every suggestion a short quote from the report, a few words as written there, that shows where the value appears.
 - The report is often in German. Map what it says to the codes in the schema; leave out anything no code matches.
 - firstRegistration and huUntil (the next general inspection, HU) are months: write them as YYYY-MM-01.
@@ -98,7 +99,7 @@ const BAD_REQUEST: Failure = { status: 400, error: 'bad_request' }
 
 async function read(admin: SupabaseClient, files: string[]): Promise<Suggestion[] | Failure> {
   // One file at a time, so only its raw bytes and the base64 blocks so far are in memory.
-  const content: Anthropic.Beta.BetaContentBlockParam[] = []
+  const content: OpenAI.Responses.ResponseInputContent[] = []
   let total = 0
   for (const path of files) {
     const { data, error } = await admin.storage.from('reports').download(path)
@@ -107,15 +108,17 @@ async function read(admin: SupabaseClient, files: string[]): Promise<Suggestion[
     total += data.size
     if (total > MAX_BYTES) return BAD_REQUEST
     const type = data.type.split(';')[0] // the bucket only takes PDF, JPEG and PNG
+    // detail 'high' throughout: inspection reports carry small print.
     if (type === 'application/pdf') {
-      content.push({ type: 'document', source: { type: 'base64', media_type: type, data: encodeBase64(await data.arrayBuffer()) } })
+      const filename = path.slice(path.lastIndexOf('/') + 1)
+      content.push({ type: 'input_file', detail: 'high', filename, file_data: `data:${type};base64,${encodeBase64(await data.arrayBuffer())}` })
     } else if (type === 'image/jpeg' || type === 'image/png') {
-      content.push({ type: 'image', source: { type: 'base64', media_type: type, data: encodeBase64(await data.arrayBuffer()) } })
+      content.push({ type: 'input_image', detail: 'high', image_url: `data:${type};base64,${encodeBase64(await data.arrayBuffer())}` })
     } else {
       return BAD_REQUEST
     }
   }
-  content.push({ type: 'text', text: "Read the report above and suggest the vehicle's data." })
+  content.push({ type: 'input_text', text: "Read the report above and suggest the vehicle's data." })
   const answer = await askJson({ system: SYSTEM, content, schema: Report, effort: 'high' })
   if (!answer.ok) return { status: answer.error === 'ai_refused' ? 422 : 502, error: answer.error }
   return suggestionsOf(answer.value)
@@ -179,7 +182,7 @@ Deno.serve(async (req) => {
   try {
     result = await read(admin, files)
   } catch (error) {
-    console.error('read-report: reading the report failed', String(error))
+    console.error('read-report: reading the report failed', (error as Error)?.constructor?.name)
     result = { status: 500, error: 'internal' }
   }
   // A read the app closed meanwhile (it gave up waiting) stays closed and empty; that is not an error.

@@ -662,7 +662,7 @@
   },
   "report": {
     "title": "Bericht auslesen",
-    "notice": "Der Bericht wird zur Auswertung an Anthropic (USA) übermittelt. Die Datei wird gelöscht, sobald Sie die Vorschläge geprüft haben, spätestens nach 7 Tagen.",
+    "notice": "Der Bericht wird zur Auswertung an OpenAI (USA) übermittelt. Die Datei wird gelöscht, sobald Sie die Vorschläge geprüft haben, spätestens nach 7 Tagen.",
     "pickPdf": "PDF wählen",
     "pickPhotos": "Fotos wählen",
     "offline": "Zum Auslesen und Abschließen ist eine Internetverbindung nötig.",

@@ -1,13 +1,13 @@
-// Listing text (design 5.7): Claude writes three title options and a sectioned description from the
+// Listing text (design 5.7): OpenAI writes three title options and a sectioned description from the
 // vehicle's stored facts and the listing's sale fields, in one language; commands rework the stored text.
 //   POST { vehicle_id, language, command?, from_language? }
 //     → 200 { listing_id, language, titles, title, description, model, generated_at, edited: false }
-// The text replaces the language's earlier one. The VIN is never read here, so it never reaches Claude.
+// The text replaces the language's earlier one. The VIN is never read here, so it never reaches OpenAI.
 // Errors: 400 bad_request, 401 unauthorized, 403 not_member, 422 ai_refused, 502 ai_failed, 500 internal.
 import { createClient } from 'jsr:@supabase/supabase-js@2'
 import { z } from 'npm:zod@4.6.7'
 
-import { askJson } from '../_shared/claude.ts'
+import { askJson } from '../_shared/ai.ts'
 import { LANGUAGES, type Language } from '../_shared/vehicleData.ts'
 
 const json = (status: number, body: unknown) =>
@@ -104,7 +104,7 @@ Deno.serve(async (req) => {
 
   const answer = await askJson({
     system: system(language),
-    content: [{ type: 'text', text: `Vehicle data (JSON):\n${JSON.stringify(facts)}${current}\n\n${task}` }],
+    content: [{ type: 'input_text', text: `Vehicle data (JSON):\n${JSON.stringify(facts)}${current}\n\n${task}` }],
     schema: Listing,
     effort: 'medium',
   })
@@ -112,8 +112,10 @@ Deno.serve(async (req) => {
 
   const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, { auth: noSession })
   if (!listingRead.data) {
-    // A text needs its listing, and the app may not have saved one yet.
-    const opened = await admin.from('listings').upsert({ id: vehicleId, gallery_id: galleryId }, { onConflict: 'id', ignoreDuplicates: true })
+    // A text needs its listing, and the app may not have saved one yet. Its facts_updated_at is the epoch, not the
+    // database's clock: a text written now must never look older than the empty listing it was written for.
+    const opened = await admin.from('listings')
+      .upsert({ id: vehicleId, gallery_id: galleryId, facts_updated_at: new Date(0).toISOString() }, { onConflict: 'id', ignoreDuplicates: true })
     if (opened.error) {
       console.error('write-listing: opening the listing failed', opened.error)
       return json(500, { error: 'internal' })
@@ -127,7 +129,6 @@ Deno.serve(async (req) => {
     title: titles[0],
     description: sections.map((s) => `## ${s.heading}\n${s.body}`).join('\n\n'),
     model: answer.model,
-    // After the listing exists: its facts_updated_at (set when it was opened) must not look newer than the text.
     generated_at: new Date().toISOString(),
     edited: false,
   }

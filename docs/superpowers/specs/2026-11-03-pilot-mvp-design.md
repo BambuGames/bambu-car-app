@@ -62,7 +62,7 @@ Bu sürümün işi, bu çekirdeği Almanya'daki pilot galeride gerçek stok ara�
 - **Yayıncı:** Mağazalarda geliştirici olarak Bambu Games hesabı görünür **[Karar]**.
 - **Platform:** iOS ve Android, ilk pilot sürümden itibaren birlikte **[Karar]**. Personel hangi telefonu kullanıyorsa onunla çeker; bu yüzden ultra geniş kamerası olmayan ve düşük segment telefonlar da desteklenir **[Öneri]**.
 - **Çekim ortamı:** Kontrol edilmez, sabit bir çekim alanı yoktur **[Karar]** (bkz. 1).
-- **Hesaplar:** Supabase, Google Cloud, Photoroom, Anthropic, Sentry ve Expo hesaplarını kullanıcı Bambu Games adına açar.
+- **Hesaplar:** Supabase, Google Cloud, Photoroom, OpenAI, Sentry ve Expo hesaplarını kullanıcı Bambu Games adına açar.
 - **Veri:** Türkiye'de tutma şartı yok **[Karar]**. Pilot AB'de olduğu için GDPR geçerli ve veriler AB'de tutulur **[Öneri]**.
 - **Bütçe:** Belirlenmedi, maliyet araştırmayla netleşecek **[Karar]**. Tahmin bölüm 13'te.
 - **Marka:** Henüz yok, çalışma adı bambu-car-app **[Karar]**. Mağaza kimliği (bundle ID) yayından sonra değiştirilemediği için markadan bağımsız seçilir, örneğin `com.bambugames.carapp`. Görünen ad ve ikon marka kesinleşince değişir **[Öneri]**.
@@ -204,17 +204,17 @@ Kaporta şemasında parçaya dokunulup durumu seçilir: orijinal, boyalı, lokal
 
 ### 8.3 Ekspertiz raporu (doküman 2.2)
 
-PDF veya fotoğraf yüklenir. Claude alanları doldurmayı önerir, kullanıcı tek tek onaylar. Onaylanmayan bilgi kaydedilmez.
+PDF veya fotoğraf yüklenir. Yapay zekâ alanları doldurmayı önerir, kullanıcı tek tek onaylar. Onaylanmayan bilgi kaydedilmez.
 
-Rapor Claude'a olduğu gibi gönderilir. Alman ekspertiz raporlarında (TÜV/HU, DEKRA, GTÜ) şasi numarası ve plaka yazdığı için 8.4'teki kural rapor okumayı kapsamaz. Yükleme ekranında raporun işlenmek üzere gönderileceği söylenir **[Öneri]**.
+Rapor OpenAI'ya olduğu gibi gönderilir. Alman ekspertiz raporlarında (TÜV/HU, DEKRA, GTÜ) şasi numarası ve plaka yazdığı için 8.4'teki kural rapor okumayı kapsamaz. Yükleme ekranında raporun işlenmek üzere gönderileceği söylenir **[Öneri]**.
 
 ### 8.4 İlan metni (doküman 6)
 
-- Claude API kullanılır, varsayılan model `claude-opus-5-5` **[Öneri]**. Daha ucuz bir modele geçmek kullanıcının kararıdır (bkz. bölüm 13).
+- OpenAI Responses API kullanılır, varsayılan model `gpt-6.2-sol` **[Öneri]**. Her istekte `store: false` gönderilir; OpenAI varsayılan olarak cevapları saklar, raporlarda şasi numarası ve plaka olabilir **[Öneri]**. Daha ucuz bir modele geçmek kullanıcının kararıdır (bkz. bölüm 13).
 - Sadece kayıtlı ve onaylı alanlar kullanılır; araçta olmayan donanım yazılmaz.
 - Birkaç başlık alternatifi ve bölümlere ayrılmış bir açıklama üretilir. Dil seçilebilir: Almanca (varsayılan), Türkçe, İngilizce.
 - Hazır komutlar: kısalt, daha profesyonel yaz, donanımı öne çıkar, sadeleştir, çevir.
-- İlan metni üretilirken şasi numarası ve plaka Claude'a gönderilmez **[Öneri]**.
+- İlan metni üretilirken şasi numarası ve plaka OpenAI'ya gönderilmez **[Öneri]**.
 - Metin kopyalanarak kullanılır; herhangi bir siteye entegrasyon yoktur.
 
 ## 9. Kredi sistemi
@@ -245,7 +245,7 @@ Rapor Claude'a olduğu gibi gönderilir. Alman ekspertiz raporlarında (TÜV/HU,
 | Mobil uygulama | React Native + Expo (dev build), TypeScript, Expo Router | Kamera: react-native-vision-camera; cihaz üstü model: react-native-fast-tflite; çizim: react-native-skia; sensörler: expo-sensors; yerel veri: expo-sqlite; diller: i18next (DE/TR/EN) |
 | Backend | Supabase (Frankfurt) | Postgres ve satır bazlı yetki (galeri izolasyonu), Auth, Storage, Realtime, Edge Functions (TypeScript) |
 | Görüntü işleme servisi | Python (OpenCV, Pillow), Docker, Google Cloud Run (Frankfurt) | Sıfıra ölçeklenir, kullandıkça ödenir. Eşdeğer seçenek: Fly.io Frankfurt |
-| Dış servisler | Photoroom Remove Background API, Anthropic Claude API | Anahtarlar sadece sunucu tarafında tutulur |
+| Dış servisler | Photoroom Remove Background API, OpenAI API | Anahtarlar sadece sunucu tarafında tutulur |
 | Yönetim | Supabase paneli ve birkaç SQL fonksiyonu (galeri açma, kredi yükleme, iade) | Web admin paneli (Next.js), ikinci galeri veya paket satışı gündeme gelince yapılır |
 | Hata takibi | Sentry (AB veri bölgesi) | Mobil uygulama ve işleme servisi |
 | Derleme ve dağıtım | EAS Build (veya yerel derleme), EAS Update (OTA) | Pilot TestFlight ve Google Play kapalı test kanalıyla dağıtılır; genel mağaza yayını pilot sonrası |
@@ -289,8 +289,8 @@ Bu bölüm hukuki görüş değildir; yayından önce bir uzmanla kontrol edilme
 
 - Veriler AB'de tutulur: Supabase ve Cloud Run Frankfurt'ta.
 - Galeriyle bir veri işleme sözleşmesi (AVV) yapılır. Bambu Games adına uygulama içinde ve mağaza sayfasında gizlilik metni (Datenschutzerklärung) ve künye (Impressum) bulunur.
-- Alt işleyenler: Supabase, Google Cloud, Photoroom (Fransa), Anthropic (ABD; veri işleme sözleşmesi, mümkünse AB çıkarım bölgesi), Sentry (AB bölgesi).
-- Plaka otomatik bulunduysa Photoroom'a kapatılmış olarak gider (en iyi çaba, bkz. 7.2). İlan metni üretiminde Claude'a şasi numarası ve plaka gitmez; ekspertiz raporları ise olduğu gibi gönderilir (bkz. 8.3).
+- Alt işleyenler: Supabase, Google Cloud, Photoroom (Fransa), OpenAI (ABD; veri işleme sözleşmesi, AB işleme bölgesi seçenek), Sentry (AB bölgesi).
+- Plaka otomatik bulunduysa Photoroom'a kapatılmış olarak gider (en iyi çaba, bkz. 7.2). İlan metni üretiminde OpenAI'ya şasi numarası ve plaka gitmez; ekspertiz raporları ise olduğu gibi gönderilir (bkz. 8.3).
 - Galeri fotoğraflarının model eğitiminde kullanılması sözleşmede ayrıca izin gerektirir.
 - AB'de App Store yayını için Bambu Games'in satıcı (trader) bilgisinin App Store Connect'te tanımlı olması gerekir.
 
@@ -301,15 +301,15 @@ Fiyatlar liste fiyatlarıdır; hesap açarken doğrulanmalıdır.
 | Kalem | Birim fiyat | Araç başı | Ayda 100 araç |
 |---|---|---|---|
 | Photoroom maske | $0.02 / görsel | ~$0.20 (8–10 dış fotoğraf) | ~$20 |
-| Claude, ilan metni (Opus 5.5: girdi $4, çıktı $20 / milyon token) | üretim başına ~$0.04 | ~$0.15 (3–4 üretim ve düzenleme) | ~$15 |
-| Claude, ekspertiz raporu | rapor başına ~$0.10–0.15 (10 sayfa varsayımı) | ~$0.13 | ~$13 |
+| OpenAI, ilan metni (gpt-6.2-sol: girdi $2, çıktı $10 / milyon token) | üretim başına ~$0.02 | ~$0.07 (3–4 üretim ve düzenleme) | ~$7 |
+| OpenAI, ekspertiz raporu | rapor başına ~$0.05–0.075 (10 sayfa varsayımı) | ~$0.065 | ~$7 |
 | Supabase Pro | $25 / ay | — | $25 |
 | Cloud Run | kullandıkça | çok düşük | birkaç dolar |
 | Sentry, EAS | ücretsiz katman | — | $0 |
-| **Toplam** | | **~$0.50** | **~$75–80** |
+| **Toplam** | | **~$0.35** | **~$60–65** |
 
 - Kendi maske modelimize (BiRefNet, MIT lisanslı) geçilirse maske maliyeti görsel başı 1 cent'in altına iner. GPU barındırma hesabı hacim büyüyünce yapılır.
-- Claude tarafında Sonnet 5.5 (girdi $2, çıktı $10) maliyeti yarıya indirir, Haiku 5.5 (girdi $0.10, çıktı $0.50) çok daha fazla düşürür. Kaliteyi karşılaştırıp karar vermek kullanıcıya aittir.
+- Düşünme (reasoning) tokenları çıktı olarak faturalanır; efor yükselirse rapor maliyeti yukarıdaki tahminin üstüne çıkabilir. Daha ucuz bir modele geçmek kaliteyi karşılaştırdıktan sonra kullanıcının kararıdır.
 - Photoroom'un $0.10'luk düzenleme paketi (AI arka plan, AI gölge, yeniden ışıklandırma) kullanılmaz: 5 kat pahalıdır ve aracı yeniden üretme riski taşır.
 - remove.bg elendi: görsel başı $0.11–0.23 tutuyor ve kapanacağına dair doğrulanmamış haberler var.
 
@@ -356,4 +356,4 @@ Dokümanda hasar ve ekspertiz bilgileri Faz 1'deydi. Galeri fotoğrafları daha 
 - Supabase faturalandırma: https://supabase.com/docs/guides/platform/billing-on-supabase
 - fal.ai arka plan API karşılaştırması (BiRefNet fiyatı): https://fal.ai/learn/tools/best-background-remover-apis-2026
 - remove.bg fiyat ve durum: https://www.banuba.com/blog/best-background-removal-apis-developer-comparison, https://saascrmreview.com/remove-bg-review/
-- Claude model fiyatları: Anthropic API referansı (2026-10-06 tarihli fiyat tablosu)
+- OpenAI model fiyatları: developers.openai.com/api/docs/pricing (18 Kasım 2026)

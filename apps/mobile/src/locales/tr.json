@@ -662,7 +662,7 @@
   },
   "report": {
     "title": "Raporu oku",
-    "notice": "Rapor değerlendirilmek üzere Anthropic'e (ABD) iletilir. Önerileri inceleyip bitirdiğinizde dosya silinir, en geç 7 gün sonra.",
+    "notice": "Rapor değerlendirilmek üzere OpenAI'a (ABD) iletilir. Önerileri inceleyip bitirdiğinizde dosya silinir, en geç 7 gün sonra.",
     "pickPdf": "PDF seç",
     "pickPhotos": "Fotoğraf seç",
     "offline": "Okumak ve bitirmek için internet bağlantısı gerekir.",

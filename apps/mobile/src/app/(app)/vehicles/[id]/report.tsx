@@ -24,7 +24,7 @@ type Read = { id: string; paths: string[]; suggestions: Suggestion[] };
 type Stage = 'idle' | 'uploading' | 'reading' | 'finishing';
 type Problem = ReportError | 'tooLarge' | 'unreadable' | 'closeFailed';
 
-// Claude can repeat a part or a code; the first one counts.
+// The model can repeat a part or a code; the first one counts.
 function unique(list: Suggestion[]): Suggestion[] {
   const seen = new Set<string>();
   return list.filter((s) => {

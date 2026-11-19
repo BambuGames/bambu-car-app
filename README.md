@@ -43,15 +43,16 @@ cd apps/mobile && npx tsc --noEmit && npx jest
 
 `supabase start`, Edge Function'ları yalnızca açılışta bulur. Yeni bir fonksiyondan sonra `npx supabase stop && npx supabase start` çalıştırın. Fonksiyonu düzenlerken `npx supabase functions serve` de iş görür.
 
-### Claude
+### OpenAI
 
-- `write-listing` (ilan metni) Claude'u resmi `@anthropic-ai/sdk` ile çağırır; ortak kod `supabase/functions/_shared/claude.ts`. Model `claude-opus-5-5`; Claude reddederse sunucu tarafı yedek model dener.
-- **Yerelde gerçek Claude çağrılmaz.**
-  - `supabase/functions/.env`'de `ANTHROPIC_API_KEY=test-key` ve `ANTHROPIC_BASE_URL=http://host.docker.internal:8091` durur.
-  - `npm run test:int` 8091 portunda sahte bir Messages API açar (`supabase/tests/integration/fakeClaude.ts`); port o sırada boş olmalı.
+- `write-listing` (ilan metni) ve `read-report` (rapor okuma) OpenAI Responses API'yi resmi `openai` kütüphanesiyle çağırır; ortak kod `supabase/functions/_shared/ai.ts`. Model `gpt-6.2-sol`; yapılandırılmış çıktı ve her istekte `store: false`. Yedek model yoktur: reddedilen istek `422 ai_refused` döner.
+- **Yerelde gerçek OpenAI çağrılmaz.**
+  - `supabase/functions/.env`'de `OPENAI_BASE_URL=http://host.docker.internal:8091/v1` durur.
+  - `npm run test:int` 8091 portunda sahte bir Responses API açar (`supabase/tests/integration/fakeOpenAI.ts`); port o sırada boş olmalı.
   - `.env` değişince `npx supabase stop`, ardından `npm run db:start`.
 - **Bulutta:**
-  - Anthropic hesabını ve anahtarını kullanıcı açar. Anahtarı fonksiyon sırrı olarak kendisi girer: `npx supabase secrets set ANTHROPIC_API_KEY=…`. `ANTHROPIC_BASE_URL` bulutta tanımlanmaz.
+  - Anahtarı fonksiyon sırrı olarak kullanıcı kendisi, onayıyla girer: `npx supabase secrets set OPENAI_API_KEY=…`.
+  - `OPENAI_BASE_URL` bulutta boş kalır (kütüphanenin varsayılanı). AB'de işleme gerekirse `https://eu.api.openai.com/v1` yazılabilir.
   - Buluta sır, migration ya da fonksiyon gönderimi yalnız kullanıcının onayıyla yapılır.
 - Anahtar git'e girmez ve yazdırılmaz. Şasi numarası ilan metni isteğine hiç girmez.
 

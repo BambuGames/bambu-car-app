@@ -662,7 +662,7 @@
   },
   "report": {
     "title": "Read report",
-    "notice": "The report is sent to Anthropic (USA) for evaluation. The file is deleted once you have reviewed the suggestions, after 7 days at the latest.",
+    "notice": "The report is sent to OpenAI (USA) for evaluation. The file is deleted once you have reviewed the suggestions, after 7 days at the latest.",
     "pickPdf": "Choose PDF",
     "pickPhotos": "Choose photos",
     "offline": "Reading and finishing need an internet connection.",

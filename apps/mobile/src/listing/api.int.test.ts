@@ -1,4 +1,4 @@
-// Runs against the local Supabase stack (`npm run test:int:mobile` from the repo root). A fake Claude API
+// Runs against the local Supabase stack (`npm run test:int:mobile` from the repo root). A fake OpenAI API
 // listens on 8091; the local write-listing function reaches it as host.docker.internal:8091.
 import { createServer, type Server } from 'node:http';
 
@@ -14,30 +14,29 @@ const noSession = { auth: { persistSession: false, autoRefreshToken: false } };
 const service = () => createClient<Database>(process.env.API_URL!, process.env.SERVICE_ROLE_KEY!, noSession);
 
 let refuse = false;
-let claude: Server;
+let openai: Server;
 beforeAll(
   () =>
     new Promise<void>((resolve) => {
-      claude = createServer((req, res) => {
+      openai = createServer((req, res) => {
         req.resume();
         req.on('end', () => {
-          if (req.method !== 'POST' || !req.url?.startsWith('/v1/messages')) return void res.writeHead(404).end();
-          const common = { id: 'msg_fake', type: 'message', role: 'assistant', model: 'claude-opus-5-5', stop_sequence: null, usage: { input_tokens: 1, output_tokens: 1 } };
-          const body = refuse
-            ? { ...common, content: [], stop_reason: 'refusal', stop_details: { type: 'refusal', category: null, explanation: null } }
-            : {
-                ...common,
-                content: [{ type: 'text', text: JSON.stringify({ titles: ['Golf 1.5 TSI', 'VW Golf, gepflegt', 'Golf mit Sitzheizung'], sections: [{ heading: 'Zusammenfassung', body: 'Ein gepflegter Golf.' }] }) }],
-                stop_reason: 'end_turn',
-                stop_details: null,
-              };
+          if (req.method !== 'POST' || req.url?.split('?')[0] !== '/v1/responses') return void res.writeHead(404).end();
+          const text = JSON.stringify({ titles: ['Golf 1.5 TSI', 'VW Golf, gepflegt', 'Golf mit Sitzheizung'], sections: [{ heading: 'Zusammenfassung', body: 'Ein gepflegter Golf.' }] });
+          const content = refuse ? { type: 'refusal', refusal: "I'm sorry, I can't help with that." } : { type: 'output_text', text, annotations: [] };
+          const body = {
+            id: 'resp_fake', object: 'response', created_at: Math.floor(Date.now() / 1000), status: 'completed', incomplete_details: null, error: null,
+            model: 'gpt-6.2-sol', output: [{ id: 'msg_fake', type: 'message', role: 'assistant', status: 'completed', content: [content] }],
+            instructions: null, metadata: {}, parallel_tool_calls: true, temperature: 1, tool_choice: 'auto', tools: [], top_p: 1,
+            usage: { input_tokens: 1, output_tokens: 1, total_tokens: 2 },
+          };
           res.writeHead(200, { 'Content-Type': 'application/json' }).end(JSON.stringify(body));
         });
       });
-      claude.listen(8091, '127.0.0.1', resolve);
+      openai.listen(8091, '127.0.0.1', resolve);
     }),
 );
-afterAll(() => new Promise<void>((resolve) => claude.close(() => resolve())));
+afterAll(() => new Promise<void>((resolve) => openai.close(() => resolve())));
 
 async function signedIn(email: string) {
   const client = createClient<Database>(process.env.API_URL!, process.env.ANON_KEY!, noSession);

@@ -1,11 +1,11 @@
-// read-report (design 5.6): reads an uploaded vehicle report with Claude and suggests field values, damage
-// states and equipment, each with a quote from the report. A fake Messages API listens on 8091 (fakeClaude.ts)
+// read-report (design 5.6): reads an uploaded vehicle report with OpenAI and suggests field values, damage
+// states and equipment, each with a quote from the report. A fake Responses API listens on 8091 (fakeOpenAI.ts)
 // and records what the function sends.
 import assert from 'node:assert/strict'
 import { after, before, beforeEach, test } from 'node:test'
 
 import { FUELS } from '../../functions/_shared/vehicleData.ts'
-import { claudeRequests, replyNext, resetFakeClaude, startFakeClaude, stopFakeClaude } from './fakeClaude.ts'
+import { openaiRequests, replyNext, resetFakeOpenAI, startFakeOpenAI, stopFakeOpenAI } from './fakeOpenAI.ts'
 import { anonClient, env, serviceClient } from './helpers.ts'
 
 const TESTGALERIE = 'e0000000-0000-0000-0000-000000000001'
@@ -14,11 +14,11 @@ const PDF = Buffer.from('%PDF-1.4\n% Gutachten\n%%EOF\n')
 const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGP4z8AAAAMBAQDJ/pLvAAAAAElFTkSuQmCC', 'base64')
 const uploaded: string[] = []
 
-before(startFakeClaude)
-beforeEach(resetFakeClaude)
+before(startFakeOpenAI)
+beforeEach(resetFakeOpenAI)
 after(async () => {
   if (uploaded.length) assert.equal((await serviceClient().storage.from('reports').remove(uploaded)).error, null)
-  await stopFakeClaude()
+  await stopFakeOpenAI()
 })
 
 async function signIn(email: string): Promise<string> {
@@ -51,7 +51,7 @@ const readReport = (token: string, body: unknown) =>
 const readRow = async (id: string) =>
   (await serviceClient().from('report_reads').select('gallery_id, vehicle_id, files, status, error, suggestions').eq('id', id).maybeSingle()).data
 
-test('read-report sends the PDF as a document and returns suggestions', async () => {
+test('read-report sends the PDF as an input file and returns suggestions', async () => {
   const owner = await signIn('owner@bambu.test')
   const id = await vehicle()
   const readId = crypto.randomUUID()
@@ -79,27 +79,65 @@ test('read-report sends the PDF as a document and returns suggestions', async ()
   assert.deepEqual(await res.json(), { read_id: readId, suggestions })
   assert.deepEqual(await readRow(readId), { gallery_id: TESTGALERIE, vehicle_id: id, files, status: 'done', error: null, suggestions })
 
-  assert.equal(claudeRequests.length, 1)
-  const [sent] = claudeRequests
-  assert.match(String(sent.headers['anthropic-beta']), /server-side-fallback-2026-07-01/)
-  const request = JSON.parse(sent.body)
-  assert.equal(request.model, 'claude-opus-5-5')
-  assert.equal(request.max_tokens, 16000)
-  assert.equal(request.thinking, undefined)
-  assert.equal(request.fallbacks, 'default')
-  assert.equal(request.output_config.effort, 'high')
-  assert.equal(request.output_config.format.type, 'json_schema')
-  assert.deepEqual(request.output_config.format.schema.properties.fuel.properties.value.enum, FUELS)
-  const [document, image, text] = request.messages[0].content
-  assert.deepEqual(document, { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: PDF.toString('base64') } })
-  assert.deepEqual(image, { type: 'image', source: { type: 'base64', media_type: 'image/png', data: PNG.toString('base64') } })
-  assert.equal(text.type, 'text')
+  assert.equal(openaiRequests.length, 1)
+  const request = JSON.parse(openaiRequests[0].body)
+  assert.equal(request.model, 'gpt-6.2-sol')
+  assert.equal(request.reasoning.effort, 'high')
+  assert.equal(request.max_output_tokens, 16000)
+  assert.equal(request.store, false)
+  assert.equal(request.text.format.type, 'json_schema')
+  assert.deepEqual(request.text.format.schema.properties.fuel.anyOf[0].properties.value.enum, FUELS)
+  assert.match(request.instructions, /inspection or appraisal report/)
+  assert.equal(request.input.length, 1)
+  assert.equal(request.input[0].role, 'user')
+  const [file, image, text] = request.input[0].content
+  assert.deepEqual(file, { type: 'input_file', detail: 'high', filename: 'gutachten.pdf', file_data: `data:application/pdf;base64,${PDF.toString('base64')}` })
+  assert.deepEqual(image, { type: 'input_image', detail: 'high', image_url: `data:image/png;base64,${PNG.toString('base64')}` })
+  assert.equal(text.type, 'input_text')
 
   // A second call with the same read id does not overwrite the read.
   const again = await readReport(owner, { vehicle_id: id, read_id: readId, files })
   assert.deepEqual({ status: again.status, body: await again.json() }, { status: 400, body: { error: 'bad_request' } })
   assert.equal((await readRow(readId))?.status, 'done')
-  assert.equal(claudeRequests.length, 1)
+  assert.equal(openaiRequests.length, 1)
+})
+
+test('null fields give no suggestion', async () => {
+  const owner = await signIn('owner@bambu.test')
+  const id = await vehicle()
+  const readId = crypto.randomUUID()
+  const file = await upload(`${TESTGALERIE}/${id}/${readId}/gutachten.pdf`, PDF, 'application/pdf')
+  // What the model answers for what the report does not state: every field is there, the missing ones null.
+  replyNext({ output: { fuel: null, mileageKm: { value: 87000, quote: 'km 87.000' }, vin: null, damage: [], equipment: [] } })
+  const res = await readReport(owner, { vehicle_id: id, read_id: readId, files: [file] })
+  assert.equal(res.status, 200)
+  assert.deepEqual((await res.json()).suggestions, [{ kind: 'field', field: 'mileageKm', value: 87000, quote: 'km 87.000' }])
+  assert.equal(openaiRequests.length, 1)
+})
+
+test('the schema sent marks every field required', async () => {
+  const owner = await signIn('owner@bambu.test')
+  const id = await vehicle()
+  const readId = crypto.randomUUID()
+  const file = await upload(`${TESTGALERIE}/${id}/${readId}/gutachten.pdf`, PDF, 'application/pdf')
+  replyNext({ output: { damage: [], equipment: [] } })
+  assert.equal((await readReport(owner, { vehicle_id: id, read_id: readId, files: [file] })).status, 200)
+
+  assert.equal(openaiRequests.length, 1)
+  const { format } = JSON.parse(openaiRequests[0].body).text
+  assert.equal(format.strict, true)
+  const objects: { path: string; properties: string[]; required: string[] }[] = []
+  const walk = (node: unknown, path: string) => {
+    if (!node || typeof node !== 'object') return
+    const { properties, required } = node as { properties?: object; required?: string[] }
+    if (properties) objects.push({ path, properties: Object.keys(properties), required: required ?? [] })
+    for (const [key, child] of Object.entries(node)) walk(child, `${path}/${key}`)
+  }
+  walk(format.schema, '#')
+  assert.ok(objects.length > 20, 'the fields, damage and equipment objects are all found')
+  for (const { path, properties, required } of objects) {
+    assert.deepEqual({ path, missing: properties.filter((key) => !required.includes(key)) }, { path, missing: [] })
+  }
 })
 
 test('read-report drops suggestions outside the value lists', async () => {
@@ -136,6 +174,7 @@ test('read-report drops suggestions outside the value lists', async () => {
   assert.deepEqual(await read({ fuel: { value: 'diesel', quote: 'Kraftstoff: Diesel' }, damage: [], equipment: [] }), [
     { kind: 'field', field: 'fuel', value: 'diesel', quote: 'Kraftstoff: Diesel' },
   ])
+  assert.equal(openaiRequests.length, 2)
 })
 
 test('the eleventh read in a day answers 429 daily_limit', async () => {
@@ -159,7 +198,7 @@ test('the eleventh read in a day answers 429 daily_limit', async () => {
 
   const { count } = await serviceClient().from('report_reads').select('id', { count: 'exact', head: true }).eq('vehicle_id', id)
   assert.equal(count, 11)
-  assert.equal(claudeRequests.length, 0)
+  assert.equal(openaiRequests.length, 0)
 })
 
 test("a path outside the vehicle's folder answers 400", async () => {
@@ -182,7 +221,7 @@ test("a path outside the vehicle's folder answers 400", async () => {
     assert.deepEqual({ files, status: res.status, body: await res.json() }, { files, status: 400, body: { error: 'bad_request' } })
   }
   assert.equal(await readRow(readId), null)
-  assert.equal(claudeRequests.length, 0)
+  assert.equal(openaiRequests.length, 0)
 })
 
 test('a member of another gallery gets 403', async () => {
@@ -194,10 +233,10 @@ test('a member of another gallery gets 403', async () => {
   assert.equal(res.status, 403)
   assert.deepEqual(await res.json(), { error: 'not_member' })
   assert.equal(await readRow(readId), null)
-  assert.equal(claudeRequests.length, 0)
+  assert.equal(openaiRequests.length, 0)
 })
 
-test('files over 20 MB together answer 400 before Claude is asked', async () => {
+test('files over 20 MB together answer 400 before OpenAI is asked', async () => {
   const owner = await signIn('owner@bambu.test')
   const id = await vehicle()
   const readId = crypto.randomUUID()
@@ -210,7 +249,7 @@ test('files over 20 MB together answer 400 before Claude is asked', async () => 
   assert.equal(res.status, 400)
   assert.deepEqual(await res.json(), { error: 'bad_request' })
   assert.equal((await readRow(readId))?.status, 'failed')
-  assert.equal(claudeRequests.length, 0)
+  assert.equal(openaiRequests.length, 0)
 })
 
 test('a refusal answers 422 ai_refused and marks the read failed', async () => {
@@ -226,7 +265,22 @@ test('a refusal answers 422 ai_refused and marks the read failed', async () => {
   assert.deepEqual([row?.status, row?.error, row?.suggestions], ['failed', 'ai_refused', null])
 })
 
-test('a read the app closed while Claude was still reading keeps no suggestions', async () => {
+test('an incomplete answer answers 502 ai_failed', async () => {
+  const owner = await signIn('owner@bambu.test')
+  const id = await vehicle()
+  const readId = crypto.randomUUID()
+  const file = await upload(`${TESTGALERIE}/${id}/${readId}/gutachten.pdf`, PDF, 'application/pdf')
+  // Cut off, even though the text so far would parse.
+  replyNext({ incomplete: true, output: { mileageKm: { value: 87000, quote: 'km-Stand 87.000' }, damage: [], equipment: [] } })
+  const res = await readReport(owner, { vehicle_id: id, read_id: readId, files: [file] })
+  assert.equal(res.status, 502)
+  assert.deepEqual(await res.json(), { error: 'ai_failed' })
+  assert.equal(openaiRequests.length, 1)
+  const row = await readRow(readId)
+  assert.deepEqual([row?.status, row?.error, row?.suggestions], ['failed', 'ai_failed', null])
+})
+
+test('a read the app closed while the model was still reading keeps no suggestions', async () => {
   const owner = await signIn('owner@bambu.test')
   const id = await vehicle()
   const readId = crypto.randomUUID()
@@ -242,6 +296,7 @@ test('a read the app closed while Claude was still reading keeps no suggestions'
   })
   const res = await readReport(owner, { vehicle_id: id, read_id: readId, files: [file] })
   assert.equal(res.status, 200) // not an error: the caller has gone, there is nothing to tell it
+  assert.equal(openaiRequests.length, 1)
   const { data: row } = await serviceClient().from('report_reads').select('suggestions, closed_at').eq('id', readId).single()
   assert.equal(row?.suggestions, null)
   assert.notEqual(row?.closed_at, null)
