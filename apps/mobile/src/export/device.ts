@@ -8,13 +8,13 @@ import { studioApi } from '../studio/useStudio';
 import type { ExportItem } from './plan';
 import type { SaveDeps } from './save';
 
-async function signedUrl(bucket: ExportItem['bucket'], path: string): Promise<string> {
+export async function signedUrl(bucket: ExportItem['bucket'], path: string): Promise<string> {
   const url = (await studioApi.signedUrls(bucket, [path]))[path];
   if (!url) throw new Error('no_signed_url');
   return url;
 }
 
-async function toCache(url: string, name: string): Promise<string> {
+export async function toCache(url: string, name: string): Promise<string> {
   return (await File.downloadFileAsync(url, new File(Paths.cache, name), { idempotent: true })).uri;
 }
 

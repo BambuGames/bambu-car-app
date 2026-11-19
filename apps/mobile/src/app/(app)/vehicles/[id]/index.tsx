@@ -111,6 +111,13 @@ export default function VehicleScreen() {
       >
         <Text style={styles.slot}>{t('report.title')}</Text>
       </Pressable>
+      <Pressable
+        accessibilityRole="button"
+        onPress={() => router.push({ pathname: '/vehicles/[id]/share', params: { id: vehicle.id } })}
+        style={({ pressed }) => [styles.row, pressed && styles.pressed]}
+      >
+        <Text style={styles.slot}>{t('share.title')}</Text>
+      </Pressable>
       {SECTIONS.map((section) => (
         <View key={section.key} style={styles.section}>
           <Text style={styles.sectionTitle} accessibilityRole="header">

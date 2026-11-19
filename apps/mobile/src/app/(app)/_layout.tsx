@@ -69,6 +69,7 @@ export default function AppLayout() {
         <Stack.Screen name="vehicles/[id]/damage" options={{ title: t('damage.title') }} />
         <Stack.Screen name="vehicles/[id]/listing" options={{ title: t('listing.title') }} />
         <Stack.Screen name="vehicles/[id]/report" options={{ title: t('report.title') }} />
+        <Stack.Screen name="vehicles/[id]/share" options={{ title: t('share.title') }} />
         <Stack.Screen name="vehicles/[id]/export" options={{ title: t('export.title') }} />
         <Stack.Screen name="account" options={{ title: t('account.title') }} />
         {/* The owner's screens (design 9); staff who open one by address land on the account screen. */}
