@@ -367,7 +367,14 @@
     "backgroundHint": "New vehicles start with this studio.",
     "applies": "Used for new processing. Render already processed vehicles again in the studio.",
     "saveFailed": "The change was not saved. Please check the internet connection.",
-    "uploadFailed": "The picture could not be uploaded. Please try again."
+    "uploadFailed": "The picture could not be uploaded. Please try again.",
+    "contact": "Contact",
+    "phone": "Phone",
+    "whatsapp": "WhatsApp",
+    "contactHint": "Shown on the sales poster.",
+    "phoneInvalid": "Invalid number. Use digits, spaces and + - / ( ), at least 6 digits.",
+    "contactOwnerOnly": "Only the gallery's manager can change the numbers.",
+    "contactSaved": "Saved."
   },
   "members": {
     "title": "Staff",
@@ -693,5 +700,30 @@
       "closeFailed": "The data was applied, but the file could not be deleted. Tap Finish once more."
     },
     "takePhotos": "Take photos"
+  },
+  "share": {
+    "poster": {
+      "priceOnRequest": "Price on request",
+      "vatDeductible": "VAT deductible",
+      "warranty": "{{months}} months warranty"
+    },
+    "title": "Share",
+    "send": "Share",
+    "language": "Language",
+    "size": "Size",
+    "photo": "Choose photo",
+    "more": "More photos",
+    "noText": "Create listing text",
+    "copyText": "Copy text (mobile.de)",
+    "copied": "Text copied to the clipboard",
+    "noPhotos": "Edit photos in the studio first",
+    "preparing": "Preparing the post.",
+    "posterLabel": "Poster preview: {{title}}",
+    "failed": "The poster could not be created. Please try again.",
+    "shareFailed": "Sharing did not work. Please try again.",
+    "plateNoBanner": "The gallery has no plate banner. Plates stay visible in the post.",
+    "plateCheck": "The plate is not checked on a chosen photo. It may be visible in the post.",
+    "plateCheckAction": "Check plates",
+    "bannerAction": "Gallery settings"
   }
 }

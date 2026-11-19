@@ -71,14 +71,14 @@ isOneToOne: false
                   ]
                 },"galleries": {
                   Row: {
-                    "banner_path": string | null,"created_at": string,"default_background_id": string | null,"id": string,"logo_path": string | null,"name": string,"watermark": NonNullable<Json>
+                    "banner_path": string | null,"created_at": string,"default_background_id": string | null,"id": string,"logo_path": string | null,"name": string,"phone": string | null,"watermark": NonNullable<Json>,"whatsapp": string | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "banner_path"?: string | null,"created_at"?: string,"default_background_id"?: string | null,"id"?: string,"logo_path"?: string | null,"name": string,"watermark"?: NonNullable<Json>
+                    "banner_path"?: string | null,"created_at"?: string,"default_background_id"?: string | null,"id"?: string,"logo_path"?: string | null,"name": string,"phone"?: string | null,"watermark"?: NonNullable<Json>,"whatsapp"?: string | null
                   }
                   Update: {
-                    "banner_path"?: string | null,"created_at"?: string,"default_background_id"?: string | null,"id"?: string,"logo_path"?: string | null,"name"?: string,"watermark"?: NonNullable<Json>
+                    "banner_path"?: string | null,"created_at"?: string,"default_background_id"?: string | null,"id"?: string,"logo_path"?: string | null,"name"?: string,"phone"?: string | null,"watermark"?: NonNullable<Json>,"whatsapp"?: string | null
                   }
                   Relationships: [
                     {

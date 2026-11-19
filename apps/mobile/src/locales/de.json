@@ -367,7 +367,14 @@
     "backgroundHint": "Neue Fahrzeuge starten mit diesem Studio.",
     "applies": "Wird für neue Bearbeitungen verwendet. Bereits bearbeitete Fahrzeuge im Studio neu rendern.",
     "saveFailed": "Die Änderung wurde nicht gespeichert. Bitte prüfen Sie die Internetverbindung.",
-    "uploadFailed": "Das Bild konnte nicht hochgeladen werden. Bitte versuchen Sie es erneut."
+    "uploadFailed": "Das Bild konnte nicht hochgeladen werden. Bitte versuchen Sie es erneut.",
+    "contact": "Kontakt",
+    "phone": "Telefon",
+    "whatsapp": "WhatsApp",
+    "contactHint": "Erscheint auf dem Verkaufsplakat.",
+    "phoneInvalid": "Ungültige Nummer. Erlaubt sind Ziffern, Leerzeichen und + - / ( ), mindestens 6 Ziffern.",
+    "contactOwnerOnly": "Nur die Galerieleitung kann die Nummern ändern.",
+    "contactSaved": "Gespeichert."
   },
   "members": {
     "title": "Mitarbeitende",
@@ -693,5 +700,30 @@
       "closeFailed": "Die Daten sind übernommen, aber die Datei konnte nicht gelöscht werden. Tippen Sie noch einmal auf Abschließen."
     },
     "takePhotos": "Fotos aufnehmen"
+  },
+  "share": {
+    "poster": {
+      "priceOnRequest": "Preis auf Anfrage",
+      "vatDeductible": "MwSt. ausweisbar",
+      "warranty": "{{months}} Monate Garantie"
+    },
+    "title": "Teilen",
+    "send": "Teilen",
+    "language": "Sprache",
+    "size": "Format",
+    "photo": "Foto wählen",
+    "more": "Weitere Fotos",
+    "noText": "Inseratstext erstellen",
+    "copyText": "Text kopieren (mobile.de)",
+    "copied": "Text in der Zwischenablage",
+    "noPhotos": "Fotos zuerst im Studio bearbeiten",
+    "preparing": "Der Beitrag wird vorbereitet.",
+    "posterLabel": "Vorschau des Plakats: {{title}}",
+    "failed": "Das Plakat konnte nicht erstellt werden. Bitte versuchen Sie es erneut.",
+    "shareFailed": "Das Teilen hat nicht geklappt. Bitte versuchen Sie es erneut.",
+    "plateNoBanner": "Die Galerie hat kein Kennzeichen-Banner. Kennzeichen bleiben im Beitrag sichtbar.",
+    "plateCheck": "Bei einem gewählten Foto ist das Kennzeichen nicht geprüft. Es kann im Beitrag sichtbar sein.",
+    "plateCheckAction": "Kennzeichen prüfen",
+    "bannerAction": "Galerie-Einstellungen"
   }
 }

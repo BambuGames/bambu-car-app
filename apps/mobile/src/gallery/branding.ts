@@ -12,6 +12,8 @@ export type GalleryBranding = {
   banner_path: string | null;
   watermark: WatermarkSettings;
   default_background_id: string | null;
+  phone: string | null;
+  whatsapp: string | null;
 };
 
 export async function fetchGallerySettings(
@@ -19,7 +21,7 @@ export async function fetchGallerySettings(
   galleryId: string,
 ): Promise<{ gallery: GalleryBranding; backgrounds: Background[]; latestOutput: string | null }> {
   const [gallery, backgrounds, latest] = await Promise.all([
-    client.from('galleries').select('logo_path, banner_path, watermark, default_background_id').eq('id', galleryId).single(),
+    client.from('galleries').select('logo_path, banner_path, watermark, default_background_id, phone, whatsapp').eq('id', galleryId).single(),
     client.from('backgrounds').select('id, gallery_id, name, spec, sort_order').order('sort_order'),
     client
       .from('photos')

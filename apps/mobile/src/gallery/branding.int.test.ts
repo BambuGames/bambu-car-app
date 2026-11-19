@@ -2,6 +2,7 @@
 import { createClient } from '@supabase/supabase-js';
 
 import type { Database } from '../lib/database.types';
+import { saveContact } from './contact';
 import { fetchGallerySettings, saveWatermark, setDefaultBackground, uploadBranding } from './branding';
 import { WATERMARK_DEFAULTS } from './watermarkLayout';
 
@@ -22,7 +23,7 @@ async function signedIn(email: string) {
 
 const service = () => createClient<Database>(process.env.API_URL!, process.env.SERVICE_ROLE_KEY!, noSession);
 const branding = async (gallery: string) =>
-  (await service().from('galleries').select('watermark, default_background_id, logo_path, banner_path').eq('id', gallery).single()).data;
+  (await service().from('galleries').select('watermark, default_background_id, logo_path, banner_path, phone, whatsapp').eq('id', gallery).single()).data;
 
 let saved: Awaited<ReturnType<typeof branding>>;
 beforeAll(async () => {
@@ -39,6 +40,7 @@ test('staff cannot change gallery settings', async () => {
   await expect(saveWatermark(staff, TESTGALERIE, { ...WATERMARK_DEFAULTS, position: 'center' })).rejects.toThrow('not_owner');
   await expect(setDefaultBackground(staff, TESTGALERIE, STUDIO_DUNKEL)).rejects.toThrow('not_owner');
   await expect(uploadBranding(staff, TESTGALERIE, 'logo', PNG)).rejects.toThrow();
+  expect(await saveContact(staff, TESTGALERIE, { phone: '123456', whatsapp: null })).toEqual({ error: 'not_owner' });
   expect(await branding(TESTGALERIE)).toEqual(before);
 });
 
@@ -48,6 +50,8 @@ test('the owner saves the watermark, the default background and a logo', async (
   await saveWatermark(owner, ANDERE, watermark);
   await setDefaultBackground(owner, ANDERE, STUDIO_DUNKEL);
   expect(await uploadBranding(owner, ANDERE, 'logo', PNG)).toBe(`${ANDERE}/logo.png`);
+  expect(await saveContact(owner, ANDERE, { phone: '+49 30 1234567', whatsapp: null })).toBeUndefined();
+  expect(await saveContact(owner, ANDERE, { whatsapp: '0171 1234567' })).toBeUndefined(); // a partial update leaves the phone alone
   const { gallery } = await fetchGallerySettings(owner, ANDERE);
-  expect(gallery).toMatchObject({ watermark, default_background_id: STUDIO_DUNKEL, logo_path: `${ANDERE}/logo.png` });
+  expect(gallery).toMatchObject({ phone: '+49 30 1234567', whatsapp: '0171 1234567', watermark, default_background_id: STUDIO_DUNKEL, logo_path: `${ANDERE}/logo.png` });
 });

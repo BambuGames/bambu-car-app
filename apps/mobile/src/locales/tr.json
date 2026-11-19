@@ -367,7 +367,14 @@
     "backgroundHint": "Yeni araçlar bu stüdyoyla başlar.",
     "applies": "Yeni işlemelerde kullanılır. Daha önce işlenmiş araçları stüdyoda yeniden çizin.",
     "saveFailed": "Değişiklik kaydedilmedi. İnternet bağlantısını kontrol edin.",
-    "uploadFailed": "Görsel yüklenemedi. Lütfen tekrar deneyin."
+    "uploadFailed": "Görsel yüklenemedi. Lütfen tekrar deneyin.",
+    "contact": "İletişim",
+    "phone": "Telefon",
+    "whatsapp": "WhatsApp",
+    "contactHint": "Satış afişinde görünür.",
+    "phoneInvalid": "Geçersiz numara. Rakam, boşluk ve + - / ( ) kullanılabilir, en az 6 rakam gerekir.",
+    "contactOwnerOnly": "Numaraları yalnız galeri yöneticisi değiştirebilir.",
+    "contactSaved": "Kaydedildi."
   },
   "members": {
     "title": "Personel",
@@ -693,5 +700,30 @@
       "closeFailed": "Veriler uygulandı ama dosya silinemedi. Bitir'e bir kez daha dokunun."
     },
     "takePhotos": "Fotoğraf çek"
+  },
+  "share": {
+    "poster": {
+      "priceOnRequest": "Fiyat sorunuz",
+      "vatDeductible": "KDV düşülebilir",
+      "warranty": "{{months}} ay garanti"
+    },
+    "title": "Paylaş",
+    "send": "Paylaş",
+    "language": "Dil",
+    "size": "Boyut",
+    "photo": "Fotoğraf seç",
+    "more": "Diğer fotoğraflar",
+    "noText": "İlan metni oluştur",
+    "copyText": "Metni kopyala (mobile.de)",
+    "copied": "Metin panoda",
+    "noPhotos": "Önce fotoğrafları stüdyoda işleyin",
+    "preparing": "Paylaşım hazırlanıyor.",
+    "posterLabel": "Afiş önizlemesi: {{title}}",
+    "failed": "Afiş oluşturulamadı. Lütfen tekrar deneyin.",
+    "shareFailed": "Paylaşım yapılamadı. Lütfen tekrar deneyin.",
+    "plateNoBanner": "Galerinin plaka bandı yok. Plakalar gönderide görünür kalır.",
+    "plateCheck": "Seçilen bir fotoğrafta plaka kontrol edilmedi. Gönderide görünebilir.",
+    "plateCheckAction": "Plakaları kontrol et",
+    "bannerAction": "Galeri ayarları"
   }
 }

@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { Image as RNImage, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { fetchGallerySettings, saveWatermark, setDefaultBackground, uploadBranding, type GalleryBranding } from '../../../gallery/branding';
+import { normalizePhone, saveContact } from '../../../gallery/contact';
 import { pickBrandingImage } from '../../../gallery/pickImage';
 import { WatermarkPreview } from '../../../gallery/WatermarkPreview';
 import type { WatermarkPosition, WatermarkSettings } from '../../../gallery/watermarkLayout';
@@ -18,6 +19,7 @@ import { studioApi } from '../../../studio/useStudio';
 import { Button } from '../../../ui/Button';
 import { Notice } from '../../../ui/Notice';
 import { Segmented } from '../../../ui/Segmented';
+import { TextField } from '../../../ui/TextField';
 import { colors, fontSize, radius, space } from '../../../ui/theme';
 
 const SIZES = { small: 0.12, medium: 0.18, large: 0.26 } as const;
@@ -34,12 +36,46 @@ const POSITIONS: { value: WatermarkPosition; left: `${number}%`; top: `${number}
 const nearest = <T extends number>(options: readonly T[], v: number): T =>
   options.reduce((best, o) => (Math.abs(o - v) < Math.abs(best - v) ? o : best), options[0]);
 
+type ContactKey = 'phone' | 'whatsapp';
+
+// One number: saved when the field loses focus and the normalized value changed; an invalid one only shows the error.
+function ContactField({ field, saved, editable, onSave }: { field: ContactKey; saved: string | null; editable: boolean; onSave: (value: string | null) => Promise<boolean> }) {
+  const { t } = useTranslation();
+  const [text, setText] = useState(saved ?? '');
+  const [invalid, setInvalid] = useState(false);
+  const [result, setResult] = useState<'saved' | 'failed' | null>(null);
+  const commit = async () => {
+    const n = normalizePhone(text);
+    setInvalid(n === 'invalid');
+    if (n === 'invalid' || n === saved) return;
+    setResult((await onSave(n)) ? 'saved' : 'failed');
+  };
+  return (
+    <View style={styles.field}>
+      <TextField
+        label={t(`gallerySettings.${field}`)}
+        value={text}
+        onChangeText={(v) => {
+          setText(v);
+          setResult(null);
+        }}
+        onBlur={commit}
+        editable={editable}
+        keyboardType="phone-pad"
+        error={invalid ? t('gallerySettings.phoneInvalid') : null}
+      />
+      {result ? <Notice kind={result === 'failed' ? 'error' : 'info'} text={t(result === 'failed' ? 'gallerySettings.saveFailed' : 'gallerySettings.contactSaved')} /> : null}
+    </View>
+  );
+}
+
 type Loaded = { gallery: GalleryBranding; backgrounds: Background[]; photoUrl: string | null; logo: { url: string; aspect: number } | null; bannerUrl: string | null };
 
 export default function GallerySettingsScreen() {
   const { t } = useTranslation();
   const { membership } = useSession();
   const galleryId = membership?.galleryId;
+  const isOwner = membership?.role === 'owner';
   const [data, setData] = useState<Loaded | null>(null);
   const [failed, setFailed] = useState(false);
   const [busy, setBusy] = useState<'logo' | 'banner' | null>(null);
@@ -125,11 +161,28 @@ export default function GallerySettingsScreen() {
     setDefaultBackground(supabase, galleryId, id).then(done, failedSave);
   };
 
+  // Only the changed field goes out, so two quick blurs cannot overwrite each other. The result shows at the field.
+  const saveContactField = (field: ContactKey) => async (value: string | null): Promise<boolean> => {
+    try {
+      if (await saveContact(supabase, galleryId, { [field]: value })) return false;
+      setData((d) => d && { ...d, gallery: { ...d.gallery, [field]: value } });
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   const selectedBackground = gallery.default_background_id ?? data.backgrounds[0]?.id;
   const band = watermark.band;
 
   return (
-    <ScrollView contentContainerStyle={styles.content} contentInsetAdjustmentBehavior="automatic">
+    <ScrollView
+      contentContainerStyle={styles.content}
+      contentInsetAdjustmentBehavior="automatic"
+      automaticallyAdjustKeyboardInsets
+      keyboardShouldPersistTaps="handled"
+      keyboardDismissMode="on-drag"
+    >
       {changed ? <Notice text={t('gallerySettings.applies')} /> : null}
       {error ? <Notice kind="error" text={error} /> : null}
 
@@ -233,6 +286,13 @@ export default function GallerySettingsScreen() {
         ))}
       </ScrollView>
       <Text style={styles.hint}>{t('gallerySettings.backgroundHint')}</Text>
+
+      <Text style={styles.heading} accessibilityRole="header">
+        {t('gallerySettings.contact')}
+      </Text>
+      <ContactField field="phone" saved={gallery.phone} editable={isOwner} onSave={saveContactField('phone')} />
+      <ContactField field="whatsapp" saved={gallery.whatsapp} editable={isOwner} onSave={saveContactField('whatsapp')} />
+      <Text style={styles.hint}>{t(isOwner ? 'gallerySettings.contactHint' : 'gallerySettings.contactOwnerOnly')}</Text>
     </ScrollView>
   );
 }
@@ -240,6 +300,7 @@ export default function GallerySettingsScreen() {
 const MARK = 44;
 const styles = StyleSheet.create({
   content: { padding: space[3], gap: space[3], backgroundColor: colors.background },
+  field: { gap: space[1] },
   heading: { fontSize: fontSize.body, fontWeight: '600', color: colors.text, marginTop: space[3] },
   label: { fontSize: fontSize.small, color: colors.textMuted, marginTop: space[1] },
   hint: { fontSize: fontSize.small, color: colors.textMuted },
