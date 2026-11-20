@@ -12,6 +12,7 @@ import { useCovers } from '../../studio/useCovers';
 import { useSync } from '../../sync/SyncProvider';
 import { Button } from '../../ui/Button';
 import { colors, fontSize, space } from '../../ui/theme';
+import { listStatusKey } from '../../vehicle/listStatus';
 
 export default function Vehicles() {
   const { t } = useTranslation();
@@ -70,7 +71,7 @@ export default function Vehicles() {
           </Text>
           <Text style={styles.meta}>
             {[
-              t(`vehicles.status.${item.status}`),
+              t(listStatusKey(item)),
               t('vehicles.exteriorProgress', { done: item.exteriorDone, total: EXTERIOR_SLOTS.length }),
               item.pendingUploads > 0 ? t('vehicles.pendingUploads', { count: item.pendingUploads }) : null,
             ]
