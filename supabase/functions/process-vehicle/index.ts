@@ -1,6 +1,8 @@
 // Starts processing a vehicle (design 9, 11.3): start_processing charges the credit once and queues the
 // photos in one transaction, as the signed-in user; the queued photos then go to the image worker. The
 // answer does not wait for the worker: the app follows the photo rows live.
+// Only the gallery's owner may start the first, charged processing (M5): staff get 403 not_owner; another gallery's
+// vehicle stays 403 not_member.
 import { createClient } from 'jsr:@supabase/supabase-js@2'
 
 declare const EdgeRuntime: { waitUntil(promise: Promise<unknown>): void }
@@ -64,6 +66,7 @@ Deno.serve(async (req) => {
     p_rerender: rerender ?? false,
   })
   if (error) {
+    if (error.message === 'not_owner') return json(403, { error: 'not_owner' }) // M5: staff cannot spend a credit
     if (error.code === '42501') return json(403, { error: 'not_member' })
     if (error.message === 'no_credit') return json(402, { error: 'no_credit' })
     if (error.message === 'photo_limit') return json(409, { error: 'photo_limit' }) // design 9: per-vehicle cap

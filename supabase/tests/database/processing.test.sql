@@ -1,7 +1,7 @@
 -- Processing (design 7.5, 9, 11.3): start_processing charges a vehicle once and queues its photos; the
 -- server's results and statuses are protected from members and from stale pushes of the app.
 begin;
-select plan(29);
+select plan(33);
 
 -- As postgres. Testgalerie (e…1): owner d…1, staff d…2. Andere Galerie (e…2): owner d…3.
 insert into public.vehicles (id, gallery_id, make, model, body_type) values
@@ -85,13 +85,28 @@ select results_eq(
   'stuck photos can be queued again after 10 minutes'
 );
 
+-- M5: only the owner starts the processing that charges a credit. The balance is 0 here, and staff
+-- still hear not_owner, not no_credit.
+set local request.jwt.claims = '{"sub":"d0000000-0000-0000-0000-000000000002","role":"authenticated"}';
+select throws_ok(
+  $$select public.start_processing('a2000000-0000-0000-0000-000000000002')$$,
+  '42501', 'not_owner',
+  'staff cannot start the first, charged processing'
+);
+select results_eq(
+  $$select (select count(*)::int from public.credit_ledger where vehicle_id = 'a2000000-0000-0000-0000-000000000002'),
+           (select process_status::text from public.photos where id = 'f2000000-0000-0000-0000-000000000004')$$,
+  $$values (0, 'unprocessed')$$,
+  'a refused start charges nothing and queues nothing'
+);
+
 -- The last credit goes to one vehicle.
 reset role;
 select public.admin_grant_credits('e0000000-0000-0000-0000-000000000001', 1, 'test');
 set local role authenticated;
-set local request.jwt.claims = '{"sub":"d0000000-0000-0000-0000-000000000002","role":"authenticated"}';
+set local request.jwt.claims = '{"sub":"d0000000-0000-0000-0000-000000000001","role":"authenticated"}';
 select is(cardinality(public.start_processing('a2000000-0000-0000-0000-000000000002')), 1,
-  'staff can start processing');
+  'the owner starts it');
 select throws_ok(
   $$select public.start_processing('a2000000-0000-0000-0000-000000000003')$$,
   'P0001', 'no_credit',
@@ -228,6 +243,20 @@ select throws_ok(
     where id = 'a2000000-0000-0000-0000-000000000002'$$,
   '42501', null,
   'another gallery''s background cannot be used'
+);
+
+-- M5: once the vehicle is paid, staff process it as before, without a second charge.
+reset role;
+update public.photos set process_status = 'done' where vehicle_id = 'a2000000-0000-0000-0000-000000000001';
+set local role authenticated;
+set local request.jwt.claims = '{"sub":"d0000000-0000-0000-0000-000000000002","role":"authenticated"}';
+select is(cardinality(public.start_processing('a2000000-0000-0000-0000-000000000001', null, true)), 3,
+  'staff can re-render a paid vehicle');
+reset role; -- staff cannot read the ledger (owners only), so count as postgres
+select results_eq(
+  $$select count(*)::int from public.credit_ledger where vehicle_id = 'a2000000-0000-0000-0000-000000000001'$$,
+  $$values (1)$$,
+  'staff re-render does not charge'
 );
 
 select * from finish();

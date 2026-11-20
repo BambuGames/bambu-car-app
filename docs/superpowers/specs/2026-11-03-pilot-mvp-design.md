@@ -75,8 +75,8 @@ Bu sürümün işi, bu çekirdeği Almanya'daki pilot galeride gerçek stok ara�
 | Rol | Ne yapar |
 |---|---|
 | Platform yöneticisi (Bambu Games) | Galeri ve kullanıcı açar, kredi yükler ve iade eder, hataları izler. Pilotta bunları Supabase panelinden yapar. |
-| Galeri yöneticisi | Galeri ayarlarını ve personeli yönetir, bakiyeyi ve kredi geçmişini görür. Personelin yaptığı her şeyi de yapabilir. |
-| Galeri personeli | Araç açar, çeker, işler, bilgileri doldurur, dışa aktarır. |
+| Galeri yöneticisi | Galeri ayarlarını ve personeli yönetir, bakiyeyi ve kredi geçmişini görür. Personelin yaptığı her şeyi de yapabilir. Aracın ilk işlemesini başlatır; pazar yerinde ilanı yayınlar (M5). |
+| Galeri personeli | Araç açar, çeker, bilgileri doldurur, dışa aktarır ve paylaşır. Bir aracın kredi düşüren ilk işlemesini başlatamaz (M5). |
 
 - Giriş e-posta ve şifreyle yapılır. Hesaplar Supabase'in davet e-postasıyla açılır; uygulamada kayıt ekranı yoktur.
 - Uygulamada "hesabımı sil" seçeneği bulunur (GDPR ve Apple kuralı).

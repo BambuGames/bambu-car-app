@@ -113,6 +113,34 @@ test("answers 403 for another gallery's vehicle", async () => {
   assert.deepEqual(await res.json(), { error: 'not_member' })
 })
 
+// M5: only the owner starts the processing that charges the credit.
+test('answers 403 not_owner when staff starts a vehicle that is not paid yet', async () => {
+  const staff = await signIn('staff@bambu.test')
+  await serviceClient().rpc('admin_grant_credits', { p_gallery_id: TESTGALERIE, p_amount: 1, p_note: 'test' })
+  const { vehicleId, photoIds } = await vehicleWithPhotos(TESTGALERIE, ['front'])
+  const before = await balance(TESTGALERIE)
+
+  const res = await processVehicle(staff, { vehicleId })
+  assert.equal(res.status, 403)
+  assert.deepEqual(await res.json(), { error: 'not_owner' })
+  assert.equal(await balance(TESTGALERIE), before)
+  const { data } = await serviceClient().from('photos').select('process_status').eq('id', photoIds[0]).single()
+  assert.equal(data?.process_status, 'unprocessed')
+})
+
+test('staff can process a vehicle again once the owner has paid', async () => {
+  const owner = await signIn('owner@bambu.test')
+  const staff = await signIn('staff@bambu.test')
+  await serviceClient().rpc('admin_grant_credits', { p_gallery_id: TESTGALERIE, p_amount: 1, p_note: 'test' })
+  const { vehicleId } = await vehicleWithPhotos(TESTGALERIE, ['front'])
+  assert.equal((await processVehicle(owner, { vehicleId })).status, 202)
+
+  const res = await processVehicle(staff, { vehicleId, rerender: true })
+  assert.ok([200, 202].includes(res.status), `staff got ${res.status}`)
+  const { data } = await serviceClient().from('credit_ledger').select('id').eq('vehicle_id', vehicleId)
+  assert.equal(data?.length, 1)
+})
+
 test('answers 400 for a malformed request and 401 without a token', async () => {
   const owner = await signIn('owner@bambu.test')
   assert.equal((await processVehicle(owner, '{not json')).status, 400)
