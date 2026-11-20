@@ -7,10 +7,10 @@ import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 
-import { canManageGallery } from '../../../../lib/roles';
+import { canManageGallery, ownerMustProcess } from '../../../../lib/roles';
 import { useSession } from '../../../../lib/session';
 import { listPhotos } from '../../../../local/photos';
-import type { ProcessError } from '../../../../studio/api';
+import { startAndSync, type ProcessError } from '../../../../studio/api';
 import { BackgroundSwatch } from '../../../../studio/BackgroundSwatch';
 import { StudioLoadState } from '../../../../studio/LoadState';
 import { coverPhoto, orderPhotos } from '../../../../studio/order';
@@ -27,7 +27,7 @@ export default function StudioScreen() {
   const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { db, membership } = useSession();
-  const { subscribe } = useSync();
+  const { subscribe, request } = useSync();
   const { data, error, refresh, now } = useStudio(id);
   const network = Network.useNetworkState();
   const online = network.isConnected !== false && network.isInternetReachable !== false;
@@ -71,10 +71,9 @@ export default function StudioScreen() {
   const start = async (body: { photoId?: string; rerender?: boolean }) => {
     setBusy(true);
     setMessage(null);
-    const result = await studioApi.startProcessing({ vehicleId: id, ...body });
+    const error = await startAndSync(studioApi, { vehicleId: id, ...body }, { refresh, request });
     setBusy(false);
-    if ('error' in result) setMessage(result.error);
-    else refresh();
+    setMessage(error);
   };
 
   const setOptions = async (options: { backgroundId?: string; toneEnabled?: boolean }) => {
@@ -92,6 +91,8 @@ export default function StudioScreen() {
   const photos = orderPhotos(data.photos);
   const summary = summarize(photos, now);
   const blocker = processBlocker({ online, pendingUploads, photos, now });
+  // M5: staff leave the processing that charges the credit to the owner.
+  const ownerProcesses = ownerMustProcess(membership, data.vehicle.credit_charged_at);
   const cover = coverPhoto(photos);
   const selected = data.vehicle.background_id ?? data.vehicle.gallery?.default_background_id ?? data.backgrounds[0]?.id;
 
@@ -127,7 +128,11 @@ export default function StudioScreen() {
       </View>
       {optionsFailed ? <Notice kind="error" text={t('studio.optionsFailed')} /> : null}
 
-      <Button label={t('studio.process')} onPress={() => start({})} disabled={blocker !== null} loading={busy} />
+      {ownerProcesses ? (
+        <Notice text={t('studio.ownerProcesses')} />
+      ) : (
+        <Button label={t('studio.process')} onPress={() => start({})} disabled={blocker !== null} loading={busy} />
+      )}
       {blocker && blocker !== 'checking' ? (
         <Notice
           kind={blocker === 'unchecked' ? 'error' : 'info'}
@@ -135,7 +140,7 @@ export default function StudioScreen() {
         />
       ) : null}
       {blocker === 'unchecked' ? <Button variant="secondary" label={t('studio.retry')} onPress={countWaiting} /> : null}
-      {!blocker && !data.vehicle.credit_charged_at ? <Notice text={t('studio.firstCharge')} /> : null}
+      {!blocker && !ownerProcesses && !data.vehicle.credit_charged_at ? <Notice text={t('studio.firstCharge')} /> : null}
       {message ? (
         <Notice
           kind="error"

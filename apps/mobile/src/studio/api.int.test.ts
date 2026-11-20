@@ -61,6 +61,13 @@ test("another gallery's vehicle cannot be processed", async () => {
   expect(await api.startProcessing({ vehicleId })).toEqual({ error: 'not_member' });
 });
 
+// M5: the processing that charges a credit is the owner's.
+test('staff cannot start a vehicle that is not paid yet', async () => {
+  const api = createStudioApi(await signedIn('staff@bambu.test'));
+  const { vehicleId } = await vehicleWithPhoto(TESTGALERIE);
+  expect(await api.startProcessing({ vehicleId })).toEqual({ error: 'not_owner' });
+});
+
 test('a gallery without credit is told so', async () => {
   const api = createStudioApi(await signedIn('other@bambu.test'));
   const { vehicleId } = await vehicleWithPhoto(ANDERE);

@@ -46,6 +46,7 @@
   "vehicles": {
     "title": "Araçlar",
     "empty": "Henüz araç yok.",
+    "waitingForProcessing": "İşlenmeyi bekliyor",
     "status": {
       "draft": "Taslak",
       "shooting": "Çekimde",
@@ -238,6 +239,7 @@
     "rerender": "Yeniden çiz",
     "rerenderHint": "Seçili arka planı ve galeri ayarlarını uygular. Kredi harcamaz.",
     "firstCharge": "İlk işlemede 1 kredi düşer.",
+    "ownerProcesses": "Bu aracı galeri sahibi işleyecek.",
     "progress": "{{total}} fotoğraftan {{done}} hazır",
     "retry": "Yeniden dene",
     "blocked": {
@@ -253,6 +255,7 @@
       "photo_limit": "Bu araç için çok fazla fotoğraf çekildi. Lütfen Bambu Games ile iletişime geçin.",
       "offline": "İşlemek için internet bağlantısı gerekiyor.",
       "not_member": "Bu araç sizin galerinize ait değil.",
+      "not_owner": "Bu aracı galeri sahibi işleyecek.",
       "internal": "İşleme başlatılamadı. Lütfen yeniden deneyin.",
       "no_credit_owner": "Krediniz bitti. Yeni krediyi Bambu Games verir."
     },

@@ -17,7 +17,7 @@ export type StudioVehicle = {
   gallery: { default_background_id: string | null } | null;
 };
 export type Studio = { vehicle: StudioVehicle; photos: StudioPhoto[]; backgrounds: Background[] };
-export type ProcessError = 'no_credit' | 'photo_limit' | 'not_member' | 'offline' | 'internal';
+export type ProcessError = 'no_credit' | 'photo_limit' | 'not_member' | 'not_owner' | 'offline' | 'internal';
 
 const PHOTO_COLUMNS =
   'id, slot, process_status, process_error, output_path, output_wm_path, mask_path, original_path, captured_at, placement, plate_corners, plate_status, mask_edits, updated_at';
@@ -57,8 +57,11 @@ export function createStudioApi(client: SupabaseClient<Database>) {
       const { data, error } = await client.functions.invoke<{ queued: string[] }>('process-vehicle', { body });
       if (!error) return { queued: data?.queued ?? [] };
       if (error instanceof FunctionsHttpError) {
-        const status = (error.context as Response).status;
-        return { error: HTTP_ERRORS[status] ?? 'internal' };
+        const answer = error.context as Response;
+        // Both 403s: another gallery's vehicle (not_member) and a vehicle only the owner may pay for (not_owner).
+        const body = (await answer.json().catch(() => null)) as { error?: unknown } | null;
+        if (body?.error === 'not_owner') return { error: 'not_owner' };
+        return { error: HTTP_ERRORS[answer.status] ?? 'internal' };
       }
       // Only a request that never reached the function is offline; a relay error means it crashed or would not start.
       return { error: error instanceof FunctionsFetchError ? 'offline' : 'internal' };
@@ -105,10 +108,26 @@ export async function saveAndRender(
   }
 }
 
-const PROCESS_ERRORS: readonly string[] = ['no_credit', 'photo_limit', 'not_member', 'offline', 'internal'] satisfies ProcessError[];
+const PROCESS_ERRORS: readonly string[] = ['no_credit', 'photo_limit', 'not_member', 'not_owner', 'offline', 'internal'] satisfies ProcessError[];
 
 /** The reason to show for a failed studio call: the ProcessError it carries, else offline or internal. */
 export function processErrorOf(e: unknown, online: boolean): ProcessError {
   const reason = e instanceof Error ? e.message : '';
   return PROCESS_ERRORS.includes(reason) ? (reason as ProcessError) : online ? 'internal' : 'offline';
+}
+
+/**
+ * Starts processing; on success refreshes the studio and asks for a sync, so the vehicle list (read from the
+ * phone's database) leaves "Waiting for processing" at once (M5). Returns the reason when it did not start.
+ */
+export async function startAndSync(
+  api: Pick<StudioApi, 'startProcessing'>,
+  body: { vehicleId: string; photoId?: string; rerender?: boolean },
+  after: { refresh: () => void; request: () => void },
+): Promise<ProcessError | null> {
+  const result = await api.startProcessing(body);
+  if ('error' in result) return result.error;
+  after.refresh();
+  after.request();
+  return null;
 }

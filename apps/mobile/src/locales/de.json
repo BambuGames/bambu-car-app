@@ -46,6 +46,7 @@
   "vehicles": {
     "title": "Fahrzeuge",
     "empty": "Noch keine Fahrzeuge.",
+    "waitingForProcessing": "Wartet auf Verarbeitung",
     "status": {
       "draft": "Entwurf",
       "shooting": "Fotos werden aufgenommen",
@@ -238,6 +239,7 @@
     "rerender": "Neu rendern",
     "rerenderHint": "Übernimmt den gewählten Hintergrund und die Galerie-Einstellungen. Kostet kein Guthaben.",
     "firstCharge": "Beim ersten Bearbeiten wird 1 Guthaben verbraucht.",
+    "ownerProcesses": "Dieses Fahrzeug verarbeitet der Inhaber der Galerie.",
     "progress": "{{done}} von {{total}} fertig",
     "retry": "Erneut versuchen",
     "blocked": {
@@ -253,6 +255,7 @@
       "photo_limit": "Für dieses Fahrzeug wurden zu viele Fotos aufgenommen. Bitte wenden Sie sich an Bambu Games.",
       "offline": "Für das Bearbeiten wird eine Internetverbindung benötigt.",
       "not_member": "Dieses Fahrzeug gehört nicht zu Ihrer Galerie.",
+      "not_owner": "Dieses Fahrzeug verarbeitet der Inhaber der Galerie.",
       "internal": "Die Bearbeitung konnte nicht gestartet werden. Bitte versuchen Sie es erneut.",
       "no_credit_owner": "Ihr Guthaben ist aufgebraucht. Neues Guthaben erhalten Sie von Bambu Games."
     },

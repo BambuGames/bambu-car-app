@@ -46,6 +46,7 @@
   "vehicles": {
     "title": "Vehicles",
     "empty": "No vehicles yet.",
+    "waitingForProcessing": "Waiting for processing",
     "status": {
       "draft": "Draft",
       "shooting": "Taking photos",
@@ -238,6 +239,7 @@
     "rerender": "Render again",
     "rerenderHint": "Applies the chosen background and the gallery settings. Uses no credit.",
     "firstCharge": "The first processing uses 1 credit.",
+    "ownerProcesses": "The gallery owner processes this vehicle.",
     "progress": "{{done}} of {{total}} done",
     "retry": "Try again",
     "blocked": {
@@ -253,6 +255,7 @@
       "photo_limit": "Too many photos were taken for this vehicle. Please contact Bambu Games.",
       "offline": "Processing needs an internet connection.",
       "not_member": "This vehicle does not belong to your gallery.",
+      "not_owner": "The gallery owner processes this vehicle.",
       "internal": "Processing could not be started. Please try again.",
       "no_credit_owner": "Your credit is used up. Bambu Games provides new credit."
     },
