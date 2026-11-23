@@ -3,10 +3,12 @@ import { useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { FieldLabel } from './FieldLabel';
 import { colors, fontSize, radius, space } from './theme';
 
 export function SelectField<T extends string>({
   label,
+  code,
   value,
   options,
   onChange,
@@ -14,6 +16,7 @@ export function SelectField<T extends string>({
   closeLabel,
 }: {
   label: string;
+  code?: string | null;
   value: T | null;
   options: { value: T; label: string }[];
   onChange: (value: T | null) => void;
@@ -28,7 +31,7 @@ export function SelectField<T extends string>({
   };
   return (
     <View style={styles.field}>
-      <Text style={styles.label}>{label}</Text>
+      <FieldLabel label={label} code={code} />
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={label}
@@ -72,30 +75,30 @@ export function SelectField<T extends string>({
 
 const styles = StyleSheet.create({
   field: { gap: space[1] },
-  label: { fontSize: fontSize.small, fontWeight: '500', color: colors.text },
   input: {
     minHeight: 48,
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.field,
     borderRadius: radius,
     paddingHorizontal: space[2],
+    backgroundColor: colors.sheet,
   },
-  value: { fontSize: fontSize.body, color: colors.text },
-  empty: { color: colors.textMuted },
-  sheet: { flex: 1, backgroundColor: colors.background },
+  value: { fontSize: fontSize.body, color: colors.ink },
+  empty: { color: colors.ink2 },
+  sheet: { flex: 1, backgroundColor: colors.paper },
   sheetHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: space[3] },
-  sheetTitle: { fontSize: fontSize.body, fontWeight: '600', color: colors.text },
+  sheetTitle: { fontSize: fontSize.body, fontWeight: '600', color: colors.ink },
   close: { minHeight: 44, justifyContent: 'center' },
-  closeText: { fontSize: fontSize.body, color: colors.accent },
+  closeText: { fontSize: fontSize.body, color: colors.action },
   row: {
     minHeight: 48,
     justifyContent: 'center',
     paddingHorizontal: space[3],
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.border,
+    borderBottomColor: colors.rule,
   },
-  rowText: { fontSize: fontSize.body, color: colors.text },
-  selected: { color: colors.accent, fontWeight: '600' },
-  clear: { fontSize: fontSize.body, color: colors.textMuted },
+  rowText: { fontSize: fontSize.body, color: colors.ink },
+  selected: { color: colors.action, fontWeight: '600' },
+  clear: { fontSize: fontSize.body, color: colors.ink2 },
 });

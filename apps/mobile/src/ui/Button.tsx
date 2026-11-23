@@ -4,7 +4,8 @@ import { colors, fontSize, radius, space } from './theme';
 
 type Variant = 'primary' | 'secondary' | 'danger';
 
-const labelColor: Record<Variant, string> = { primary: colors.background, secondary: colors.text, danger: colors.danger };
+// primary: the action green, one per screen · secondary: outlined · danger: outlined, mark text.
+const labelColor: Record<Variant, string> = { primary: colors.onAction, secondary: colors.ink, danger: colors.mark };
 
 export function Button({
   label,
@@ -25,7 +26,12 @@ export function Button({
       accessibilityState={{ disabled: disabled || loading, busy: loading }}
       onPress={onPress}
       disabled={disabled || loading}
-      style={({ pressed }) => [styles.base, variant === 'primary' && styles.primary, (pressed || disabled) && styles.dimmed]}
+      style={({ pressed }) => [
+        styles.base,
+        variant === 'primary' ? styles.primary : styles.outlined,
+        pressed && styles.pressed,
+        disabled && styles.disabled,
+      ]}
     >
       {loading ? (
         <ActivityIndicator color={labelColor[variant]} />
@@ -37,8 +43,10 @@ export function Button({
 }
 
 const styles = StyleSheet.create({
-  base: { minHeight: 48, borderRadius: radius, alignItems: 'center', justifyContent: 'center', paddingHorizontal: space[3] },
-  primary: { backgroundColor: colors.accent },
-  dimmed: { opacity: 0.6 },
-  label: { fontSize: fontSize.body, fontWeight: '600' },
+  base: { minHeight: 50, borderRadius: radius, alignItems: 'center', justifyContent: 'center', paddingHorizontal: space[3] },
+  primary: { backgroundColor: colors.action },
+  outlined: { borderWidth: 1, borderColor: colors.field, backgroundColor: colors.sheet },
+  pressed: { opacity: 0.8 },
+  disabled: { opacity: 0.45 },
+  label: { fontSize: fontSize.body, fontWeight: '600', textAlign: 'center' },
 });

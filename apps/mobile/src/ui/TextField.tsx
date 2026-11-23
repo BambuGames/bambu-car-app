@@ -1,17 +1,23 @@
 import { StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native';
 
+import { FieldLabel } from './FieldLabel';
 import { colors, fontSize, radius, space } from './theme';
 
-export function TextField({ label, error, ...input }: { label: string; error?: string | null } & TextInputProps) {
+export function TextField({
+  label,
+  code,
+  error,
+  ...input
+}: { label: string; code?: string | null; error?: string | null } & TextInputProps) {
   return (
     <View style={styles.field}>
-      <Text style={styles.label}>{label}</Text>
+      <FieldLabel label={label} code={code} />
       <TextInput
         autoCorrect={false}
         spellCheck={false}
         {...input}
         accessibilityLabel={label}
-        placeholderTextColor={colors.textMuted}
+        placeholderTextColor={colors.ink2}
         style={[styles.input, input.multiline ? styles.multiline : null, error ? styles.inputError : null]}
       />
       {error ? <Text style={styles.error}>{error}</Text> : null}
@@ -21,19 +27,18 @@ export function TextField({ label, error, ...input }: { label: string; error?: s
 
 const styles = StyleSheet.create({
   field: { gap: space[1] },
-  label: { fontSize: fontSize.small, fontWeight: '500', color: colors.text },
   input: {
     minHeight: 48,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.field,
     borderRadius: radius,
     paddingHorizontal: space[2],
     fontSize: fontSize.body,
-    color: colors.text,
-    backgroundColor: colors.background,
+    color: colors.ink,
+    backgroundColor: colors.sheet,
   },
   // A multiline field grows with its text; without vertical padding it ends at the last line and clips its descenders.
   multiline: { paddingVertical: space[2], textAlignVertical: 'top' },
-  inputError: { borderColor: colors.danger },
-  error: { fontSize: fontSize.small, color: colors.danger },
+  inputError: { borderColor: colors.mark },
+  error: { fontSize: fontSize.small, color: colors.mark },
 });

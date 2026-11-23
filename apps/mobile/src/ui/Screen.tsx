@@ -22,6 +22,6 @@ export function Screen({ children }: { children: ReactNode }) {
 }
 
 const styles = StyleSheet.create({
-  fill: { flex: 1, backgroundColor: colors.background },
+  fill: { flex: 1, backgroundColor: colors.paper },
   content: { padding: space[3], gap: space[3] },
 });

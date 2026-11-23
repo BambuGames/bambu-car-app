@@ -10,6 +10,7 @@
     "newPassword": "New password",
     "code": "Code from the email",
     "back": "Back",
+    "tagline": "Studio photos and listings, straight from the lot.",
     "signIn": {
       "title": "Sign in",
       "submit": "Sign in",
@@ -47,6 +48,8 @@
     "title": "Vehicles",
     "empty": "No vehicles yet.",
     "waitingForProcessing": "Waiting for processing",
+    "exteriorMissing": "Exterior {{done}}/{{total}} · {{missing}} missing",
+    "noPhotos": "No photos yet",
     "status": {
       "draft": "Draft",
       "shooting": "Taking photos",

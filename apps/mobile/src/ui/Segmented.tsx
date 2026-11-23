@@ -33,10 +33,10 @@ export function Segmented<T extends string>({
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', borderWidth: 1, borderColor: colors.border, borderRadius: radius, overflow: 'hidden' },
+  row: { flexDirection: 'row', borderWidth: 1, borderColor: colors.field, borderRadius: radius, overflow: 'hidden', backgroundColor: colors.sheet },
   option: { flex: 1, minHeight: 44, paddingVertical: space[2], paddingHorizontal: space[1], alignItems: 'center', justifyContent: 'center' },
-  selected: { backgroundColor: colors.text },
-  text: { fontSize: fontSize.body, color: colors.text, textAlign: 'center' },
-  selectedText: { color: colors.background },
-  disabled: { color: colors.textMuted },
+  selected: { backgroundColor: colors.action },
+  text: { fontSize: fontSize.body, color: colors.ink, textAlign: 'center' },
+  selectedText: { color: colors.onAction, fontWeight: '600' },
+  disabled: { color: colors.ink2 },
 });

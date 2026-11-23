@@ -10,6 +10,7 @@
     "newPassword": "Neues Passwort",
     "code": "Code aus der E-Mail",
     "back": "Zurück",
+    "tagline": "Studiofotos und Anzeigen direkt vom Hof.",
     "signIn": {
       "title": "Anmelden",
       "submit": "Anmelden",
@@ -47,6 +48,8 @@
     "title": "Fahrzeuge",
     "empty": "Noch keine Fahrzeuge.",
     "waitingForProcessing": "Wartet auf Verarbeitung",
+    "exteriorMissing": "Außen {{done}}/{{total}} · {{missing}} fehlen",
+    "noPhotos": "Noch keine Fotos",
     "status": {
       "draft": "Entwurf",
       "shooting": "Fotos werden aufgenommen",

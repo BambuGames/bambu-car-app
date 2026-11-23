@@ -38,7 +38,7 @@ export function DamageMap({ map, selected, onSelect, label }: { map: Map; select
                 transform={[{ scale }]}
                 style="stroke"
                 strokeWidth={id === selected ? 6 : 2}
-                color={id === selected ? colors.text : colors.border}
+                color={id === selected ? colors.ink : colors.rule}
               />
             ))}
           </Canvas>

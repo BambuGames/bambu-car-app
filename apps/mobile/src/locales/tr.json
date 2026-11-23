@@ -10,6 +10,7 @@
     "newPassword": "Yeni şifre",
     "code": "E-postadaki kod",
     "back": "Geri",
+    "tagline": "Galeriden doğrudan stüdyo fotoğrafı ve ilan.",
     "signIn": {
       "title": "Giriş yap",
       "submit": "Giriş yap",
@@ -47,6 +48,8 @@
     "title": "Araçlar",
     "empty": "Henüz araç yok.",
     "waitingForProcessing": "İşlenmeyi bekliyor",
+    "exteriorMissing": "Dış {{done}}/{{total}} · {{missing}} eksik",
+    "noPhotos": "Henüz fotoğraf yok",
     "status": {
       "draft": "Taslak",
       "shooting": "Çekimde",
