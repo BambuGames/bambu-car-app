@@ -19,7 +19,7 @@ import { studioApi, useStudio } from '../../../../studio/useStudio';
 import { useSync } from '../../../../sync/SyncProvider';
 import { Button } from '../../../../ui/Button';
 import { Notice } from '../../../../ui/Notice';
-import { colors, fontSize, radius, space } from '../../../../ui/theme';
+import { colors, fonts, fontSize, radiusPhoto, space } from '../../../../ui/theme';
 
 const NOT_RECOGNISED = new Set(['empty_mask', 'car_too_small']);
 
@@ -123,6 +123,8 @@ export default function StudioScreen() {
           value={data.vehicle.tone_enabled}
           onValueChange={(toneEnabled) => setOptions({ toneEnabled })}
           disabled={!online}
+          trackColor={{ true: colors.action, false: colors.rule }}
+          ios_backgroundColor={colors.rule}
           accessibilityLabel={t('studio.tone')}
         />
       </View>
@@ -130,7 +132,8 @@ export default function StudioScreen() {
 
       {ownerProcesses ? (
         <Notice text={t('studio.ownerProcesses')} />
-      ) : (
+      ) : blocker === 'nothing' ? null : (
+        // With nothing left to process the button would only ever be disabled; the notice below says why.
         <Button label={t('studio.process')} onPress={() => start({})} disabled={blocker !== null} loading={busy} />
       )}
       {blocker && blocker !== 'checking' ? (
@@ -236,19 +239,20 @@ function Tile(props: {
 }
 
 const styles = StyleSheet.create({
-  content: { padding: space[3], gap: space[3], backgroundColor: colors.background },
-  heading: { fontSize: fontSize.body, fontWeight: '600', color: colors.text, marginTop: space[2] },
+  content: { padding: space[3], gap: space[3], backgroundColor: colors.paper },
+  heading: { fontFamily: fonts.title, fontSize: fontSize.title, color: colors.ink, marginTop: space[2] },
   swatches: { gap: space[2] },
   row: { flexDirection: 'row', alignItems: 'center', gap: space[3] },
   rowText: { flex: 1, gap: space[0] },
-  label: { fontSize: fontSize.body, color: colors.text },
-  hint: { fontSize: fontSize.small, color: colors.textMuted },
-  error: { color: colors.danger },
+  label: { fontSize: fontSize.body, color: colors.ink },
+  hint: { fontSize: fontSize.small, color: colors.ink2 },
+  error: { color: colors.mark },
   rerender: { gap: space[1] },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: space[3] },
   tile: { width: '47%', gap: space[1] },
-  thumb: { width: '100%', aspectRatio: 4 / 3, borderRadius: radius, backgroundColor: colors.surface, marginBottom: space[1] },
-  tag: { fontSize: fontSize.small, fontWeight: '600', color: colors.text },
-  pendingTag: { color: colors.pending },
+  thumb: { width: '100%', aspectRatio: 4 / 3, borderRadius: radiusPhoto, backgroundColor: colors.sheet, marginBottom: space[1] },
+  tag: { fontSize: fontSize.small, fontWeight: '600', color: colors.ink },
+  // A plate still to confirm is the user's work: the mark ink, with its words.
+  pendingTag: { color: colors.mark },
   pressed: { opacity: 0.7 },
 });

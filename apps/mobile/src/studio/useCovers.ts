@@ -9,8 +9,12 @@ import { studioApi } from './useStudio';
 
 export type Cover = { url: string; path: string };
 
+// The last covers per gallery, so a screen opened after the list starts with them (no placeholder that jumps
+// to a photo a moment later) and then refreshes quietly.
+const lastCovers = new Map<string, Record<string, Cover | null>>();
+
 export function useCovers(galleryId: string | undefined): Record<string, Cover | null> {
-  const [covers, setCovers] = useState<Record<string, Cover | null>>({});
+  const [covers, setCovers] = useState<Record<string, Cover | null>>(() => (galleryId && lastCovers.get(galleryId)) || {});
   useFocusEffect(
     useCallback(() => {
       if (!galleryId) return;
@@ -29,8 +33,10 @@ export function useCovers(galleryId: string | undefined): Record<string, Cover |
           );
           const paths = coversByVehicle(data as Parameters<typeof coversByVehicle>[0]);
           const urls = await studioApi.signedUrls('processed', Object.values(paths).filter((p): p is string => !!p));
+          const next = Object.fromEntries(Object.entries(paths).map(([id, p]) => [id, p && urls[p] ? { url: urls[p], path: p } : null]));
+          lastCovers.set(galleryId, next);
           if (!active) return;
-          setCovers(Object.fromEntries(Object.entries(paths).map(([id, p]) => [id, p && urls[p] ? { url: urls[p], path: p } : null])));
+          setCovers(next);
         } catch {
           // offline or not reachable: no thumbnails
         }

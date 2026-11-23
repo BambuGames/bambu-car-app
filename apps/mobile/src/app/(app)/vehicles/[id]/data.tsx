@@ -16,14 +16,17 @@ import { studioApi } from '../../../../studio/useStudio';
 import { useSync } from '../../../../sync/SyncProvider';
 import { changeBodyType } from '../../../../vehicle/api';
 import { EditingElsewhere } from '../../../../vehicle/EditingElsewhere';
+import { codeFor } from '../../../../vehicle/fieldCodes';
 import { SECTIONS, sectionDone, sectionProgress } from '../../../../vehicle/sections';
 import { confirmAlert } from '../../../../ui/confirm';
+import { ChoiceList } from '../../../../ui/ChoiceList';
+import { Icon } from '../../../../ui/Icon';
 import { Notice } from '../../../../ui/Notice';
 import { Screen } from '../../../../ui/Screen';
 import { Segmented } from '../../../../ui/Segmented';
 import { SelectField } from '../../../../ui/SelectField';
 import { TextField } from '../../../../ui/TextField';
-import { colors, fontSize, radius, space } from '../../../../ui/theme';
+import { colors, fonts, fontSize, radius, space } from '../../../../ui/theme';
 
 const BODY_TYPES: BodyType[] = ['sedan', 'hatchback', 'kombi', 'suv', 'other'];
 const same = (a: string, b: string) => a.trim().toLocaleLowerCase() === b.trim().toLocaleLowerCase();
@@ -154,6 +157,7 @@ function Form({ initial }: { initial: { vehicle: Vehicle; listing: Listing | nul
       <TextField
         key={key}
         label={t(`vehicleData.fields.${key}`)}
+        code={codeFor(key)}
         value={text[key]}
         onChangeText={onChange}
         error={errors[key]}
@@ -168,6 +172,7 @@ function Form({ initial }: { initial: { vehicle: Vehicle; listing: Listing | nul
     <SelectField<T>
       key={key}
       label={t(`vehicleData.fields.${key}`)}
+      code={codeFor(key)}
       value={vehicle.data[key] as T | null}
       options={list.map((value) => ({ value, label: t(`vehicleData.values.${listName}.${value as string}` as never) }))}
       onChange={(value) => saveData({ [key]: value })}
@@ -262,6 +267,7 @@ function Form({ initial }: { initial: { vehicle: Vehicle; listing: Listing | nul
         <View style={styles.group}>
           <TextField
             label={t('vehicleForm.make')}
+            code={codeFor('make')}
             value={make}
             autoCapitalize="words"
             onChangeText={(v) => {
@@ -274,6 +280,7 @@ function Form({ initial }: { initial: { vehicle: Vehicle; listing: Listing | nul
         <View style={styles.group}>
           <TextField
             label={t('vehicleForm.model')}
+            code={codeFor('model')}
             value={model}
             autoCapitalize="words"
             onChangeText={(v) => {
@@ -283,22 +290,14 @@ function Form({ initial }: { initial: { vehicle: Vehicle; listing: Listing | nul
           />
           <Suggestions items={models} value={model} onPick={(name) => { setModel(name); pickMakeModel({ model: name }); }} />
         </View>
-        <View style={styles.group} accessibilityRole="radiogroup">
+        <View style={styles.group}>
           <Text style={styles.label}>{t('vehicleForm.bodyType')}</Text>
-          {BODY_TYPES.map((type) => {
-            const on = vehicle.bodyType === type;
-            return (
-              <Pressable
-                key={type}
-                accessibilityRole="radio"
-                accessibilityState={{ checked: on }}
-                onPress={() => onBodyType(type)}
-                style={[styles.option, on && styles.optionOn]}
-              >
-                <Text style={[styles.optionText, on && styles.optionTextOn]}>{t(`bodyTypes.${type}`)}</Text>
-              </Pressable>
-            );
-          })}
+          <ChoiceList
+            label={t('vehicleForm.bodyType')}
+            options={BODY_TYPES.map((type) => ({ value: type, label: t(`bodyTypes.${type}`) }))}
+            value={vehicle.bodyType}
+            onChange={onBodyType}
+          />
           {note ? <Notice text={note} /> : null}
         </View>
         {dataField('variant', (s) => s.trim() || null)}
@@ -361,7 +360,7 @@ function Form({ initial }: { initial: { vehicle: Vehicle; listing: Listing | nul
               onPress={() => toggleEquipment(code)}
               style={styles.check}
             >
-              <View style={[styles.box, on && styles.boxOn]}>{on ? <Text style={styles.tick}>✓</Text> : null}</View>
+              <View style={[styles.box, on && styles.boxOn]}>{on ? <Icon ios="checkmark" android="check" size={14} color={colors.onAction} /> : null}</View>
               <Text style={styles.optionText}>{equipmentLabel(code)}</Text>
             </Pressable>
           );
@@ -419,13 +418,15 @@ function Form({ initial }: { initial: { vehicle: Vehicle; listing: Listing | nul
       {SECTIONS.map((section) => (
         <View key={section.key} style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle} accessibilityRole="header">
+            <Text
+              style={styles.sectionTitle}
+              accessibilityRole="header"
+              accessibilityValue={section.key !== 'basics' && sectionDone(section, vehicle, listing) ? { text: t('vehicles.status.ready') } : undefined}
+            >
               {t(`vehicleData.sections.${section.key}`)}
             </Text>
-            {section.key !== 'basics' ? (
-              <Text style={[styles.hint, sectionDone(section, vehicle, listing) && styles.done]}>
-                {sectionDone(section, vehicle, listing) ? '✓' : '–'}
-              </Text>
+            {section.key !== 'basics' && sectionDone(section, vehicle, listing) ? (
+              <Icon ios="checkmark.circle.fill" android="check_circle" size={20} color={colors.ok} />
             ) : null}
           </View>
           {body[section.key]}
@@ -436,23 +437,19 @@ function Form({ initial }: { initial: { vehicle: Vehicle; listing: Listing | nul
 }
 
 const styles = StyleSheet.create({
-  section: { gap: space[2] },
-  sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' },
-  sectionTitle: { fontSize: fontSize.title, fontWeight: '600', color: colors.text },
+  // Sections sit on the paper ground, separated by a rule; the fields themselves are the sheet surface.
+  section: { gap: space[2], paddingTop: space[3], borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.rule },
+  sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  sectionTitle: { fontFamily: fonts.title, fontSize: fontSize.title, color: colors.ink },
   group: { gap: space[1] },
-  label: { fontSize: fontSize.small, fontWeight: '500', color: colors.text },
-  hint: { fontSize: fontSize.small, color: colors.textMuted },
-  done: { color: colors.ready },
-  suggestions: { borderWidth: 1, borderColor: colors.border, borderRadius: radius },
+  label: { fontSize: fontSize.small, fontWeight: '600', color: colors.ink },
+  hint: { fontSize: fontSize.small, color: colors.ink2 },
+  suggestions: { borderWidth: 1, borderColor: colors.rule, borderRadius: radius },
   suggestion: { minHeight: 44, justifyContent: 'center', paddingHorizontal: space[2] },
-  suggestionText: { fontSize: fontSize.body, color: colors.text },
-  option: { minHeight: 48, justifyContent: 'center', paddingHorizontal: space[2], borderWidth: 1, borderColor: colors.border, borderRadius: radius },
-  optionOn: { borderColor: colors.accent, borderWidth: 2 },
-  optionText: { flexShrink: 1, fontSize: fontSize.body, color: colors.text },
-  optionTextOn: { color: colors.accent, fontWeight: '600' },
+  suggestionText: { fontSize: fontSize.body, color: colors.ink },
+  optionText: { flexShrink: 1, fontSize: fontSize.body, color: colors.ink },
   check: { flexDirection: 'row', alignItems: 'center', gap: space[2], minHeight: 48 },
-  box: { width: 24, height: 24, borderRadius: 4, borderWidth: 1.5, borderColor: colors.border, alignItems: 'center', justifyContent: 'center' },
-  boxOn: { backgroundColor: colors.accent, borderColor: colors.accent },
-  tick: { color: colors.background, fontSize: fontSize.small, fontWeight: '700' },
+  box: { width: 24, height: 24, borderRadius: 4, borderWidth: 1.5, borderColor: colors.field, backgroundColor: colors.sheet, alignItems: 'center', justifyContent: 'center' },
+  boxOn: { backgroundColor: colors.action, borderColor: colors.action },
   notes: { minHeight: 120, textAlignVertical: 'top', paddingTop: space[2] },
 });

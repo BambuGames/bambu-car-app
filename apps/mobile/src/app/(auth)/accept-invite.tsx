@@ -8,6 +8,7 @@ import { signInWithCode } from '../../lib/codeSignIn';
 import { supabase } from '../../lib/supabase';
 import { Button } from '../../ui/Button';
 import { Notice } from '../../ui/Notice';
+import { BrandHead } from '../../ui/BrandHead';
 import { Screen } from '../../ui/Screen';
 import { TextField } from '../../ui/TextField';
 
@@ -46,6 +47,7 @@ export default function AcceptInvite() {
 
   return (
     <Screen>
+      <BrandHead />
       <Notice text={t('auth.acceptInvite.hint')} />
       <TextField
         label={t('auth.code')}

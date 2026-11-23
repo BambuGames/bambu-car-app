@@ -1,7 +1,7 @@
 import { Stack } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
-import { colors } from '../../ui/theme';
+import { colors, fonts } from '../../ui/theme';
 
 export const unstable_settings = { anchor: 'sign-in' };
 
@@ -12,8 +12,10 @@ export default function AuthLayout() {
       screenOptions={{
         headerShadowVisible: false,
         headerBackTitle: t('auth.back'),
-        headerTintColor: colors.text,
-        contentStyle: { backgroundColor: colors.background },
+        headerTintColor: colors.action,
+        headerStyle: { backgroundColor: colors.paper },
+        headerTitleStyle: { fontFamily: fonts.title, color: colors.ink },
+        contentStyle: { backgroundColor: colors.paper },
       }}
     >
       <Stack.Screen name="sign-in" options={{ title: t('auth.signIn.title') }} />

@@ -115,11 +115,11 @@ export default function MembersScreen() {
 }
 
 const styles = StyleSheet.create({
-  content: { padding: space[3], gap: space[3], backgroundColor: colors.background },
-  heading: { fontSize: fontSize.body, fontWeight: '600', color: colors.text, marginTop: space[3] },
-  hint: { fontSize: fontSize.small, color: colors.textMuted },
-  row: { flexDirection: 'row', alignItems: 'center', gap: space[3], paddingVertical: space[1], borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.border },
+  content: { padding: space[3], gap: space[3], backgroundColor: colors.paper },
+  heading: { fontSize: fontSize.body, fontWeight: '600', color: colors.ink, marginTop: space[3] },
+  hint: { fontSize: fontSize.small, color: colors.ink2 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: space[3], paddingVertical: space[1], borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.rule },
   rowText: { flex: 1, gap: space[0] },
-  email: { fontSize: fontSize.body, color: colors.text },
-  pending: { color: colors.pending, fontWeight: '600' },
+  email: { fontSize: fontSize.body, color: colors.ink },
+  pending: { color: colors.wait, fontWeight: '600' },
 });

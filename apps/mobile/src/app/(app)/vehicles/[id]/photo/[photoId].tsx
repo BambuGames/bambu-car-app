@@ -107,6 +107,6 @@ export default function PhotoScreen() {
 }
 
 const styles = StyleSheet.create({
-  content: { padding: space[3], gap: space[3], backgroundColor: colors.background },
-  status: { fontSize: fontSize.body, color: colors.textMuted },
+  content: { padding: space[3], gap: space[3], backgroundColor: colors.paper },
+  status: { fontSize: fontSize.body, color: colors.ink2 },
 });

@@ -27,5 +27,5 @@ export function StudioLoadState({ error, online, onRetry }: { error: string | nu
 }
 
 const styles = StyleSheet.create({
-  content: { padding: space[3], gap: space[3], backgroundColor: colors.background },
+  content: { padding: space[3], gap: space[3], backgroundColor: colors.paper },
 });

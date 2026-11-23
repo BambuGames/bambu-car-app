@@ -12,7 +12,8 @@ import { pendingCount } from '../../local/outbox';
 import { Button } from '../../ui/Button';
 import { Notice } from '../../ui/Notice';
 import { Screen } from '../../ui/Screen';
-import { colors, fontSize, space } from '../../ui/theme';
+import { NavGroup, NavRow } from '../../ui/NavRow';
+import { colors, fonts, fontSize, space } from '../../ui/theme';
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
@@ -71,16 +72,20 @@ export default function Account() {
           <Text style={styles.heading} accessibilityRole="header">
             {t('account.manage')}
           </Text>
-          <Button variant="secondary" label={t('credits.title')} onPress={() => router.push('/credits')} />
-          <Button variant="secondary" label={t('gallerySettings.title')} onPress={() => router.push('/gallery/settings')} />
-          <Button variant="secondary" label={t('members.title')} onPress={() => router.push('/gallery/members')} />
+          <NavGroup inset>
+            <NavRow label={t('credits.title')} onPress={() => router.push('/credits')} />
+            <NavRow label={t('gallerySettings.title')} onPress={() => router.push('/gallery/settings')} />
+            <NavRow label={t('members.title')} onPress={() => router.push('/gallery/members')} last />
+          </NavGroup>
         </View>
       ) : null}
-      <Button variant="secondary" label={t('account.licenses')} onPress={() => router.push('/licenses')} />
-      {legalLinks().map((link) => (
-        <Button key={link.key} variant="secondary" label={t(`legal.${link.key}`)} onPress={() => openLegal(link.url)} />
-      ))}
-      <Button variant="secondary" label={t('account.signOut')} onPress={signOut} />
+      <NavGroup inset>
+        <NavRow label={t('account.licenses')} onPress={() => router.push('/licenses')} />
+        {legalLinks().map((link) => (
+          <NavRow key={link.key} label={t(`legal.${link.key}`)} onPress={() => openLegal(link.url)} />
+        ))}
+        <NavRow label={t('account.signOut')} onPress={signOut} last />
+      </NavGroup>
       <Button variant="danger" label={t('account.delete')} onPress={confirmDelete} loading={busy} />
       {error ? <Notice kind="error" text={error} /> : null}
     </Screen>
@@ -89,8 +94,8 @@ export default function Account() {
 
 const styles = StyleSheet.create({
   row: { gap: space[0] },
-  label: { fontSize: fontSize.small, color: colors.textMuted },
-  value: { fontSize: fontSize.body, color: colors.text },
+  label: { fontSize: fontSize.small, color: colors.ink2 },
+  value: { fontSize: fontSize.body, color: colors.ink },
   section: { gap: space[2] },
-  heading: { fontSize: fontSize.body, fontWeight: '600', color: colors.text, marginTop: space[2] },
+  heading: { fontFamily: fonts.title, fontSize: fontSize.title, color: colors.ink, marginTop: space[2] },
 });

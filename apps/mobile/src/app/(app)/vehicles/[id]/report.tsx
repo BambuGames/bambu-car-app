@@ -16,7 +16,7 @@ import { useSync } from '../../../../sync/SyncProvider';
 import { Button } from '../../../../ui/Button';
 import { Notice } from '../../../../ui/Notice';
 import { Screen } from '../../../../ui/Screen';
-import { colors, fontSize } from '../../../../ui/theme';
+import { colors, fonts, fontSize } from '../../../../ui/theme';
 import { EditingElsewhere } from '../../../../vehicle/EditingElsewhere';
 
 const api = createReportApi(supabase);
@@ -193,6 +193,6 @@ export default function ReportScreen() {
 }
 
 const styles = StyleSheet.create({
-  heading: { fontSize: fontSize.title, fontWeight: '600', color: colors.text },
-  hint: { fontSize: fontSize.small, color: colors.textMuted },
+  heading: { fontFamily: fonts.title, fontSize: fontSize.title, color: colors.ink },
+  hint: { fontSize: fontSize.small, color: colors.ink2 },
 });

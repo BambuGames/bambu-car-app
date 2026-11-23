@@ -85,5 +85,5 @@ export default function TouchUpScreen() {
 }
 
 const styles = StyleSheet.create({
-  content: { flexGrow: 1, padding: space[3], gap: space[3], backgroundColor: colors.background },
+  content: { flexGrow: 1, padding: space[3], gap: space[3], backgroundColor: colors.paper },
 });

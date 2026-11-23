@@ -10,10 +10,12 @@ import { searchMakes, searchModels, type Make, type Model } from '../../../local
 import { createVehicle } from '../../../local/vehicles';
 import { useSync } from '../../../sync/SyncProvider';
 import { Button } from '../../../ui/Button';
+import { ChoiceList } from '../../../ui/ChoiceList';
 import { Notice } from '../../../ui/Notice';
 import { Screen } from '../../../ui/Screen';
 import { TextField } from '../../../ui/TextField';
 import { colors, fontSize, radius, space } from '../../../ui/theme';
+import { codeFor } from '../../../vehicle/fieldCodes';
 
 const BODY_TYPES: BodyType[] = ['sedan', 'hatchback', 'kombi', 'suv', 'other'];
 const same = (a: string, b: string) => a.trim().toLocaleLowerCase() === b.trim().toLocaleLowerCase();
@@ -96,29 +98,21 @@ export default function NewVehicle() {
   return (
     <Screen>
       <View style={styles.field}>
-        <TextField label={t('vehicleForm.make')} value={make} onChangeText={setMake} error={errors.make} autoCapitalize="words" />
+        <TextField label={t('vehicleForm.make')} code={codeFor('make')} value={make} onChangeText={setMake} error={errors.make} autoCapitalize="words" />
         <Suggestions items={makes} value={make} onPick={setMake} />
       </View>
       <View style={styles.field}>
-        <TextField label={t('vehicleForm.model')} value={model} onChangeText={setModel} error={errors.model} autoCapitalize="words" />
+        <TextField label={t('vehicleForm.model')} code={codeFor('model')} value={model} onChangeText={setModel} error={errors.model} autoCapitalize="words" />
         <Suggestions items={models} value={model} onPick={setModel} />
       </View>
-      <View style={styles.field} accessibilityRole="radiogroup">
+      <View style={styles.field}>
         <Text style={styles.label}>{t('vehicleForm.bodyType')}</Text>
-        {BODY_TYPES.map((type) => {
-          const selected = bodyType === type;
-          return (
-            <Pressable
-              key={type}
-              accessibilityRole="radio"
-              accessibilityState={{ checked: selected }}
-              onPress={() => setBodyType(type)}
-              style={[styles.option, selected && styles.optionSelected]}
-            >
-              <Text style={[styles.optionText, selected && styles.optionTextSelected]}>{t(`bodyTypes.${type}`)}</Text>
-            </Pressable>
-          );
-        })}
+        <ChoiceList
+          label={t('vehicleForm.bodyType')}
+          options={BODY_TYPES.map((type) => ({ value: type, label: t(`bodyTypes.${type}`) }))}
+          value={bodyType}
+          onChange={setBodyType}
+        />
         {errors.bodyType ? <Text style={styles.error}>{errors.bodyType}</Text> : null}
       </View>
       {error ? <Notice kind="error" text={error} /> : null}
@@ -129,20 +123,9 @@ export default function NewVehicle() {
 
 const styles = StyleSheet.create({
   field: { gap: space[1] },
-  label: { fontSize: fontSize.small, fontWeight: '500', color: colors.text },
-  suggestions: { borderWidth: 1, borderColor: colors.border, borderRadius: radius },
+  label: { fontSize: fontSize.small, fontWeight: '600', color: colors.ink },
+  suggestions: { borderWidth: 1, borderColor: colors.rule, borderRadius: radius },
   suggestion: { minHeight: 44, justifyContent: 'center', paddingHorizontal: space[2] },
-  suggestionText: { fontSize: fontSize.body, color: colors.text },
-  option: {
-    minHeight: 48,
-    justifyContent: 'center',
-    paddingHorizontal: space[2],
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius,
-  },
-  optionSelected: { borderColor: colors.accent, borderWidth: 2 },
-  optionText: { fontSize: fontSize.body, color: colors.text },
-  optionTextSelected: { color: colors.accent, fontWeight: '600' },
-  error: { fontSize: fontSize.small, color: colors.danger },
+  suggestionText: { fontSize: fontSize.body, color: colors.ink },
+  error: { fontSize: fontSize.small, color: colors.mark },
 });

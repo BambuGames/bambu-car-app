@@ -16,6 +16,7 @@ import { StudioLoadState } from '../../../../studio/LoadState';
 import { originalKey } from '../../../../studio/status';
 import { studioApi, useStudio } from '../../../../studio/useStudio';
 import { Button } from '../../../../ui/Button';
+import { Icon } from '../../../../ui/Icon';
 import { Notice } from '../../../../ui/Notice';
 import { Segmented } from '../../../../ui/Segmented';
 import { colors, fontSize, radius, space } from '../../../../ui/theme';
@@ -149,7 +150,9 @@ export default function ExportScreen() {
                     contentFit="cover"
                     accessible={false}
                   />
-                  <View style={[styles.check, on && styles.checkOn]} />
+                  <View style={[styles.check, on && styles.checkOn]}>
+                    {on ? <Icon ios="checkmark" android="check" size={13} color={colors.onAction} /> : null}
+                  </View>
                 </Pressable>
               );
             })}
@@ -173,18 +176,20 @@ export default function ExportScreen() {
 
 const CHECK = 22;
 const styles = StyleSheet.create({
-  content: { padding: space[3], gap: space[3], backgroundColor: colors.background },
+  content: { padding: space[3], gap: space[3], backgroundColor: colors.paper },
   selectionRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  hint: { fontSize: fontSize.small, color: colors.textMuted },
-  link: { fontSize: fontSize.small, fontWeight: '600', color: colors.text },
+  hint: { fontSize: fontSize.small, color: colors.ink2 },
+  link: { fontSize: fontSize.small, fontWeight: '600', color: colors.ink },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: space[2] },
   tile: { width: '31%' },
-  thumb: { width: '100%', aspectRatio: 4 / 3, borderRadius: radius, backgroundColor: colors.surface },
+  thumb: { width: '100%', aspectRatio: 4 / 3, borderRadius: radius, backgroundColor: colors.sheet },
   thumbOff: { opacity: 0.35 },
   // A selection mark in the corner: filled when the photo is in the set.
   check: {
     position: 'absolute', top: space[1], right: space[1], width: CHECK, height: CHECK, borderRadius: CHECK / 2,
-    borderWidth: 2, borderColor: colors.background, backgroundColor: 'rgba(0,0,0,0.25)',
+    alignItems: 'center', justifyContent: 'center',
+    // Sits on a photo: the dimmed ring stays visible on light and dark shots.
+    borderWidth: 2, borderColor: colors.sheet, backgroundColor: 'rgba(0,0,0,0.25)',
   },
-  checkOn: { backgroundColor: colors.text },
+  checkOn: { backgroundColor: colors.action },
 });

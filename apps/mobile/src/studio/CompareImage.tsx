@@ -40,5 +40,5 @@ export function CompareImage({ before, after }: { before: Picture | null; after:
 
 const styles = StyleSheet.create({
   wrap: { gap: space[2] },
-  image: { width: '100%', aspectRatio: 4 / 3, borderRadius: radius, backgroundColor: colors.surface },
+  image: { width: '100%', aspectRatio: 4 / 3, borderRadius: radius, backgroundColor: colors.sheet },
 });

@@ -1,12 +1,14 @@
 import { Link, Stack } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { initials } from '../../lib/initials';
 import { canManageGallery } from '../../lib/roles';
 import { useSession } from '../../lib/session';
 import { SyncProvider } from '../../sync/SyncProvider';
 import { Button } from '../../ui/Button';
-import { colors, fontSize, space } from '../../ui/theme';
+import { colors, fonts, fontSize, maxScale, space } from '../../ui/theme';
+import { Wordmark } from '../../ui/Wordmark';
 
 // Signed in without a gallery to show: nobody has attached the account to one yet, or (unknown) the
 // server could not be asked and this device has never had its answer.
@@ -43,17 +45,25 @@ export default function AppLayout() {
         screenOptions={{
           headerShadowVisible: false,
           headerBackTitle: t('auth.back'),
-          headerTintColor: colors.text,
-          contentStyle: { backgroundColor: colors.background },
+          headerTintColor: colors.action,
+          headerStyle: { backgroundColor: colors.paper },
+          headerTitleStyle: { fontFamily: fonts.title, color: colors.ink },
+          contentStyle: { backgroundColor: colors.paper },
         }}
       >
         <Stack.Screen
           name="index"
           options={{
+            // The screen draws its own display title: the native iOS large title disappeared after returning
+            // from a pushed screen (iOS 26, react-native-screens 4.30). The bar carries the wordmark (a title
+            // view, so iOS 26 gives it no glass capsule) and the account button.
             title: t('vehicles.title'),
+            headerTitle: () => <Wordmark size={19} maxFontSizeMultiplier={maxScale.bar} />,
             headerRight: () => (
-              <Link href="/account" style={styles.headerLink}>
-                {t('account.title')}
+              <Link href="/account" asChild>
+                <Pressable accessibilityRole="button" accessibilityLabel={t('account.title')} hitSlop={6} style={styles.account}>
+                  <Text style={styles.accountText} maxFontSizeMultiplier={maxScale.bar}>{initials(membership.galleryName)}</Text>
+                </Pressable>
               </Link>
             ),
           }}
@@ -85,8 +95,17 @@ export default function AppLayout() {
 }
 
 const styles = StyleSheet.create({
-  noGallery: { flex: 1, justifyContent: 'center', padding: space[4], gap: space[3], backgroundColor: colors.background },
-  title: { fontSize: fontSize.title, fontWeight: '600', color: colors.text },
-  body: { fontSize: fontSize.body, lineHeight: 22, color: colors.text },
-  headerLink: { fontSize: fontSize.body, color: colors.text },
+  noGallery: { flex: 1, justifyContent: 'center', padding: space[4], gap: space[3], backgroundColor: colors.paper },
+  title: { fontFamily: fonts.title, fontSize: fontSize.title, color: colors.ink },
+  body: { fontSize: fontSize.body, lineHeight: 22, color: colors.ink },
+  // 36 pt circle; hitSlop takes the target to 48. iOS 26 draws its own glass circle around bar items.
+  account: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...(Platform.OS === 'ios' ? null : { backgroundColor: colors.sheet, borderWidth: 1, borderColor: colors.rule }),
+  },
+  accountText: { fontFamily: fonts.title, fontSize: 13, color: colors.ink2 },
 });

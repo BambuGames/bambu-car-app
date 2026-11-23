@@ -192,12 +192,12 @@ export function TouchUpEditor({
                   strokeWidth={2 * toOutputRadius(placement, edit.radius) * size.width * view.scale}
                   strokeCap="round"
                   strokeJoin="round"
-                  color={colors.danger}
+                  color={colors.mark}
                   opacity={MARK}
                 />
               ) : (
                 <Group key={i}>
-                  <Circle cx={fromOriginal(edit.point).x} cy={fromOriginal(edit.point).y} r={11} color={colors.danger} />
+                  <Circle cx={fromOriginal(edit.point).x} cy={fromOriginal(edit.point).y} r={11} color={colors.mark} />
                   {/* A ring, so the mark shows on a red car too. */}
                   <Circle
                     cx={fromOriginal(edit.point).x}
@@ -205,7 +205,7 @@ export function TouchUpEditor({
                     r={11}
                     style="stroke"
                     strokeWidth={3}
-                    color={colors.background}
+                    color={colors.paper}
                   />
                 </Group>
               ),
@@ -217,7 +217,7 @@ export function TouchUpEditor({
                 strokeWidth={2 * stroke.brush * size.width * view.scale}
                 strokeCap="round"
                 strokeJoin="round"
-                color={colors.danger}
+                color={colors.mark}
                 opacity={MARK}
               />
             ) : null}
@@ -259,8 +259,8 @@ export function TouchUpEditor({
 
 const styles = StyleSheet.create({
   wrap: { gap: space[3] },
-  frame: { width: '100%', aspectRatio: 4 / 3, borderRadius: radius, overflow: 'hidden', backgroundColor: colors.surface },
-  hint: { fontSize: fontSize.small, color: colors.textMuted },
+  frame: { width: '100%', aspectRatio: 4 / 3, borderRadius: radius, overflow: 'hidden', backgroundColor: colors.sheet },
+  hint: { fontSize: fontSize.small, color: colors.ink2 },
   actions: { flexDirection: 'row', gap: space[3] },
   action: { flex: 1 },
 });

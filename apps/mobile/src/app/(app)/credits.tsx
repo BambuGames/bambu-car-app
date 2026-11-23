@@ -81,15 +81,15 @@ export default function CreditsScreen() {
 }
 
 const styles = StyleSheet.create({
-  content: { padding: space[3], gap: space[3], backgroundColor: colors.background },
+  content: { padding: space[3], gap: space[3], backgroundColor: colors.paper },
   header: { gap: space[1], marginBottom: space[2] },
-  label: { fontSize: fontSize.small, color: colors.textMuted },
-  balance: { fontSize: 44, fontWeight: '600', color: colors.text, fontVariant: ['tabular-nums'] },
-  hint: { fontSize: fontSize.small, color: colors.textMuted },
-  heading: { fontSize: fontSize.body, fontWeight: '600', color: colors.text, marginTop: space[3] },
-  separator: { height: StyleSheet.hairlineWidth, backgroundColor: colors.border },
+  label: { fontSize: fontSize.small, color: colors.ink2 },
+  balance: { fontSize: 44, fontWeight: '600', color: colors.ink, fontVariant: ['tabular-nums'] },
+  hint: { fontSize: fontSize.small, color: colors.ink2 },
+  heading: { fontSize: fontSize.body, fontWeight: '600', color: colors.ink, marginTop: space[3] },
+  separator: { height: StyleSheet.hairlineWidth, backgroundColor: colors.rule },
   entry: { flexDirection: 'row', alignItems: 'center', gap: space[3] },
   entryText: { flex: 1, gap: space[0] },
-  entryLabel: { fontSize: fontSize.body, color: colors.text },
-  amount: { fontSize: fontSize.body, fontWeight: '600', color: colors.text, fontVariant: ['tabular-nums'] },
+  entryLabel: { fontSize: fontSize.body, color: colors.ink },
+  amount: { fontSize: fontSize.body, fontWeight: '600', color: colors.ink, fontVariant: ['tabular-nums'] },
 });

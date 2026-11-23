@@ -4,7 +4,7 @@ import { Image, StyleSheet, Text, View } from 'react-native';
 
 import type { QcIssue } from '../domain/capture';
 import { Button } from '../ui/Button';
-import { colors, fontSize, radius, space } from '../ui/theme';
+import { colors, fonts, fontSize, radius, space } from '../ui/theme';
 
 export function ReviewSheet({
   uri,
@@ -43,10 +43,10 @@ export function ReviewSheet({
 
 const styles = StyleSheet.create({
   backdrop: { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', padding: space[4] },
-  sheet: { flexDirection: 'row', gap: space[4], backgroundColor: colors.background, borderRadius: radius, padding: space[3] },
-  photo: { flex: 3, aspectRatio: 4 / 3, borderRadius: radius, backgroundColor: colors.surface },
+  sheet: { flexDirection: 'row', gap: space[4], backgroundColor: colors.paper, borderRadius: radius, padding: space[3] },
+  photo: { flex: 3, aspectRatio: 4 / 3, borderRadius: radius, backgroundColor: colors.sheet },
   side: { flex: 2, gap: space[2] },
-  title: { fontSize: fontSize.title, fontWeight: '600', color: colors.text },
-  issue: { fontSize: fontSize.body, color: colors.danger },
+  title: { fontFamily: fonts.title, fontSize: fontSize.title, color: colors.ink },
+  issue: { fontSize: fontSize.body, color: colors.mark },
   actions: { marginTop: 'auto', gap: space[2] },
 });

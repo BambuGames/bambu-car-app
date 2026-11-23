@@ -16,4 +16,4 @@ export function PosterPreview({ uri, label, format = '4:5' }: { uri: string | nu
   );
 }
 
-const styles = StyleSheet.create({ frame: { width: '100%', backgroundColor: colors.surface } });
+const styles = StyleSheet.create({ frame: { width: '100%', backgroundColor: colors.sheet } });

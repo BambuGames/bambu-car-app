@@ -9,6 +9,7 @@ import { legalLinks, openLegal } from '../../lib/legal';
 import { supabase } from '../../lib/supabase';
 import { Button } from '../../ui/Button';
 import { Notice } from '../../ui/Notice';
+import { BrandHead } from '../../ui/BrandHead';
 import { Screen } from '../../ui/Screen';
 import { TextField } from '../../ui/TextField';
 import { colors, fontSize, space } from '../../ui/theme';
@@ -38,6 +39,7 @@ export default function SignIn() {
 
   return (
     <Screen>
+      <BrandHead />
       <TextField
         label={t('auth.email')}
         value={email}
@@ -74,5 +76,5 @@ export default function SignIn() {
 
 const styles = StyleSheet.create({
   legal: { flexDirection: 'row', justifyContent: 'center', gap: space[4] },
-  legalText: { fontSize: fontSize.small, color: colors.textMuted, textDecorationLine: 'underline' },
+  legalText: { fontSize: fontSize.small, color: colors.ink2, textDecorationLine: 'underline' },
 });

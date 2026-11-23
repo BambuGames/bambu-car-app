@@ -29,9 +29,10 @@ import { coverPhoto } from '../../../../studio/order';
 import { studioApi, useStudio } from '../../../../studio/useStudio';
 import { useSync } from '../../../../sync/SyncProvider';
 import { Button } from '../../../../ui/Button';
+import { Icon } from '../../../../ui/Icon';
 import { Notice } from '../../../../ui/Notice';
 import { Segmented } from '../../../../ui/Segmented';
-import { colors, fontSize, radius, space } from '../../../../ui/theme';
+import { colors, fontSize, radius, radiusPhoto, space } from '../../../../ui/theme';
 
 const LANGUAGE_NAMES: Record<Language, string> = { de: 'Deutsch', tr: 'Türkçe', en: 'English' };
 const FORMATS: PosterFormat[] = ['4:5', '9:16'];
@@ -238,7 +239,7 @@ export default function ShareScreen() {
       {posterFailed ? <Notice kind="error" text={t('share.failed')} /> : null}
       {warning ? (
         <>
-          <Notice kind="error" text={t(warning === 'check' ? 'share.plateCheck' : 'share.plateNoBanner')} />
+          <Notice kind="attention" text={t(warning === 'check' ? 'share.plateCheck' : 'share.plateNoBanner')} />
           <Button
             variant="secondary"
             label={t(warning === 'check' ? 'share.plateCheckAction' : 'share.bannerAction')}
@@ -280,7 +281,9 @@ export default function ShareScreen() {
                       style={styles.tile}
                     >
                       <Image source={thumbs[i.path] ? { uri: thumbs[i.path], cacheKey: i.path } : undefined} style={[styles.tileImage, !on && styles.tileOff]} contentFit="cover" accessible={false} />
-                      <View style={[styles.check, on && styles.checkOn]} />
+                      <View style={[styles.check, on && styles.checkOn]}>
+                        {on ? <Icon ios="checkmark" android="check" size={13} color={colors.onAction} /> : null}
+                      </View>
                     </Pressable>
                   );
                 })}
@@ -309,21 +312,23 @@ export default function ShareScreen() {
 
 const CHECK = 22;
 const styles = StyleSheet.create({
-  content: { padding: space[3], gap: space[3], backgroundColor: colors.background },
+  content: { padding: space[3], gap: space[3], backgroundColor: colors.paper },
   preview: { alignItems: 'center' },
-  label: { fontSize: fontSize.small, fontWeight: '500', color: colors.text },
-  link: { fontSize: fontSize.body, fontWeight: '600', color: colors.text, textDecorationLine: 'underline' },
+  label: { fontSize: fontSize.small, fontWeight: '600', color: colors.ink },
+  link: { fontSize: fontSize.body, fontWeight: '600', color: colors.action, textDecorationLine: 'underline' },
   strip: { gap: space[1] },
   thumbBox: { padding: 2, borderRadius: radius, borderWidth: 2, borderColor: 'transparent' },
-  thumbOn: { borderColor: colors.accent },
-  thumb: { width: 88, aspectRatio: 4 / 3, borderRadius: radius - 2, backgroundColor: colors.surface },
+  thumbOn: { borderColor: colors.action },
+  thumb: { width: 88, aspectRatio: 4 / 3, borderRadius: radiusPhoto, backgroundColor: colors.sheet },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: space[2] },
   tile: { width: '31%' },
-  tileImage: { width: '100%', aspectRatio: 4 / 3, borderRadius: radius, backgroundColor: colors.surface },
+  tileImage: { width: '100%', aspectRatio: 4 / 3, borderRadius: radiusPhoto, backgroundColor: colors.sheet },
   tileOff: { opacity: 0.35 },
   check: {
     position: 'absolute', top: space[1], right: space[1], width: CHECK, height: CHECK, borderRadius: CHECK / 2,
-    borderWidth: 2, borderColor: colors.background, backgroundColor: 'rgba(0,0,0,0.25)',
+    alignItems: 'center', justifyContent: 'center',
+    // Sits on a photo: the dimmed ring stays visible on light and dark shots.
+    borderWidth: 2, borderColor: colors.sheet, backgroundColor: 'rgba(0,0,0,0.25)',
   },
-  checkOn: { backgroundColor: colors.text },
+  checkOn: { backgroundColor: colors.action },
 });

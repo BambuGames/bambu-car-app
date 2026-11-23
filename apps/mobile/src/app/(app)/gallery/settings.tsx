@@ -24,7 +24,7 @@ import { colors, fontSize, radius, space } from '../../../ui/theme';
 
 const SIZES = { small: 0.12, medium: 0.18, large: 0.26 } as const;
 const OPACITIES = [0.5, 0.75, 1] as const;
-const BAND_COLORS = { black: colors.text, grey: colors.textMuted, white: colors.background, blue: colors.accent, red: colors.danger, green: colors.ready } as const;
+const BAND_COLORS = { black: colors.ink, grey: colors.ink2, white: colors.paper, blue: colors.action, red: colors.mark, green: colors.ready } as const;
 const POSITIONS: { value: WatermarkPosition; left: `${number}%`; top: `${number}%` }[] = [
   { value: 'top_left', left: '0%', top: '0%' },
   { value: 'top_right', left: '100%', top: '0%' },
@@ -237,7 +237,7 @@ export default function GallerySettingsScreen() {
       <Segmented
         label={t('gallerySettings.band')}
         value={band ? band.edge : 'none'}
-        onChange={(v) => updateWatermark({ band: v === 'none' ? null : { color: band?.color ?? colors.text, edge: v } })}
+        onChange={(v) => updateWatermark({ band: v === 'none' ? null : { color: band?.color ?? colors.ink, edge: v } })}
         options={[
           { value: 'none', label: t('gallerySettings.bandNone') },
           { value: 'top', label: t('gallerySettings.bandTop') },
@@ -299,20 +299,20 @@ export default function GallerySettingsScreen() {
 
 const MARK = 44;
 const styles = StyleSheet.create({
-  content: { padding: space[3], gap: space[3], backgroundColor: colors.background },
+  content: { padding: space[3], gap: space[3], backgroundColor: colors.paper },
   field: { gap: space[1] },
-  heading: { fontSize: fontSize.body, fontWeight: '600', color: colors.text, marginTop: space[3] },
-  label: { fontSize: fontSize.small, color: colors.textMuted, marginTop: space[1] },
-  hint: { fontSize: fontSize.small, color: colors.textMuted },
+  heading: { fontSize: fontSize.body, fontWeight: '600', color: colors.ink, marginTop: space[3] },
+  label: { fontSize: fontSize.small, color: colors.ink2, marginTop: space[1] },
+  hint: { fontSize: fontSize.small, color: colors.ink2 },
   // A small picture of the photo: tap where the logo should go.
-  positions: { width: 176, aspectRatio: 4 / 3, margin: MARK / 2, borderWidth: 1, borderColor: colors.border, borderRadius: radius },
+  positions: { width: 176, aspectRatio: 4 / 3, margin: MARK / 2, borderWidth: 1, borderColor: colors.rule, borderRadius: radius },
   positionTarget: { position: 'absolute', width: MARK, height: MARK, marginLeft: -MARK / 2, marginTop: -MARK / 2, alignItems: 'center', justifyContent: 'center' },
-  positionMark: { width: 20, height: 14, borderRadius: 3, borderWidth: 2, borderColor: colors.textMuted, backgroundColor: colors.background },
-  positionSelected: { borderColor: colors.text, backgroundColor: colors.text },
+  positionMark: { width: 20, height: 14, borderRadius: 3, borderWidth: 2, borderColor: colors.ink2, backgroundColor: colors.paper },
+  positionSelected: { borderColor: colors.action, backgroundColor: colors.action },
   colors: { flexDirection: 'row', flexWrap: 'wrap', gap: space[2] },
   colorRing: { width: MARK, height: MARK, borderRadius: MARK / 2, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: 'transparent' },
-  colorSelected: { borderColor: colors.text },
-  color: { width: 32, height: 32, borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.border },
-  banner: { width: '100%', aspectRatio: 520 / 110, borderRadius: radius, backgroundColor: colors.surface },
+  colorSelected: { borderColor: colors.ink },
+  color: { width: 32, height: 32, borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.rule },
+  banner: { width: '100%', aspectRatio: 520 / 110, borderRadius: radius, backgroundColor: colors.sheet },
   swatches: { gap: space[2] },
 });

@@ -83,12 +83,12 @@ export function PlateEditor({
         </View>
         <Canvas style={StyleSheet.absoluteFill} pointerEvents="none">
           <Path path={path} style="stroke" strokeWidth={5} color="rgba(0,0,0,0.55)" />
-          <Path path={path} style="stroke" strokeWidth={2} color={colors.background} />
+          <Path path={path} style="stroke" strokeWidth={2} color={colors.paper} />
           {corners.map((p, i) => (
-            <Circle key={i} cx={p.x} cy={p.y} r={11} color={colors.accent} />
+            <Circle key={i} cx={p.x} cy={p.y} r={11} color={colors.action} />
           ))}
           {corners.map((p, i) => (
-            <Circle key={`r${i}`} cx={p.x} cy={p.y} r={11} style="stroke" strokeWidth={2} color={colors.background} />
+            <Circle key={`r${i}`} cx={p.x} cy={p.y} r={11} style="stroke" strokeWidth={2} color={colors.paper} />
           ))}
         </Canvas>
       </View>
@@ -97,5 +97,5 @@ export function PlateEditor({
 }
 
 const styles = StyleSheet.create({
-  frame: { width: '100%', aspectRatio: 4 / 3, borderRadius: radius, overflow: 'hidden', backgroundColor: colors.surface },
+  frame: { width: '100%', aspectRatio: 4 / 3, borderRadius: radius, overflow: 'hidden', backgroundColor: colors.sheet },
 });

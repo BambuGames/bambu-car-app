@@ -36,6 +36,6 @@ export function WatermarkPreview({
 }
 
 const styles = StyleSheet.create({
-  frame: { width: '100%', aspectRatio: 4 / 3, borderRadius: radius, overflow: 'hidden', backgroundColor: colors.border },
+  frame: { width: '100%', aspectRatio: 4 / 3, borderRadius: radius, overflow: 'hidden', backgroundColor: colors.rule },
   layer: { position: 'absolute', left: 0, right: 0 },
 });

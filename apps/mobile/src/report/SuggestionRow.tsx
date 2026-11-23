@@ -77,13 +77,13 @@ export function SuggestionRow({ suggestion, vehicle, decision, disabled, onDecid
 }
 
 const styles = StyleSheet.create({
-  row: { gap: space[1], paddingBottom: space[3], borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.border },
-  label: { fontSize: fontSize.body, fontWeight: '600', color: colors.text },
-  line: { fontSize: fontSize.small, color: colors.textMuted },
-  value: { fontSize: fontSize.body, color: colors.text },
+  row: { gap: space[1], paddingBottom: space[3], borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.rule },
+  label: { fontSize: fontSize.body, fontWeight: '600', color: colors.ink },
+  line: { fontSize: fontSize.small, color: colors.ink2 },
+  value: { fontSize: fontSize.body, color: colors.ink },
   buttons: { flexDirection: 'row', gap: space[2], marginTop: space[1] },
-  choice: { flex: 1, minHeight: 48, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border, borderRadius: radius },
-  choiceOn: { borderWidth: 2, borderColor: colors.accent },
-  choiceText: { fontSize: fontSize.body, color: colors.text },
-  choiceTextOn: { color: colors.accent, fontWeight: '600' },
+  choice: { flex: 1, minHeight: 48, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.rule, borderRadius: radius },
+  choiceOn: { borderWidth: 2, borderColor: colors.action },
+  choiceText: { fontSize: fontSize.body, color: colors.ink },
+  choiceTextOn: { color: colors.action, fontWeight: '600' },
 });

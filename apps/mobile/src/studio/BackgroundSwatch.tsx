@@ -51,10 +51,10 @@ export function BackgroundSwatch({
 
 const styles = StyleSheet.create({
   item: { width: W + 8, gap: space[1], alignItems: 'center' },
-  frame: { padding: 2, borderRadius: radius, borderWidth: 2, borderColor: colors.border },
-  selected: { borderColor: colors.accent },
+  frame: { padding: 2, borderRadius: radius, borderWidth: 2, borderColor: colors.rule },
+  selected: { borderColor: colors.action },
   canvas: { width: W, height: H, borderRadius: radius - 2, overflow: 'hidden' },
-  placeholder: { backgroundColor: colors.surface },
-  name: { fontSize: fontSize.small, color: colors.text },
+  placeholder: { backgroundColor: colors.sheet },
+  name: { fontSize: fontSize.small, color: colors.ink },
   disabled: { opacity: 0.5 },
 });

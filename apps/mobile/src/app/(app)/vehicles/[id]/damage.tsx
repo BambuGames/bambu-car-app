@@ -12,7 +12,7 @@ import { EditingElsewhere } from '../../../../vehicle/EditingElsewhere';
 import { Notice } from '../../../../ui/Notice';
 import { Button } from '../../../../ui/Button';
 import { Screen } from '../../../../ui/Screen';
-import { colors, damageColors, fontSize, radius, space } from '../../../../ui/theme';
+import { colors, damageColors, fonts, fontSize, radius, space } from '../../../../ui/theme';
 import { DamageMap } from '../../../../vehicle/DamageMap';
 import { damageSummary, setPartState } from '../../../../vehicle/damage';
 
@@ -133,16 +133,16 @@ function Editor({ initial }: { initial: Vehicle }) {
 }
 
 const styles = StyleSheet.create({
-  hint: { fontSize: fontSize.small, color: colors.textMuted },
-  body: { fontSize: fontSize.body, color: colors.text },
-  title: { fontSize: fontSize.title, fontWeight: '600', color: colors.text },
-  label: { fontSize: fontSize.small, fontWeight: '500', color: colors.text },
+  hint: { fontSize: fontSize.small, color: colors.ink2 },
+  body: { fontSize: fontSize.body, color: colors.ink },
+  title: { fontFamily: fonts.title, fontSize: fontSize.title, color: colors.ink },
+  label: { fontSize: fontSize.small, fontWeight: '500', color: colors.ink },
   group: { gap: space[1] },
   legend: { flexDirection: 'row', flexWrap: 'wrap', columnGap: space[3], rowGap: space[1] },
   legendItem: { flexDirection: 'row', alignItems: 'center', gap: space[1] },
-  swatch: { width: 14, height: 14, borderRadius: 4, borderWidth: 1, borderColor: colors.border },
-  option: { flexDirection: 'row', alignItems: 'center', gap: space[2], minHeight: 48, paddingHorizontal: space[2], borderWidth: 1, borderColor: colors.border, borderRadius: radius },
-  optionOn: { borderColor: colors.accent, borderWidth: 2 },
-  optionText: { flexShrink: 1, fontSize: fontSize.body, color: colors.text },
-  optionTextOn: { color: colors.accent, fontWeight: '600' },
+  swatch: { width: 14, height: 14, borderRadius: 4, borderWidth: 1, borderColor: colors.rule },
+  option: { flexDirection: 'row', alignItems: 'center', gap: space[2], minHeight: 48, paddingHorizontal: space[2], borderWidth: 1, borderColor: colors.rule, borderRadius: radius },
+  optionOn: { borderColor: colors.action, borderWidth: 2 },
+  optionText: { flexShrink: 1, fontSize: fontSize.body, color: colors.ink },
+  optionTextOn: { color: colors.action, fontWeight: '600' },
 });

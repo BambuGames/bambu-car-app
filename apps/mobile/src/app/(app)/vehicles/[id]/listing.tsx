@@ -227,14 +227,14 @@ function Action({ label, onPress, disabled }: { label: string; onPress: () => vo
 }
 
 const styles = StyleSheet.create({
-  hint: { fontSize: fontSize.small, color: colors.textMuted },
-  label: { fontSize: fontSize.small, fontWeight: '500', color: colors.text },
+  hint: { fontSize: fontSize.small, color: colors.ink2 },
+  label: { fontSize: fontSize.small, fontWeight: '500', color: colors.ink },
   group: { gap: space[1] },
-  option: { justifyContent: 'center', minHeight: 48, paddingVertical: space[1], paddingHorizontal: space[2], borderWidth: 1, borderColor: colors.border, borderRadius: radius },
-  optionOn: { borderColor: colors.accent, borderWidth: 2 },
-  optionText: { fontSize: fontSize.body, color: colors.text },
-  optionTextOn: { color: colors.accent, fontWeight: '600' },
-  action: { justifyContent: 'center', minHeight: 48, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.border },
-  actionText: { fontSize: fontSize.body, color: colors.text },
+  option: { justifyContent: 'center', minHeight: 48, paddingVertical: space[1], paddingHorizontal: space[2], borderWidth: 1, borderColor: colors.rule, borderRadius: radius },
+  optionOn: { borderColor: colors.action, borderWidth: 2 },
+  optionText: { fontSize: fontSize.body, color: colors.ink },
+  optionTextOn: { color: colors.action, fontWeight: '600' },
+  action: { justifyContent: 'center', minHeight: 48, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.rule },
+  actionText: { fontSize: fontSize.body, color: colors.ink },
   dimmed: { opacity: 0.5 },
 });

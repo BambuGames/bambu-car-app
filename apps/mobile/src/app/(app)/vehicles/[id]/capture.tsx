@@ -250,7 +250,7 @@ export default function CaptureScreen() {
           onPress={() => shoot(false)}
           style={({ pressed }) => [styles.shutter, (pressed || busy) && styles.shutterPressed]}
         >
-          {saving ? <ActivityIndicator color={colors.text} /> : null}
+          {saving ? <ActivityIndicator color={colors.ink} /> : null}
         </Pressable>
         <Button variant="secondary" label={t('capture.finish')} onPress={onFinishPress} disabled={busy} />
       </View>
@@ -267,8 +267,8 @@ const styles = StyleSheet.create({
   previewArea: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: space[3], padding: space[4], backgroundColor: '#000000' },
   centerText: { fontSize: fontSize.body, color: colors.guide, textAlign: 'center' },
-  permission: { backgroundColor: colors.background },
-  permissionText: { color: colors.text },
+  permission: { backgroundColor: colors.paper },
+  permissionText: { color: colors.ink },
   messageBar: {
     position: 'absolute',
     top: space[2],
@@ -290,25 +290,25 @@ const styles = StyleSheet.create({
     backgroundColor: '#000000',
   },
   note: { fontSize: fontSize.small, color: colors.guide },
-  sidebar: { width: 200, padding: space[3], gap: space[3], justifyContent: 'center', backgroundColor: colors.background },
-  step: { fontSize: fontSize.body, fontWeight: '600', color: colors.text },
+  sidebar: { width: 200, padding: space[3], gap: space[3], justifyContent: 'center', backgroundColor: colors.paper },
+  step: { fontSize: fontSize.body, fontWeight: '600', color: colors.ink },
   modes: { gap: space[1] },
-  mode: { paddingVertical: space[2], paddingHorizontal: space[2], borderRadius: radius, borderWidth: 1, borderColor: colors.border },
-  modeSelected: { backgroundColor: colors.text, borderColor: colors.text },
-  modeSuggested: { borderColor: colors.accent, borderWidth: 2 },
-  modeText: { fontSize: fontSize.small, color: colors.text, textAlign: 'center' },
-  modeTextSelected: { color: colors.background },
-  modeHint: { fontSize: fontSize.small, color: colors.textMuted },
+  mode: { paddingVertical: space[2], paddingHorizontal: space[2], borderRadius: radius, borderWidth: 1, borderColor: colors.rule },
+  modeSelected: { backgroundColor: colors.action, borderColor: colors.action },
+  modeSuggested: { borderColor: colors.action, borderWidth: 2 },
+  modeText: { fontSize: fontSize.small, color: colors.ink, textAlign: 'center' },
+  modeTextSelected: { color: colors.onAction, fontWeight: '600' },
+  modeHint: { fontSize: fontSize.small, color: colors.ink2 },
   autoRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  autoText: { fontSize: fontSize.small, color: colors.text },
+  autoText: { fontSize: fontSize.small, color: colors.ink },
   shutter: {
     alignSelf: 'center',
     width: 72,
     height: 72,
     borderRadius: 36,
     borderWidth: 4,
-    borderColor: colors.text,
-    backgroundColor: colors.surface,
+    borderColor: colors.ink,
+    backgroundColor: colors.sheet,
     alignItems: 'center',
     justifyContent: 'center',
   },

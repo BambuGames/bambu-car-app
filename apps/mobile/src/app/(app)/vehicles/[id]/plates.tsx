@@ -127,8 +127,8 @@ export default function PlatesScreen() {
 }
 
 const styles = StyleSheet.create({
-  content: { padding: space[3], gap: space[3], backgroundColor: colors.background },
-  count: { fontSize: fontSize.small, color: colors.textMuted },
-  image: { width: '100%', aspectRatio: 4 / 3, borderRadius: radius, backgroundColor: colors.surface },
-  hint: { fontSize: fontSize.body, color: colors.text },
+  content: { padding: space[3], gap: space[3], backgroundColor: colors.paper },
+  count: { fontSize: fontSize.small, color: colors.ink2 },
+  image: { width: '100%', aspectRatio: 4 / 3, borderRadius: radius, backgroundColor: colors.sheet },
+  hint: { fontSize: fontSize.body, color: colors.ink },
 });

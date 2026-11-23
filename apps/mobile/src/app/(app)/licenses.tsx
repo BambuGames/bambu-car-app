@@ -84,9 +84,9 @@ export default function Licenses() {
 }
 
 const styles = StyleSheet.create({
-  section: { fontSize: fontSize.body, fontWeight: '600', color: colors.text, marginTop: space[2] },
+  section: { fontSize: fontSize.body, fontWeight: '600', color: colors.ink, marginTop: space[2] },
   entry: { gap: space[0] },
-  model: { fontSize: fontSize.body, color: colors.text },
-  meta: { fontSize: fontSize.small, color: colors.textMuted },
-  link: { fontSize: fontSize.small, color: colors.text, textDecorationLine: 'underline' },
+  model: { fontSize: fontSize.body, color: colors.ink },
+  meta: { fontSize: fontSize.small, color: colors.ink2 },
+  link: { fontSize: fontSize.small, color: colors.ink, textDecorationLine: 'underline' },
 });
