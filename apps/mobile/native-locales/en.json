@@ -1,0 +1,7 @@
+{
+  "ios": {
+    "NSCameraUsageDescription": "The camera is used to take the vehicle photos.",
+    "NSPhotoLibraryUsageDescription": "For the gallery's logo and number plate banner.",
+    "NSPhotoLibraryAddUsageDescription": "To save the edited vehicle photos to your Photos."
+  }
+}

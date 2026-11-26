@@ -1,0 +1,7 @@
+{
+  "ios": {
+    "NSCameraUsageDescription": "Die Kamera wird für die Fahrzeugfotos verwendet.",
+    "NSPhotoLibraryUsageDescription": "Für das Logo und das Kennzeichen-Banner der Galerie.",
+    "NSPhotoLibraryAddUsageDescription": "Zum Sichern der bearbeiteten Fahrzeugfotos in Ihren Fotos."
+  }
+}

@@ -14,7 +14,8 @@
         "usesNonExemptEncryption": false
       },
       "infoPlist": {
-        "NSCameraUsageDescription": "Die Kamera wird für die Fahrzeugfotos verwendet."
+        "NSCameraUsageDescription": "Die Kamera wird für die Fahrzeugfotos verwendet.",
+        "CFBundleAllowMixedLocalizations": true
       }
     },
     "android": {
@@ -41,6 +42,11 @@
       "output": "single",
       "favicon": "./assets/images/favicon.png"
     },
+    "locales": {
+      "de": "./native-locales/de.json",
+      "tr": "./native-locales/tr.json",
+      "en": "./native-locales/en.json"
+    },
     "plugins": [
       "expo-router",
       [
@@ -53,7 +59,7 @@
         }
       ],
       "expo-sqlite",
-      "expo-localization",
+      ["expo-localization", { "supportedLocales": ["de", "tr", "en"] }],
       [
         "react-native-fast-tflite",
         {

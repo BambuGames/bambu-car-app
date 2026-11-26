@@ -1,0 +1,7 @@
+{
+  "ios": {
+    "NSCameraUsageDescription": "Kamera, araç fotoğraflarını çekmek için kullanılır.",
+    "NSPhotoLibraryUsageDescription": "Galerinin logosu ve plaka banner'ı için.",
+    "NSPhotoLibraryAddUsageDescription": "Düzenlenen araç fotoğraflarını Fotoğraflar'a kaydetmek için."
+  }
+}
