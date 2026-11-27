@@ -27,8 +27,8 @@ Durum (2026-11-26):
 ## 1. Web sayfaları (photocar.ai)
 
 Kaynak `site/` klasörü. Şirket bilgileri bambugames.com.tr'deki gizlilik politikasından alındı.
-Künyede eksik: yönetim kurulu / temsilci adı ("Vertreten durch", DDG § 5). Gizlilik metni yayından
-sonra da hukuki kontrolden geçmeli.
+Künyede temsilci: Mehmet Çakmak ("Vertreten durch", DDG § 5). Gizlilik metni yayından sonra da hukuki
+kontrolden geçmeli.
 
 Barındırma: **GitHub Pages**, bu repodan (artık herkese açık). `.github/workflows/pages.yml`, `main`'e `site/`
 değişikliği gelince ya da elle çalıştırılınca `site/` klasörünü yayınlar.
@@ -130,6 +130,5 @@ işleme servisi güncellenmeli. Sıra: fonksiyon → uygulama → göç. Her ad�
 
 ## 6. Senden gerekenler
 
-- **Künye için temsilci:** "Vertreten durch" satırı için yönetim kurulu başkanı ya da yetkili kişinin adı.
 - **Pages oluşturma izni:** organizasyon sahibinin açması (Settings → Member privileges → Pages creation).
 - **Metunic'te DNS kayıtları:** yukarıdaki tablo.
