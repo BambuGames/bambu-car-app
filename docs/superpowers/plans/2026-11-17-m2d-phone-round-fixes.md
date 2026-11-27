@@ -715,6 +715,10 @@ Kurulum, tur 1'deki gibidir (bellekteki `phone-round` notu):
      - Araca yapışık parçaya dokununca uyarı çıkar.
   8. **Stüdyo:** "Bearbeiten"den sonra ilerleme ekranda canlı değişir (bulgu 21).
   9. **Katalog:** Yeni araç eklerken Chery ve modelleri listede görünür.
+  10. **Eğim işareti (showroom, 2026-11-26 planı):**
+      - Kamerayı aşağı eğip çek: kaydedilen `capture.pitchSignedDeg` iPhone'da ve Galaxy'de pozitif mi?
+      - Değilse `apps/mobile/src/capture/guidance.ts` içindeki `PITCH_SIGN` o platform için −1 yapılır.
+      - Aynı araç bir showroom arka planında işlenir; zemin ve araç aynı eğimde mi, gözle kontrol edilir.
 
 - [ ] **Adım 3: Bulguları yaz, sunucuları durdur**
   - Sonuçlar `.superpowers/sdd/2026-11-17-m2d-phone-round-fixes/phone-round-2.md` dosyasına yazılır.

@@ -5,6 +5,8 @@ import {
   createSpaceAdvisor,
   evaluateGuidance,
   horizonDeg,
+  PITCH_SIGN,
+  signedPitchDeg,
   tiltFromGravity,
 } from './guidance';
 
@@ -32,6 +34,17 @@ test('tiltFromGravity reads level and tilted landscape holds', () => {
   expect(tiltFromGravity({ x: -9.81, y: 0, z: 0 })).toEqual({ rollDeg: 0, pitchDeg: 0 });
   expect(tiltFromGravity({ x: 9.81 * Math.cos(rad(5)), y: 9.81 * Math.sin(rad(5)), z: 0 }).rollDeg).toBeCloseTo(5);
   expect(tiltFromGravity({ x: -9.81 * Math.cos(rad(10)), y: 0, z: 9.81 * Math.sin(rad(10)) }).pitchDeg).toBeCloseTo(10);
+});
+
+test('signedPitchDeg is positive looking down and zero level', () => {
+  expect(signedPitchDeg({ x: -9.81, y: 0, z: 0 }, 'ios')).toBeCloseTo(0);
+  const down = { x: -9.81 * Math.cos(rad(10)), y: 0, z: 9.81 * Math.sin(rad(10)) };
+  expect(signedPitchDeg(down, 'ios')).toBeCloseTo(10 * PITCH_SIGN.ios);
+  expect(signedPitchDeg(down, 'android')).toBeCloseTo(10 * PITCH_SIGN.android);
+});
+
+test('signedPitchDeg has no value without a gravity reading', () => {
+  expect(signedPitchDeg(null, 'ios')).toBeNull();
 });
 
 test('a car on the template with a level, still phone is ready', () => {

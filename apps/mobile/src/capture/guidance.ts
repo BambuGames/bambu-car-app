@@ -39,6 +39,17 @@ export function tiltFromGravity(g: { x: number; y: number; z: number }): { rollD
   };
 }
 
+// The gravity vector's sign along the screen normal per platform, so that looking down reads positive. W3C:
+// with the screen facing up, z is positive; checked on a phone of each platform in phone round 2.
+export const PITCH_SIGN: Record<'ios' | 'android', 1 | -1> = { ios: 1, android: 1 };
+
+// Signed tilt for drawing a showroom with the photo's camera: degrees, > 0 when the camera looks down; null
+// without a gravity reading (processing then draws the room level).
+export function signedPitchDeg(g: { x: number; y: number; z: number } | null, platform: 'ios' | 'android'): number | null {
+  if (g === null) return null;
+  return PITCH_SIGN[platform] * Math.atan2(g.z, Math.hypot(g.x, g.y)) * (180 / Math.PI);
+}
+
 // Signed horizon for straightening in processing (design 6.3, 7.2): degrees from the photo's down to true down,
 // counter-clockwise positive as seen on screen, so > 0 means the horizon rises to the right. Measured against
 // the nearer landscape axis, so it reads the same on both landscape sides and if a platform flips the vector.

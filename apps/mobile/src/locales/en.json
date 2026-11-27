@@ -237,7 +237,7 @@
     "needsUpload": "The studio opens once a photo is uploaded.",
     "background": "Background",
     "tone": "Colour matching",
-    "toneHint": "Brings the brightness and colour of the photos closer together.",
+    "toneHint": "Brings the brightness and colour of the photos closer together and to neutral light.",
     "process": "Process",
     "rerender": "Render again",
     "rerenderHint": "Applies the chosen background and the gallery settings. Uses no credit.",

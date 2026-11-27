@@ -131,7 +131,7 @@ def _template(vertices, faces, body_type, slot, mode, distance=None):
     mask = silhouette(vertices, faces, azimuth, distance, hfov, yaw)
     x, y, w, h = cv2.boundingRect(mask)
     meta = {"bodyType": body_type, "slot": slot, "mode": mode, "hfovDeg": hfov,
-            "cameraHeightM": CAMERA_HEIGHT_M, "pitchDeg": 0.0, "distanceM": round(distance, 3),
+            "cameraHeightM": CAMERA_HEIGHT_M, "pitchDeg": 0.0, "distanceM": round(distance, 3), "yawDeg": round(yaw, 3),
             "box": [round(x / W, 4), round(y / H, 4), round((x + w) / W, 4), round((y + h) / H, 4)],
             "svg": f"{slot}_{mode}.svg"}
     svg = f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}"><path d="{to_svg_path(mask)}"/></svg>\n'
@@ -202,13 +202,14 @@ WORKER_DEST = HERE.parent.parent / "services/image-worker/worker/templates.json"
 
 
 def export_worker(out_dir: str, dest: str) -> None:
-    """Writes every template's target box for the image worker, which places the car on it."""
+    """Writes every template's target box and camera pose (distance, centering yaw) for the image worker: it
+    places the car on the box and draws a showroom from the same camera."""
     rows = []
     for meta_file in sorted(Path(out_dir).glob("*/*.json")):
         meta = json.loads(meta_file.read_text())
         if meta["mode"] == "wide" and meta["slot"] in WIDE_SKIPPED:
             continue
-        rows.append({k: meta[k] for k in ("bodyType", "slot", "mode", "box")})
+        rows.append({k: meta[k] for k in ("bodyType", "slot", "mode", "box", "distanceM", "yawDeg")})
     Path(dest).parent.mkdir(parents=True, exist_ok=True)
     Path(dest).write_text(json.dumps(rows, indent=1) + "\n")
 

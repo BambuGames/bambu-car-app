@@ -39,12 +39,48 @@ def car_alpha():
     return alpha
 
 
-def test_shadow_only_below_the_car():
-    shadow = contact_shadow(car_alpha())
-    car_height = 1440 - 900
-    assert shadow[: 1440 - int(0.03 * car_height) - 1].max() == 0  # nothing well above the bottom of the car
-    assert shadow[1445, 1280] > 0.2  # dark just below it
-    assert shadow.max() <= 0.45 + 1e-6
+def wheels(*centres, r=110, body=(500, 1150, 2100, 1330)):
+    """A car body box with round tyres below it: centres are (x, y_bottom_of_tyre)."""
+    a = np.zeros((1920, 2560), np.uint8)
+    x0, y0, x1, y1 = body
+    a[y0:y1, x0:x1] = 255
+    for cx, bottom in centres:
+        cv2.circle(a, (cx, bottom - r), r, 255, -1)
+    return a
+
+
+def test_every_wheel_on_the_ground_line_gets_a_dark_contact():
+    a = wheels((700, 1440), (1900, 1390))  # 45° view: the far wheel stands higher
+    s = contact_shadow(a)
+    assert s[1443, 700] > 0.5 and s[1393, 1900] > 0.5
+
+
+def test_a_far_wheel_at_the_end_of_the_outline_gets_a_contact_too():
+    a = wheels((700, 1440), (1500, 1430), (2080, 1380))
+    assert contact_shadow(a)[1383, 2080] > 0.5
+
+
+def test_the_floor_under_the_body_is_darker_than_the_open_floor():
+    a = wheels((700, 1440), (1900, 1390))
+    s = contact_shadow(a)
+    assert 0.1 < s[1350, 1300] < s[1443, 700]  # under the sill, between the tyres
+    assert s[1700, 1300] < 0.05  # far below the car
+
+
+def test_no_shadow_above_the_outline_or_beside_the_car():
+    a = wheels((700, 1440), (1900, 1390))
+    s = contact_shadow(a)
+    assert s[:1100].max() == 0  # above the body
+    assert s[:, :300].max() < 0.02 and s[:, 2400:].max() < 0.02
+    assert s.max() <= 0.9 + 1e-6
+
+
+def test_shadow_shows_on_a_dark_floor():
+    bg = render_background(DARK)
+    a = wheels((700, 1440), (1900, 1390))
+    car = np.full((1920, 2560, 3), 200, np.uint8)
+    out = compose(bg, car, a, contact_shadow(a))
+    assert int(bg[1446, 700].max()) - int(out[1446, 700].max()) >= 10
 
 
 def test_compose_returns_a_2560_by_1920_jpeg():

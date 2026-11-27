@@ -9,7 +9,7 @@
     "userInterfaceStyle": "light",
     "ios": {
       "icon": "./assets/images/icon.png",
-      "bundleIdentifier": "com.bambugames.carapp",
+      "bundleIdentifier": "com.bambugames.photocar",
       "config": {
         "usesNonExemptEncryption": false
       },
@@ -26,7 +26,7 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.bambugames.carapp",
+      "package": "com.bambugames.photocar",
       "permissions": [
         "android.permission.CAMERA"
       ],

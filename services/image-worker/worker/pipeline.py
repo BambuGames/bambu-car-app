@@ -21,8 +21,10 @@ from worker.backgrounds import render_background
 from worker.compose import compose, contact_shadow, encode_jpeg, warp
 from worker.imaging import OUT_SIZE, apply_edits, bbox, keep_target, load_upright, placement, solid, straighten
 from worker.photoroom import PhotoroomError
+from worker.showroom import MAX_PITCH_DEG, pitch_shift, showroom_background
 from worker.store import Store
 from worker.templates import template_box
+from worker.whitebalance import apply_gains, estimate_gains
 from worker.watermark import apply_watermark
 
 log = logging.getLogger("worker.pipeline")
@@ -63,6 +65,30 @@ def _as3x3(m: np.ndarray) -> np.ndarray:
     return np.vstack([m, [0.0, 0.0, 1.0]])
 
 
+def _pitch(photo: dict) -> float:
+    """The phone's signed tilt (> 0 looking down) within the capture limit; 0 for older captures, which kept
+    only its size."""
+    value = (photo.get("capture") or {}).get("pitchSignedDeg")
+    return float(np.clip(value, -MAX_PITCH_DEG, MAX_PITCH_DEG)) if isinstance(value, (int, float)) else 0.0
+
+
+def _with_pitch(m: np.ndarray, place: np.ndarray, car_box: tuple[int, int, int, int],
+                box: tuple[float, float, float, float], pitch: float) -> np.ndarray:
+    """Moves the placed car up or down with the floor under it when the camera looked down or up; never
+    further than keeps the car inside the frame (2 % margin). `place` maps the levelled photo, where
+    `car_box` lies, onto the output."""
+    dy = pitch_shift(box[3], pitch)
+    if dy == 0:
+        return m
+    h = OUT_SIZE[1]
+    top = place[1, 1] * car_box[1] + place[1, 2]
+    bottom = place[1, 1] * car_box[3] + place[1, 2]
+    dy = min(0.0, max(dy, 0.02 * h - top)) if dy < 0 else max(0.0, min(dy, 0.98 * h - bottom))
+    out = m.copy()
+    out[1, 2] += dy
+    return out
+
+
 def _folder(photo: dict) -> str:
     return f"{photo['gallery_id']}/{photo['vehicle_id']}/{photo['id']}"
 
@@ -91,7 +117,9 @@ def _analyze(store: Store, photo: dict, photoroom, detector) -> dict:
         mask_path = f"{_folder(photo)}/mask.png"
         store.upload("processed", mask_path, _png(alpha), "image/png")
         fields["mask_path"] = mask_path
-        fields["tone_stats"] = tone.measure(image, alpha)
+        # Measured after the white balance, which the render applies first when colour matching is on.
+        wb = estimate_gains(image, alpha)
+        fields["tone_stats"] = {**tone.measure(apply_gains(image, wb), alpha), "wb": wb}
         plate_box = plates_mod.pick_target(found, alpha)
     else:
         plate_box = found[0][1] if found else None
@@ -110,6 +138,8 @@ def _render(store: Store, photo: dict, vehicle: dict, ctx: dict, now_ms: int) ->
     h, w = image.shape[:2]
     clip = None  # the banner stays on the car where there is a car mask
     if photo["slot"] in EXTERIOR:
+        if ctx["target"] is not None:  # colour matching on: neutral light first, then the set's tone
+            image = apply_gains(image, (photo.get("tone_stats") or {}).get("wb"))
         alpha = cv2.imdecode(np.frombuffer(_download(store, "processed", photo["mask_path"]), np.uint8), cv2.IMREAD_GRAYSCALE)
         if alpha is None or alpha.shape != (h, w):
             raise PipelineError("stale_mask")  # not this original's mask: placing it would misalign the car
@@ -121,11 +151,17 @@ def _render(store: Store, photo: dict, vehicle: dict, ctx: dict, now_ms: int) ->
             raise PipelineError("empty_mask")
         if box is None:
             raise PipelineError("internal")
-        m = (_as3x3(placement(car_box, box)) @ _as3x3(m_level))[:2]
+        place = placement(car_box, box)
+        m = (_as3x3(place) @ _as3x3(m_level))[:2]
+        background = ctx["background"]
+        if ctx["showroom"] is not None:  # the room from this slot's camera; the car moves with its floor
+            pitch = _pitch(photo)
+            background = showroom_background(ctx["showroom"], vehicle["body_type"], photo["slot"], pitch)
+            m = _with_pitch(m, place, car_box, box, pitch)
         car, car_alpha = warp(image, m, OUT_SIZE), warp(alpha, m, OUT_SIZE)
         if ctx["target"] is not None and photo.get("tone_stats"):
             car = tone.apply(car, tone.correction(photo["tone_stats"], ctx["target"]), car_alpha)
-        out = compose(ctx["background"], car, car_alpha, contact_shadow(car_alpha))
+        out = compose(background, car, car_alpha, contact_shadow(car_alpha))
         clip = solid(car_alpha)
     else:
         # Detail and interior (design 7.3): the photo itself, 4:3, with the set's mean tone correction.
@@ -133,6 +169,8 @@ def _render(store: Store, photo: dict, vehicle: dict, ctx: dict, now_ms: int) ->
         s = OUT_SIZE[0] / crop_w
         m = np.array([[s, 0, -s * (w - crop_w) / 2], [0, s, -s * (h - crop_h) / 2]])
         out = cv2.warpAffine(image, m, OUT_SIZE, flags=cv2.INTER_AREA)
+        if ctx["detail_wb"] is not None:
+            out = apply_gains(out, ctx["detail_wb"])
         if ctx["detail_correction"] is not None:
             out = tone.apply(out, ctx["detail_correction"])
 
@@ -160,14 +198,28 @@ def _context(store: Store, vehicle: dict, photos: list[dict]) -> dict:
     """What every render of this vehicle shares: background, branding and the set's tone target."""
     gallery = vehicle.get("gallery") or {}
     spec = (vehicle.get("background") or {}).get("spec") or DEFAULT_BACKGROUND
-    background = render_background(spec, OUT_SIZE, lambda path: cv2.imdecode(
+    showroom = spec if spec.get("kind") == "showroom" else None  # drawn per photo, from its slot's camera
+    background = None if showroom else render_background(spec, OUT_SIZE, lambda path: cv2.imdecode(
         np.frombuffer(_download(store, "backgrounds", path), np.uint8), cv2.IMREAD_COLOR))
     stats = [p["tone_stats"] for p in photos if p["slot"] in EXTERIOR and p.get("tone_stats")]
     target = tone.set_target(stats) if vehicle.get("tone_enabled", True) else None
     detail = None if target is None else tone.mean_correction([tone.correction(s, target) for s in stats])
+    # Details and interiors have no mask to read the light around: the set's mean white balance.
+    wbs = [s.get("wb") for s in stats]
+    detail_wb = None
+    if target is not None and any(wbs):
+        detail_wb = [float(np.mean([(w or (1.0, 1.0, 1.0))[i] for w in wbs])) for i in range(3)]
     branding = lambda key: _rgba(_download(store, "branding", gallery[key])) if gallery.get(key) else None  # noqa: E731
-    return {"background": background, "target": target, "detail_correction": detail,
+    return {"background": background, "showroom": showroom, "target": target, "detail_correction": detail,
+            "detail_wb": detail_wb,
             "banner": branding("banner_path"), "logo": branding("logo_path"), "watermark": gallery.get("watermark") or {}}
+
+
+def _warm_room(spec: dict, body_type: str, slot: str, pitch: float) -> None:
+    try:
+        showroom_background(spec, body_type, slot, pitch)
+    except Exception:  # noqa: BLE001 — the render of that photo reports it
+        log.warning("could not draw the showroom for %s", slot)
 
 
 def _fail(store: Store, photo_id: str, error: Exception, expect: dict) -> None:
@@ -209,8 +261,13 @@ def run(store: Store, vehicle_id: str, photo_ids: list[str], photoroom, detector
         except Exception as e:  # noqa: BLE001 — one photo's failure must not stop the others
             fail(p["id"], e)
 
+    to_analyze = [p for p in store.photos(vehicle_id) if p["id"] in claimed]
+    spec = (vehicle.get("background") or {}).get("spec") or DEFAULT_BACKGROUND
     with ThreadPoolExecutor(ANALYSIS_THREADS) as pool:
-        list(pool.map(analyze, [p for p in store.photos(vehicle_id) if p["id"] in claimed]))
+        if spec.get("kind") == "showroom":  # draw the rooms while Photoroom works; rendering finds them cached
+            for slot, pitch in {(p["slot"], _pitch(p)) for p in to_analyze if p["slot"] in EXTERIOR}:
+                pool.submit(_warm_room, spec, vehicle["body_type"], slot, pitch)
+        list(pool.map(analyze, to_analyze))
 
     photos = store.photos(vehicle_id)  # with this run's analysis: the tone target needs the whole set
     try:

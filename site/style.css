@@ -1,0 +1,41 @@
+/* photocar.ai legal and support pages. System fonts only: the pages load nothing from third parties. */
+:root {
+  --paper: #E8EDE9;
+  --sheet: #F4F7F5;
+  --ink: #12291F;
+  --ink2: #4A5D55;
+  --rule: #C5D0CA;
+  --action: #173F33;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 17px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+header, main, footer { max-width: 720px; margin: 0 auto; padding: 0 20px; }
+header { padding-top: 28px; padding-bottom: 8px; }
+.brand { font-weight: 700; font-size: 22px; letter-spacing: -0.01em; color: var(--ink); text-decoration: none; }
+.brand span { color: var(--ink2); }
+
+main { background: var(--sheet); border: 1px solid var(--rule); border-radius: 10px; padding: 28px 28px 32px; margin-top: 16px; }
+h1 { font-size: 30px; line-height: 1.2; margin: 0 0 8px; }
+h2 { font-size: 20px; line-height: 1.3; margin: 32px 0 8px; }
+p, ul { margin: 0 0 12px; }
+ul { padding-left: 22px; }
+li { margin-bottom: 6px; }
+.meta { color: var(--ink2); font-size: 15px; }
+a { color: var(--action); }
+
+footer { padding-top: 20px; padding-bottom: 40px; font-size: 15px; color: var(--ink2); }
+footer a { margin-right: 16px; }
+
+@media (max-width: 520px) {
+  main { padding: 20px 18px 24px; border-radius: 0; border-left: 0; border-right: 0; }
+  header, footer { padding-left: 18px; padding-right: 18px; }
+  main { margin-left: 0; margin-right: 0; }
+}

@@ -9,6 +9,7 @@ export type CaptureInfo = {
   focal35: number | null;
   rollDeg: number; // signed horizon, > 0 rises to the right (horizonDeg); processing straightens by it
   pitchDeg: number; // magnitude only: up and down read differently per platform
+  pitchSignedDeg: number | null; // > 0 looking down (signedPitchDeg), null without a sensor reading; the sign is verified per platform in phone round 2
   targetBox: [number, number, number, number] | null;
   simpleMode: boolean;
   auto: boolean;

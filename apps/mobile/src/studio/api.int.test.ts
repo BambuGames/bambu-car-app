@@ -46,7 +46,13 @@ test('the studio offers the three platform studios and saves the choice', async 
   const api = createStudioApi(await signedIn('staff@bambu.test'));
   const { vehicleId } = await vehicleWithPhoto(TESTGALERIE);
   const before = await api.fetchStudio(vehicleId);
-  expect(before.backgrounds.filter((b) => b.gallery_id === null).map((b) => b.name)).toEqual(['Studio Weiß', 'Studio Hellgrau', 'Studio Dunkel']);
+  expect(before.backgrounds.filter((b) => b.gallery_id === null).map((b) => b.name)).toEqual([
+    'Studio Weiß',
+    'Studio Hellgrau',
+    'Studio Dunkel',
+    'Showroom Weiß',
+    'Showroom Anthrazit',
+  ]);
   await api.setStudioOptions(vehicleId, { backgroundId: before.backgrounds[2].id, toneEnabled: false });
   const after = await api.fetchStudio(vehicleId);
   expect(after.vehicle).toMatchObject({ background_id: before.backgrounds[2].id, tone_enabled: false });

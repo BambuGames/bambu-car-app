@@ -6,6 +6,7 @@
   "cameraHeightM": 1.0,
   "pitchDeg": 0.0,
   "distanceM": 3.035,
+  "yawDeg": 0.0,
   "box": [
     0.2406,
     0.3933,

@@ -237,7 +237,7 @@
     "needsUpload": "Stüdyo, bir fotoğraf yüklenince açılır.",
     "background": "Arka plan",
     "tone": "Renk eşitleme",
-    "toneHint": "Fotoğrafların parlaklığını ve rengini birbirine yaklaştırır.",
+    "toneHint": "Fotoğrafların parlaklığını ve rengini birbirine ve nötr ışığa yaklaştırır.",
     "process": "İşle",
     "rerender": "Yeniden çiz",
     "rerenderHint": "Seçili arka planı ve galeri ayarlarını uygular. Kredi harcamaz.",

@@ -2,7 +2,16 @@
 
 App Store Connect ve Play Console'daki beyan formlarının cevapları. Cevaplar 2026-11-26 tarihli koda
 dayanır. Uygulamaya yeni bir veri akışı (analitik, konum, bildirim, satın alma) eklenirse bu dosya ve
-formlar güncellenmeli. Köşeli parantezli yerler sonradan doldurulur.
+formlar güncellenmeli. Köşeli parantezli yerler sonradan doldurulur. Kurulum sırası: `setup.md`.
+
+| Sayfa | Adres | Kaynak |
+|---|---|---|
+| Gizlilik politikası | `https://photocar.ai/datenschutz/` | `site/datenschutz/` |
+| Künye (Impressum) | `https://photocar.ai/impressum/` | `site/impressum/` |
+| Hesap silme | `https://photocar.ai/konto-loeschen/` | `site/konto-loeschen/` |
+| Destek | `https://photocar.ai/support/` | `site/support/` |
+
+Uygulama kimliği iki mağazada da `com.bambugames.photocar`.
 
 ## Uygulamanın gönderdiği veriler (kaynak)
 
@@ -62,8 +71,8 @@ paylaşım alanı yoktur.
 - Soru: "Does your app use encryption?"
   - Cevap: Yes.
   - Ardından muaf olduğu seçilir (yalnız standart şifreleme).
-- Bunun her yüklemede sorulmaması için app.json'a `ios.infoPlist.ITSAppUsesNonExemptEncryption: false`
-  eklenebilir. Bu henüz yapılmadı.
+- `app.json`'daki `ios.config.usesNonExemptEncryption: false` derlemede `ITSAppUsesNonExemptEncryption = false`
+  olur. App Store Connect bu yüzden soruyu her yüklemede sormaz; `appConfig.test.ts` bu ayarı korur.
 
 ### Hesap
 
@@ -98,15 +107,18 @@ Account deletion: Konto (Account) → Konto löschen (Delete account).
 ### Beta App Review (TestFlight dış test)
 
 - **Beta App Description:** `listing.md` → TestFlight bölümü.
-- **Feedback Email:** `[E-MAIL]`
+- **Feedback Email:** `info@bambugames.com.tr`
 - **Sign-in information:** Yukarıdaki demo hesap.
 - **İnceleme notu:** App Review notunun aynısı.
 
 ### AB satıcı bilgisi (DSA trader status)
 
 - **TestFlight için:** Gerekmez.
-- **AB'de genel yayın için:** Bambu Games'in adresi, telefonu ve e-postası App Store'da herkese açık
-  gösterilir; yayından önce girilir.
+- **AB'de genel yayın için:** Satıcının adresi, telefonu ve e-postası App Store'da herkese açık gösterilir;
+  yayından önce girilir.
+- **Hesap bireysel:** App Store'da satıcı **Mehmet Çakmak**. AB'de genel yayında Mehmet Çakmak'ın adresi,
+  telefonu ve e-postası gösterilir. Şirket adıyla görünmesi için üyeliğin kuruma çevrilmesi (D-U-N-S
+  numarası gerekir) ya da uygulamanın kurumsal hesaba aktarılması gerekir. Play'de geliştirici **Bambu Games**.
 
 ---
 
@@ -158,24 +170,25 @@ Account deletion: Konto (Account) → Konto löschen (Delete account).
 
 ### Hesap silme sayfası (web)
 
-Play, uygulama dışında açılan bir sayfa ister. Sayfa gizlilik politikasının yanında, aynı alan adında
-durabilir. İçermesi gerekenler:
+Play, uygulama dışında açılan bir sayfa ister: `https://photocar.ai/konto-loeschen/` (taslağı
+`site/konto-loeschen/`). İçermesi gerekenler:
 
 1. Uygulamanın adı (photocar.ai) ve geliştirici (Bambu Games).
 2. **Uygulama içinden silme:** Konto → Konto löschen. Giriş bilgileri ve hesap hemen silinir.
-3. **Uygulamaya giremeyenler için:** `[E-MAIL]` adresine, hesabın e-posta adresinden yazarak silme isteği.
+3. **Uygulamaya giremeyenler için:** `info@bambugames.com.tr` adresine, hesabın e-posta adresinden yazarak silme isteği.
 4. **Silinen veriler:** E-posta adresi, kullanıcı kimliği, hesaba bağlı oturumlar.
 5. **Kalan veriler:**
    - Galerinin araçları ve fotoğrafları galeriye aittir, hesap silinince galeride kalır. Galeri
      sahibinin isteğiyle silinir.
-   - Kredi hareketleri muhasebe için `[süre]` saklanır.
+   - Kredi hareketleri ticaret ve vergi hukukunun saklama süreleri boyunca (10 yıla kadar) saklanır.
    - Ekspertiz raporları zaten en geç 7 günde silinir.
 
 ---
 
 ## Gizlilik politikasında geçmesi gerekenler
 
-Metni Bambu Games yazar. Mağaza beyanlarıyla tutarlı olması için içermesi gerekenler:
+Almanca taslak `site/datenschutz/` içinde; yayından önce hukuki kontrolden geçmeli. Mağaza beyanlarıyla
+tutarlı olması için içermesi gerekenler:
 
 - **Sorumlu:** Bambu Games (unvan, adres, iletişim).
 - **Veriler:**

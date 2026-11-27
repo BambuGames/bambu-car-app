@@ -6,7 +6,8 @@ import trimesh
 
 import json
 
-from templates import SLOTS, export_app, export_worker, load_car, make_template, mode_distance, project, solve_distance
+from templates import (SLOTS, center_yaw, export_app, export_worker, load_car, make_template, mode_distance, project,
+                       solve_distance)
 
 
 def box_car():
@@ -141,4 +142,10 @@ def test_export_worker_writes_boxes(tmp_path):
     export_worker(str(tmp_path / "out"), str(dest))
     rows = json.loads(dest.read_text())
     assert sorted((r["bodyType"], r["slot"], r["mode"]) for r in rows) == [("sedan", "left", "normal"), ("sedan", "left", "wide")]
-    assert len(rows[0]["box"]) == 4 and set(rows[0]) == {"bodyType", "slot", "mode", "box"}
+    assert len(rows[0]["box"]) == 4
+    assert set(rows[0]) == {"bodyType", "slot", "mode", "box", "distanceM", "yawDeg"}
+
+
+def test_meta_has_the_centering_yaw():
+    meta, _ = make_template(V, F, "sedan", "front_left_45", "normal")
+    assert meta["yawDeg"] == pytest.approx(center_yaw(V, 45, meta["distanceM"]), abs=0.001)

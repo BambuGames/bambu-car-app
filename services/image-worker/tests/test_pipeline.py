@@ -12,6 +12,8 @@ from worker.backgrounds import render_background
 from worker.photoroom import PhotoroomError
 from worker.pipeline import run
 from worker.plate import cover_box
+from worker.showroom import pitch_shift, showroom_background
+from worker.templates import template_box
 
 W, H = 800, 600
 CAR = (200, 250, 600, 450)
@@ -19,6 +21,7 @@ NEIGHBOUR = (620, 300, 760, 440)
 BRIDGE = (600, 400, 620, 410)
 PLATE = (370, 400, 430, 415)
 STUDIO = {"kind": "studio", "wall": "#FFFFFF", "floor": "#F2F2F2"}
+SHOWROOM = {"kind": "showroom", "wall": "#F0F1F1", "ceiling": "#F6F7F7", "floor": "#44474B", "grout": "#2B2D30", "gloss": 0.55}
 
 
 def jpeg(image: np.ndarray) -> bytes:
@@ -31,7 +34,7 @@ def png(rgba: np.ndarray) -> bytes:
     return buf.getvalue()
 
 
-def original(index: int, grey: int = 90, neighbour: bool = False) -> np.ndarray:
+def original(index: int, grey: int = 90, neighbour: bool = False, tint: tuple | None = None) -> np.ndarray:
     rng = np.random.default_rng(index)
     image = rng.integers(60, 200, (H, W, 3), np.uint8)
     x0, y0, x1, y1 = CAR
@@ -42,6 +45,8 @@ def original(index: int, grey: int = 90, neighbour: bool = False) -> np.ndarray:
     px0, py0, px1, py1 = PLATE
     image[py0:py1, px0:px1] = 230
     image[py0 + 3:py1 - 3, px0 + 8:px1 - 8:6] = 20  # characters
+    if tint is not None:  # coloured light over the whole scene, car included (BGR factors)
+        image = np.clip(image * np.array(tint, np.float32), 0, 255).astype(np.uint8)
     image[:10, :10] = 10 * index  # tells the fake Photoroom which photo it got
     return image
 
@@ -59,27 +64,29 @@ def photo_index(sent: bytes) -> int:
     return int(round(image[2:8, 2:8].mean() / 10))
 
 
-def setup(photos: list[dict], tone: bool = True):
-    """photos: dicts with id, slot, index and optional grey, neighbour, edits."""
+def setup(photos: list[dict], tone: bool = True, background: dict = STUDIO, body: str = "sedan"):
+    """photos: dicts with id, slot, index and optional grey, neighbour, edits, pitch (signed, > 0 down)."""
     banner = np.zeros((20, 100, 4), np.uint8)
     banner[..., 0], banner[..., 3] = 255, 255  # red (RGBA, as the gallery's PNG)
     logo = np.zeros((40, 80, 4), np.uint8)
     logo[..., 3] = 255  # opaque black, visible on the white studio
     store = MemoryStore(
-        vehicle_rows={"v1": {"id": "v1", "gallery_id": "g1", "body_type": "sedan", "tone_enabled": tone,
-                             "status": "processing", "background": {"spec": STUDIO},
+        vehicle_rows={"v1": {"id": "v1", "gallery_id": "g1", "body_type": body, "tone_enabled": tone,
+                             "status": "processing", "background": {"spec": background},
                              "gallery": {"watermark": {"position": "bottom_right"}, "logo_path": "g1/logo.png",
                                          "banner_path": "g1/banner.png"}}},
         files={("branding", "g1/logo.png"): png(logo), ("branding", "g1/banner.png"): png(banner)},
     )
     for p in photos:
         path = f"g1/v1/{p['id']}.jpg"
-        store.files[("originals", path)] = jpeg(original(p["index"], p.get("grey", 90), p.get("neighbour", False)))
+        store.files[("originals", path)] = jpeg(original(p["index"], p.get("grey", 90), p.get("neighbour", False),
+                                                         p.get("tint")))
         x0, y0, x1, y1 = CAR
         store.photo_rows[p["id"]] = {
             "id": p["id"], "vehicle_id": "v1", "gallery_id": "g1", "slot": p["slot"], "original_path": path,
             "captured_at": "2026-11-12T10:00:00+00:00",
-            "capture": {"targetBox": [x0 / W, y0 / H, x1 / W, y1 / H], "rollDeg": 0},
+            "capture": {"targetBox": [x0 / W, y0 / H, x1 / W, y1 / H], "rollDeg": 0,
+                        **({"pitchSignedDeg": p["pitch"]} if "pitch" in p else {})},
             "process_status": "queued", "mask_path": None, "mask_edits": p.get("edits", []), "plate_status": None,
             "plate_corners": None, "tone_stats": None, "output_path": None, "output_wm_path": None, "placement": None,
         }
@@ -258,3 +265,102 @@ def test_plates_are_searched_only_where_a_plate_can_show(slot, status):
     store, photoroom, detector = setup([{"id": "p1", "slot": slot, "index": 1}])  # the detector finds PLATE
     go(store, photoroom, detector, ["p1"])
     assert store.photo_rows["p1"]["plate_status"] == status
+
+
+def test_a_showroom_gives_each_slot_its_own_room():
+    store, pr, det = setup([{"id": "p1", "slot": "front", "index": 1}, {"id": "p2", "slot": "left", "index": 2}],
+                           background=SHOWROOM)
+    go(store, pr, det, ["p1", "p2"])
+    for pid, slot in (("p1", "front"), ("p2", "left")):
+        out = decode(store, store.photo_rows[pid]["output_path"])
+        room = showroom_background(SHOWROOM, "sedan", slot)
+        assert np.abs(out[40:200, 40:200].astype(int) - room[40:200, 40:200].astype(int)).mean() < 4
+
+
+def test_a_tilted_photo_moves_the_car_with_the_floor():
+    flat, tilted = (setup([{"id": "p1", "slot": "front_left_45", "index": 1, "pitch": p}], background=SHOWROOM)
+                    for p in (0.0, 8.0))
+    for s in (flat, tilted):
+        go(s[0], s[1], s[2], ["p1"])
+    dy = tilted[0].photo_rows["p1"]["placement"]["m"][1][2] - flat[0].photo_rows["p1"]["placement"]["m"][1][2]
+    assert dy == pytest.approx(pitch_shift(template_box("sedan", "front_left_45")[3], 8.0), abs=1.0)
+
+
+def test_a_large_tilt_keeps_the_car_in_the_frame():
+    # suv front_left_45: box top 0.35 H; at 20° the unclamped shift (about -671 px) would push the roof out
+    store, pr, det = setup([{"id": "p1", "slot": "front_left_45", "index": 1, "pitch": 20.0}],
+                           background=SHOWROOM, body="suv")
+    go(store, pr, det, ["p1"])
+    _, top = to_output(store.photo_rows["p1"], CAR[0], CAR[1])
+    assert top >= 0.02 * 1920 - 1
+
+
+def test_an_unsigned_pitch_and_the_studio_stay_level():
+    ty = {}
+    for name, extra, bg in (("studio_flat", {}, STUDIO), ("studio_tilted", {"pitch": 8.0}, STUDIO),
+                            ("showroom_unsigned", {}, SHOWROOM)):  # no pitchSignedDeg: an older capture
+        s = setup([{"id": "p1", "slot": "front_left_45", "index": 1, **extra}], background=bg)
+        go(*s, ["p1"])
+        ty[name] = s[0].photo_rows["p1"]["placement"]["m"][1][2]
+    assert ty["studio_tilted"] == pytest.approx(ty["studio_flat"], abs=0.5)
+    assert ty["showroom_unsigned"] == pytest.approx(ty["studio_flat"], abs=0.5)
+
+
+def test_details_ignore_the_showroom():
+    store, pr, det = setup([{"id": "p1", "slot": "front", "index": 1}, {"id": "d1", "slot": "detail_wheel", "index": 2}],
+                           background=SHOWROOM)
+    go(store, pr, det, ["p1", "d1"])
+    assert store.photo_rows["d1"]["process_status"] == "done"
+    out = decode(store, store.photo_rows["d1"]["output_path"])
+    room = showroom_background(SHOWROOM, "sedan", "front")
+    assert np.abs(out[40:200, 40:200].astype(int) - room[40:200, 40:200].astype(int)).mean() > 20  # the photo, not a room
+
+
+def test_a_large_tilt_keeps_a_rolled_car_in_the_frame():
+    store, pr, det = setup([{"id": "p1", "slot": "front_left_45", "index": 1, "pitch": 20.0}],
+                           background=SHOWROOM, body="suv")
+    store.photo_rows["p1"]["capture"]["rollDeg"] = 12.0
+    go(store, pr, det, ["p1"])
+    row = store.photo_rows["p1"]
+    tops = [to_output(row, x, y)[1] for x, y in ((CAR[0], CAR[1]), (CAR[2], CAR[1]))]
+    assert abs(min(tops) - 0.02 * 1920) <= 3  # clamped: the roof stops right at the margin
+
+
+YELLOW = (0.6, 0.9, 1.25)  # garage light, BGR
+
+
+def car_colour(store, pid):
+    row = store.photo_rows[pid]
+    x, y = to_output(row, 260, 300)  # on the car, away from the plate
+    return decode(store, row["output_path"])[y, x].astype(int)
+
+
+def test_white_balance_pulls_a_yellow_car_toward_neutral():
+    store, pr, det = setup([{"id": "p1", "slot": "front_left_45", "index": 1, "grey": 140, "tint": YELLOW}])
+    go(store, pr, det, ["p1"])
+    before = np.clip(np.array([140, 140, 140]) * YELLOW, 0, 255)
+    after = car_colour(store, "p1")
+    assert after.max() - after.min() < 0.6 * (before.max() - before.min())
+
+
+def test_tone_off_also_skips_white_balance():
+    store, pr, det = setup([{"id": "p1", "slot": "front_left_45", "index": 1, "grey": 140, "tint": YELLOW}], tone=False)
+    go(store, pr, det, ["p1"])
+    before = np.clip(np.array([140, 140, 140]) * YELLOW, 0, 255)
+    assert np.abs(car_colour(store, "p1") - before).max() <= 6
+
+
+def test_old_tone_stats_without_wb_render_unchanged():
+    store, pr, det = setup([{"id": "p1", "slot": "front_left_45", "index": 1}])
+    go(store, pr, det, ["p1"])
+    outputs = []
+    for n, wb in enumerate(("missing", None)):
+        row = store.photo_rows["p1"]
+        stats = {k: v for k, v in row["tone_stats"].items() if k != "wb"}
+        if wb != "missing":
+            stats["wb"] = wb
+        row.update({"tone_stats": stats, "process_status": "queued"})
+        go(store, pr, det, ["p1"], clock=lambda n=n: 2000.0 + n)
+        assert row["process_status"] == "done"
+        outputs.append(decode(store, row["output_path"]))
+    assert np.array_equal(outputs[0], outputs[1])

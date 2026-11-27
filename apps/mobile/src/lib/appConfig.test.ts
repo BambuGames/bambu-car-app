@@ -14,6 +14,14 @@ test('the Android splash wordmark fits inside the icon circle', () => {
   expect(Math.hypot(imageWidth / 2, height / 2)).toBeLessThanOrEqual(96);
 });
 
+// The store identity cannot change once the store records exist; usesNonExemptEncryption becomes
+// ITSAppUsesNonExemptEncryption = false, which spares the export compliance question on every upload (HTTPS only).
+test('the store identity is com.bambugames.photocar and the app declares exempt encryption', () => {
+  expect(app.expo.ios.bundleIdentifier).toBe('com.bambugames.photocar');
+  expect(app.expo.android.package).toBe('com.bambugames.photocar');
+  expect(app.expo.ios.config.usesNonExemptEncryption).toBe(false);
+});
+
 test('the app declares German, Turkish and English to both stores', () => {
   expect(pluginOptions('expo-localization')?.supportedLocales).toEqual(LANGUAGES);
   expect(Object.keys(app.expo.locales ?? {}).sort()).toEqual([...LANGUAGES].sort());

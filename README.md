@@ -120,7 +120,7 @@ cd apps/mobile
 npx expo prebuild --platform android   # yalnız ilk seferde; android/ klasörü git'e girmez
 cd android
 JAVA_HOME=/Library/Java/JavaVirtualMachines/zulu-17.jdk/Contents/Home ./gradlew app:installDebug -PreactNativeDevServerPort=8082 -PreactNativeArchitectures=arm64-v8a
-adb shell am start -n com.bambugames.carapp/.MainActivity
+adb shell am start -n com.bambugames.photocar/.MainActivity
 ```
 
 - Emülatör yeniden başlayınca ya da telefon yeniden takılınca `adb reverse` ayarları silinir. İki komutu tekrar çalıştırın.
@@ -128,7 +128,7 @@ adb shell am start -n com.bambugames.carapp/.MainActivity
 - Android'de Fast Refresh bağlanmıyor. Kod değişikliğinden sonra uygulamayı yeniden başlatın:
 
   ```bash
-  adb shell am force-stop com.bambugames.carapp && adb shell am start -n com.bambugames.carapp/.MainActivity
+  adb shell am force-stop com.bambugames.photocar && adb shell am start -n com.bambugames.photocar/.MainActivity
   ```
 
 ## Kamera ve cihaz

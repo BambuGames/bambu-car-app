@@ -237,7 +237,7 @@
     "needsUpload": "Das Studio öffnet sich, sobald ein Foto hochgeladen ist.",
     "background": "Hintergrund",
     "tone": "Farbangleichung",
-    "toneHint": "Gleicht Helligkeit und Farbe der Fotos aneinander an.",
+    "toneHint": "Gleicht Helligkeit und Farbe der Fotos aneinander und an neutrales Licht an.",
     "process": "Bearbeiten",
     "rerender": "Neu rendern",
     "rerenderHint": "Übernimmt den gewählten Hintergrund und die Galerie-Einstellungen. Kostet kein Guthaben.",

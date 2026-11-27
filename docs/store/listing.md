@@ -1,15 +1,17 @@
 # Mağaza metinleri — photocar.ai
 
 Bu dosya App Store Connect ve Play Console'a kopyalanacak metinleri tutar. Her alanın yanındaki sayı,
-karakter sınırına göre ölçüldü; metni değiştirirsen sınırı yeniden kontrol et. Köşeli parantezli yerler
-(`[E-MAIL]` vb.) alan adı ve iletişim adresi belli olunca doldurulur.
+karakter sınırına göre ölçüldü; metni değiştirirsen sınırı yeniden kontrol et. İletişim adresi
+`info@bambugames.com.tr`; açıklamalar bu adresle yeniden ölçüldü.
 
 - **Uygulama adı (her iki mağaza, her dil):** `photocar.ai`
 - **Kategori:** App Store'da birincil *Business*, ikincil *Photo & Video*; Play'de *Business* (ya da *Auto & Vehicles*).
 - **Ana dil:** App Store Connect'te *German*, Play Console'da *de-DE*. Türkçe ve İngilizce ek dil olarak girilir.
-- **Telif (App Store):** `2026 Bambu Games` (şirketin tam unvanıyla değiştir).
-- **Destek URL'si / pazarlama URL'si:** `[https://photocar.ai/support]`, `[https://photocar.ai]`.
-- **Gizlilik politikası URL'si:** `[EXPO_PUBLIC_PRIVACY_URL ile aynı adres]`.
+- **Telif (App Store):** `2026 Bambu Games Yazılım Sanayi ve Ticaret A.Ş.`
+- **Satıcı / geliştirici adı:** App Store'da `Mehmet Çakmak` (bireysel Apple hesabı), Play'de `Bambu Games`.
+- **Destek URL'si / pazarlama URL'si:** `https://photocar.ai/support/`, `https://photocar.ai/`.
+- **Gizlilik politikası URL'si:** `https://photocar.ai/datenschutz/` (EAS'teki `EXPO_PUBLIC_PRIVACY_URL` ile aynı).
+  Sayfaların kaynağı `site/`; yayına alınmadan bu adresler açılmaz.
 - Açıklamalarda marka adı olarak yalnız WhatsApp ve Instagram geçiyor (paylaşım hedefi olarak); anahtar
   kelimelerde başka marka adı yok, Apple buna izin vermiyor.
 
@@ -36,7 +38,7 @@ Fahrzeuge direkt auf dem Hof fotografieren und Studiobilder mit Ihrem Kennzeiche
 Autohaus,Autofotos,Fahrzeugfotos,Inserat,Fotostudio,Hintergrund,Kennzeichen,Gebrauchtwagen,Händler
 ```
 
-**Açıklama** (2140/4000) — Play'in tam açıklamasıyla aynı
+**Açıklama** (2154/4000) — Play'in tam açıklamasıyla aynı
 
 ```text
 photocar.ai macht das Smartphone zum Fotostudio für Ihr Autohaus. Sie fotografieren das Fahrzeug dort, wo es steht – bei jedem Wetter und auch ohne Netz – und erhalten Studiobilder, Fahrzeugdaten und einen Inseratstext.
@@ -71,7 +73,7 @@ FÜR IHR TEAM
 • Ihre Daten werden in der EU (Frankfurt) gespeichert.
 
 ZUGANG
-photocar.ai ist für Autohäuser. Den Zugang richten wir für Ihr Autohaus ein; eine Registrierung in der App gibt es nicht. Kontakt: [E-MAIL]
+photocar.ai ist für Autohäuser. Den Zugang richten wir für Ihr Autohaus ein; eine Registrierung in der App gibt es nicht. Kontakt: info@bambugames.com.tr
 ```
 
 ### Google Play
@@ -126,7 +128,7 @@ Araçları galerinin önünde çekin; plakası galerinizin banner'ıyla kapanmı
 galeri,araç fotoğrafı,oto galeri,ilan,stüdyo,arka plan,plaka,ikinci el,bayi
 ```
 
-**Açıklama** (1903/4000) — Play'in tam açıklamasıyla aynı
+**Açıklama** (1916/4000) — Play'in tam açıklamasıyla aynı
 
 ```text
 photocar.ai, telefonu galeriniz için bir fotoğraf stüdyosuna çevirir. Aracı durduğu yerde, her havada ve internet olmadan da çekersiniz; stüdyo fotoğrafları, araç bilgileri ve ilan metni hazır olur.
@@ -161,7 +163,7 @@ EKİBİNİZ İÇİN
 • Verileriniz AB'de (Frankfurt) saklanır.
 
 ERİŞİM
-photocar.ai galeriler içindir. Hesabı galeriniz için biz açarız; uygulama içinden kayıt olunmaz. İletişim: [E-POSTA]
+photocar.ai galeriler içindir. Hesabı galeriniz için biz açarız; uygulama içinden kayıt olunmaz. İletişim: info@bambugames.com.tr
 ```
 
 ### Google Play
@@ -216,7 +218,7 @@ Shoot cars right on the lot and get studio images with your own number plate ban
 car dealer,dealership,car photos,vehicle photos,listing,studio,background,number plate,used cars
 ```
 
-**Açıklama** (1919/4000) — Play'in tam açıklamasıyla aynı
+**Açıklama** (1934/4000) — Play'in tam açıklamasıyla aynı
 
 ```text
 photocar.ai turns a phone into a photo studio for your dealership. Shoot the car where it stands, in any weather and even without a network, and get studio images, vehicle data and a listing text.
@@ -251,7 +253,7 @@ FOR YOUR TEAM
 • Your data is stored in the EU (Frankfurt).
 
 ACCESS
-photocar.ai is for car dealerships. We set up the account for your dealership; there is no sign-up in the app. Contact: [EMAIL]
+photocar.ai is for car dealerships. We set up the account for your dealership; there is no sign-up in the app. Contact: info@bambugames.com.tr
 ```
 
 ### Google Play

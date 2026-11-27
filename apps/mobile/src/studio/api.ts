@@ -5,7 +5,10 @@ import type { Database, Json } from '../lib/database.types';
 import type { Point } from './geometry';
 import type { MaskEdit, StudioPhoto } from './status';
 
-export type BackgroundSpec = { kind: 'studio'; wall: string; floor: string } | { kind: 'image'; path: string };
+export type BackgroundSpec =
+  | { kind: 'studio'; wall: string; floor: string }
+  | { kind: 'image'; path: string }
+  | { kind: 'showroom'; wall: string; ceiling: string; floor: string; grout: string; gloss: number };
 export type Background = { id: string; gallery_id: string | null; name: string; spec: BackgroundSpec; sort_order: number };
 export type StudioVehicle = {
   id: string;
